@@ -1,0 +1,355 @@
+HALL
+
+LIVING
+	bedroom
+	wardrobe
+	parlor (common room) (drawing room)
+	solar
+	stewards quarters
+	office/study
+	servants quarters - increase production
+	lords chamber
+
+MILITARY
+	keep/guard tower
+	barracks
+	garrison quarters
+	mess hall
+	casemate (musketry/siege storage)
+	armory
+	forge
+	gatehouse (protect entrance)
+
+COOKING
+	kitchen - increase food production
+	buttery
+	bottlery
+	pantry
+
+MISC
+	stairs/lift
+	stables
+	bailey
+	storeroom - bonus to production/efficiency of all service rooms
+	cellar
+	dungeon
+	wash room - morale, cleanliness
+	lavatory - cleanliness
+	chapel - increase morale, become corrupt, torture blasphemers
+	
+ADVANCED
+	throne room
+	library
+	treasury
+	brothel
+	tailor
+	hospital
+	alchemy lab
+	enchanting room
+	observatorium
+
+	theater
+	minstrels gallery
+	courtroom (archives)
+	brewery
+
+SMALL ADDITIONS
+	garden
+	oratory (private praying room)
+	oubliette (trap door dungeon for people to die in)
+	cesspit (septic tank)
+
+
+UPGRADES
+Hall
+	dirt/stone floor
+	carpets/tapestries
+	tables
+	dais and chair
+	chandelier
+	candles/candelabra
+	lamps on stand
+	fireplace
+	statues
+	carvings
+
+kitchen
+	hearth
+	spits
+	cauldron
+	scullory
+	poultry
+	terthered herbs
+
+
+
+UPDATE NOTIFICATION
+(last notification)
+	king moved out of hall and into his own quarters
+	your staff can now cook in their own kitchens rather than the hall
+	servants work faster since they dont have to remove their pallets from the work stations
+
+
+
+RESOURCES
+	food
+	timber
+	gold
+	servants
+	drink (wine)
+	cloth (wool, silk)
+	livestock
+
+	happiness
+	morale
+	hygiene
+		EFFECT
+			effectiveness of workers
+			illness incapacitate/kill workers
+			babies die of disease
+		CAUSE
+			latrine/washroom
+			knock over stuff
+			servant workload
+			over-crowded sleeping
+			replace sleeping straw
+	fear
+	luxury
+	reputation
+
+
+FEES
+	Servants (food, gold)
+	Bulding stuff (gold, wood)
+	Guests (food)
+
+INCOME
+	Guests (gold)
+	Peasants *taxes (gold)
+	Laborers (wood)
+
+GUESTS
+	COMPLAINTS OF GUESTS
+		based on how royal the castle is
+		not enough/good food
+		too few servants
+		too rude servants (kill one?)
+		dirty
+		cold
+	GUEST HAPPINESS
+
+
+GOAL
+	keep guests happy
+	build larger castle (population)
+	become good/evil
+	survive so long
+	raise successful son
+
+
+SERVANT TASKS
+	sweep floors
+	wash basins
+	start fires
+	heat water
+	wash clothes
+	empty chamberpot
+	sewing/weaving clothes
+	teaching children
+
+KING TASKS
+	fiscal, judicial, political
+	mete out justice
+	mint coins
+	collect rent from subjects
+	recreational hunting
+
+OTHER PEOPLE OF IMPORT
+	chamberlain (in charge of the great chamber/hall)
+	the chaplain
+	the keeper of the wardrobe
+	the butler (also known as the bottler, he ensured there was enough drink stored in the buttery)
+	the cook
+	the chandler (who made candles)
+	and the marshal (who was in charge of the stables)
+
+	CRAFTSMEN
+		cobblers (making shoes)
+		armorers
+		coopers (who made casks)
+		hoopers (who helped the coopers build the barrels)
+		billers (making axes)
+		spencers (who dispensed)
+		sculptor
+
+
+DAY IN THE CASTLE
+	servants wake to light fires and start breakfast
+	lords/ladies wake up and clean themselves
+	servants clean rooms and do laundry
+	everyone has bread and drink
+	morning mass
+
+
+NATURAL DISASTERS
+	plague
+	deaths
+	invading armies
+
+ENTERTAINMENT
+	GOOD
+		reading
+		music playing
+		drawing
+		storytelling
+		board games
+		archery
+		gameball
+		feast/banquet
+		joust/tourney
+		fair/festival
+		theater play
+		hunting
+		wrestling
+
+	EVIL
+		fight club
+		gladiator
+		human sacrifice
+		orgies
+		kill blasphemers
+		cannibal feast
+
+
+ACTIONS
+	build room- cost gold/timber
+	hire servant- build time
+		chance to make mistake if tired
+	trade gold for food/wood
+	build peasant housing
+
+	decide what to do if servant makes mistake
+	build road to allied town (+trading)
+	replace sleeping straw of servants
+
+	set taxes
+	set how much food is available
+	set how much wood to burn
+	set wood vs timber harvesti
+	set amount of rest/sleep servants getng
+
+GOOD/EVIL king
+	how much taxing
+	how hard servants are worked/how they are punished
+	how clean the castle is
+	how well fed
+	punishments/trials in court
+
+TAXING
+	low taxes attract peasants for free
+
+
+CONSEQUENCES
+	entire castle die of plague - cleanliness
+	burns down from rioting - reputation/morale
+	assassination of king - security
+	starve to death - food
+	death by invasion - reputation
+
+
+MORALE
+	kindness vs military
+
+
+REPUTATION
+	mistreat guest
+	laon sharks
+	let ward die
+
+
+COURT
+	treason
+		help a traitor
+	murder
+		peasant kills neighbor peasant
+			poison (suspected)
+			bludgeon (obvious)
+			self-defense (uncertain)
+		peasant kills noble
+		peasant kills noble's dog
+		noble kills peasant
+	rape
+		noble rapes peasants daughter
+		noble rapes peasants wife
+		peasant rapes peasants boy
+		peasant finds noble sleeping with wife
+	poaching
+		peasant steals corn from noble's fields
+		peasant kills deer on noble's land
+		peasant harvests trees or wood from land
+	burglary
+		peasant plowing another peasants land
+	assault
+	petty theft
+	public drunkenness
+
+	in divorce, land goes to whom
+	mistreating slaves
+	deserter
+	peasant insults noble
+	slave runs away
+	two hunters claim the deer as their own
+	cheating at cards/dice
+	not paying taxes
+	property belonging to two people
+	peasant boy trips noble
+	not paying dues to church
+
+
+	PUNISHMENT
+		hanged
+		lose hand
+		trial by combat
+		banishment
+		lose ear
+		fined
+		sell person into slavery
+
+
+
+You have been tasked by your liege to guard his fields of corn from poachers and theives. One night, on patrok, you stumble across a haggard man in thread-bare clothing stealing corn from the field. You quickly confront him, and he immediately begs for his life. He claims he is stealing corn to feed his family since the lord of the land - your liege - demands too much in taxes. Your liege is indeed known from his harsh taxes throughout the land. Make your choice.
+	I slay the man on the spot as my liege would expect me to do, as he nothing more than a thief and a liar.
+	I turn over the man to my liege for punishment, as he has broken the law of the land and it is my sworn duty to enforce it. 
+	I confiscate the corn he has stolen, warn him that stealing is a path toward doom and destruction, but I let him go to return to his family. 
+	I allow the man to take enough corn to feed his family for a couple of days, encouraging him to leave the land. 
+
+You are the sworn executioner for your liege. A man has been sent to you for execution as a traitor of the liege and your people. You know this individual as a close, virtuous friend who mysteriously vanished one day. You also know that the man's crimes for which he was convicted supposedly caused the deaths of many innocent civilians. Upon seeing you he begs for his life, claiming he was framed by a higher authority. Make your choice.
+	I execute him as per my liege's instructions, and do it in such a manner that he suffers painfully before he dies as retribution for his crimes against my people.
+	I execute him as per my liege's instructions, but doing so in as painless of a way as possible. Justice must be served, but I can show some compassion.
+	I risk my own life and free him so that he may prove his innocence. If I can, I'll help him in any way.
+
+
+
+
+
+
+
+
+
+
+icons
+	food			meat
+	timber			log
+	gold			coin
+
+	peasants 		scythe
+	servants 		duster
+	military 		sword
+	nobles 			purse
+
+	happiness 		smile
+	morale 			thumb up
+	fear 			eye
+	luxury 			bar
+	reputation 		scroll
+	hygiene 		broom
