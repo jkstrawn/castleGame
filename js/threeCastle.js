@@ -1,6 +1,6 @@
-var SCREEN_WIDTH = window.innerWidth;
-var SCREEN_HEIGHT = window.innerHeight;
-var pointLight = null;
+var SCREEN_WIDTH = window.innerWidth,
+	SCREEN_HEIGHT = window.innerHeight,
+	pointLight = null;
 
 var Shape = function() {
 	
@@ -358,18 +358,25 @@ var CastleSim = function() {
 	}
 }
 
-var stats;
-var sim = new CastleSim();
+var stats, sim
 
-sim.init();
-animate();
+document.addEventListener("DOMContentLoaded",function(){ 
+	sim = new CastleSim();
 
-window.addEventListener( 'resize', onWindowResize, false );
-document.addEventListener( 'mousedown', onDocumentMouseDown, false );
-document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+	sim.init();
+	animate();
+	window.addEventListener( 'resize', onWindowResize, false );
+	document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+	document.addEventListener( 'mouseup', onDocumentMouseUp, false );
+	document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+})
 
 function onDocumentMouseDown(event) {
 	sim.click(event);
+}
+
+function onDocumentMouseUp(event) {
+
 }
 
 function onDocumentMouseMove(event) {
