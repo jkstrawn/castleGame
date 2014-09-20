@@ -324,6 +324,51 @@ var CastleSim = function() {
 		};
 	}
 
+	this.keypress = function (event) {
+		var character = String.fromCharCode(event.keyCode)
+
+		switch (character) {
+			case "w":
+				this.moveCamera("up")
+				break
+			case "a":
+				this.moveCamera("left")
+				break
+			case "s":
+				this.moveCamera("down")
+				break
+			case "d":
+				this.moveCamera("right")
+				break
+		}
+	}
+
+	this.zoom = function (increase) {
+		if ((this.camera.fov - increase) > 0)
+		{
+			this.camera.fov -= increase
+		}
+
+		this.camera.updateProjectionMatrix(); 
+	}
+
+	this.moveCamera = function (direction) {
+		switch (direction) {
+			case "up":
+				this.camera.position.y += 1
+				break
+			case "down":
+				this.camera.position.y -= 1
+				break
+			case "left":
+				this.camera.position.x -= 1
+				break
+			case "right":
+				this.camera.position.x += 1
+				break
+		}
+	}
+
 	this.render = function() {
 
 		var delta = this.clock.getDelta();
@@ -369,6 +414,9 @@ document.addEventListener("DOMContentLoaded",function(){
 	document.addEventListener( 'mousedown', onDocumentMouseDown, false );
 	document.addEventListener( 'mouseup', onDocumentMouseUp, false );
 	document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+	window.addEventListener("mousewheel", onWindowMouseWheel, false);
+	window.addEventListener("DOMMouseScroll", onWindowMouseWheel, false);
+	window.addEventListener("keypress", onWindowKeyPress, false)
 })
 
 function onDocumentMouseDown(event) {
@@ -385,6 +433,18 @@ function onDocumentMouseMove(event) {
 
 function onWindowResize() {
 	sim.onWindowResize();
+}
+
+function onWindowMouseWheel(event) {
+		// cross-browser wheel delta
+	var event = window.event || event; // old IE support
+	var delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
+	//console.log(delta)
+	sim.zoom(delta)
+}
+
+function onWindowKeyPress(event) {
+	sim.keypress(event)
 }
 
 function animate() {		
