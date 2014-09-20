@@ -246,4 +246,30 @@ var GraphicsEngine = function(_sim) {
 
 		this.renderer.setSize( window.innerWidth, window.innerHeight );
 	};
+
+	this.zoom = function (increase) {
+		if ((this.camera.fov - increase) > 0)
+		{
+			this.camera.fov -= increase
+		}
+
+		this.camera.updateProjectionMatrix(); 
+	}
+
+	this.moveCamera = function (direction) {
+		switch (direction) {
+			case "up":
+				this.camera.position.y += 1
+				break
+			case "down":
+				this.camera.position.y -= 1
+				break
+			case "left":
+				this.camera.position.x -= 1
+				break
+			case "right":
+				this.camera.position.x += 1
+				break
+		}
+	}
 };

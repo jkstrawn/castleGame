@@ -94,6 +94,29 @@ var CastleSim = function() {
 		};
 
 		return shapes;
+	};
+
+	this.keypress = function (event) {
+		var character = String.fromCharCode(event.keyCode)
+
+		switch (character) {
+			case "w":
+				this.graphics.moveCamera("up")
+				break
+			case "a":
+				this.graphics.moveCamera("left")
+				break
+			case "s":
+				this.graphics.moveCamera("down")
+				break
+			case "d":
+				this.graphics.moveCamera("right")
+				break
+		}
+	}
+
+	this.zoom = function(dt) {
+		this.graphics.zoom(dt);
 	}
 }
 
@@ -106,6 +129,9 @@ animate();
 window.addEventListener( 'resize', onWindowResize, false );
 document.addEventListener( 'mousedown', onDocumentMouseDown, false );
 document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+window.addEventListener("mousewheel", onWindowMouseWheel, false);
+window.addEventListener("DOMMouseScroll", onWindowMouseWheel, false);
+window.addEventListener("keypress", onWindowKeyPress, false)
 
 function onDocumentMouseDown(event) {
 	sim.click(event);
@@ -126,4 +152,16 @@ function animate() {
 	sim.render();
 	stats.update();
 }
+
+function onWindowMouseWheel(event) {
+	var event = window.event || event; // old IE support
+	var delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
+	//console.log(delta)
+	sim.zoom(delta);
+}
+
+function onWindowKeyPress(event) {
+	sim.keypress(event)
+}
+
 

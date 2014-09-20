@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-
+		<title>Castle Sim</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
 			#menu {
 				width: 250px;
@@ -13,7 +15,21 @@
 				border-radius: 5px;
 			}
 		</style>
+		<style>
+			body {
+				padding:0;
+				margin:0;
+				overflow:hidden;
+				font-family:georgia;
+				text-align:center;
+			}
 
+			#stats { position: absolute; top:0; left: 0 }
+			#stats #fps { background: transparent !important }
+			#stats #fps #fpsText { color: black !important }
+			#stats #fps #fpsGraph { display: none }
+		</style>
+		
 		<script src="js/three.js"></script>
 		<script src="js/OBJLoader.js"></script>
 		<script src="js/stats.min.js"></script>
@@ -33,7 +49,6 @@
 				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
 			}
 		</script>
-
 		<script type="x-shader/x-fragment" id="fragmentShader">
 			uniform vec3 topColor;
 			uniform vec3 bottomColor;
@@ -47,31 +62,12 @@
 				gl_FragColor = vec4( mix( bottomColor, topColor, max( pow( h, exponent ), 0.0 ) ), 1.0 );
 			}
 		</script>
-
-		<title>three.js webgl - materials - lightmap</title>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<style>
-			body {
-				padding:0;
-				margin:0;
-				overflow:hidden;
-				font-family:georgia;
-				text-align:center;
-			}
-
-			#stats { position: absolute; top:0; left: 0 }
-			#stats #fps { background: transparent !important }
-			#stats #fps #fpsText { color: black !important }
-			#stats #fps #fpsGraph { display: none }
-		</style>
 	</head>
 
 	<body>
 
 		<div id="container"></div>
 		<script src="js/castleSim.js"></script>
-
 
 	</body>
 </html>
