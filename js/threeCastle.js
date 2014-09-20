@@ -3,6 +3,7 @@ var SCREEN_HEIGHT = window.innerHeight;
 var pointLight = null;
 
 var Shape = function() {
+	
 	this.model = null;
 	this.hover = false;
 
@@ -15,6 +16,7 @@ var Shape = function() {
 	};
 
 	this.setHover = function(_hover) {
+
 		if (!this.hover && _hover) {
 			this.createLight();
 		}
@@ -32,23 +34,23 @@ var Shape = function() {
 }
 
 var Room = function() {
+
 	Shape();
 	this.light = null;
 
 	this.createLight = function() {
 
-
 		pointLight.position.set( this.model.position.x, this.model.position.y + 20, this.model.position.z + 10 );
-		
-
 	}
 
 	this.removeLight = function() {
+
 		if (pointLight.position.x == this.model.position.x)
 		pointLight.position.set( 0, 100, 0 );
 	};
 
 	this.modify = function() {
+
 		this.model.position.z += 10;
 
 		pointLight.position.set( this.model.position.x, this.model.position.y + 20, this.model.position.z + 10 );
@@ -59,6 +61,7 @@ Room.prototype = new Shape();
 Room.prototype.constructor = Room;
 
 var CastleSim = function() {
+
 	this.renderer = null;
 	this.scene = null;
 	this.camera = null;
@@ -71,17 +74,18 @@ var CastleSim = function() {
 	this.mouse = new THREE.Vector2();
 	this.raycaster = new THREE.Raycaster();
 
-				this.parameters = {
-					width: 2000,
-					height: 2000,
-					widthSegments: 250,
-					heightSegments: 250,
-					depth: 1500,
-					param: 4,
-					filterparam: 1
-				};
+	this.parameters = {
+		width: 2000,
+		height: 2000,
+		widthSegments: 250,
+		heightSegments: 250,
+		depth: 1500,
+		param: 4,
+		filterparam: 1
+	};
 
 	this.init = function() {
+
 		this.container = document.createElement( 'div' );
 		document.body.appendChild( this.container );
 
@@ -94,12 +98,6 @@ var CastleSim = function() {
 		this.addRendered();
 		this.addSkyDome();
 
-
-		//var loader = new THREE.JSONLoader();
-		//loader.load( "models/room/roomUV.js", this.createThreeRooms );
-		//loader.load( "models/room/roomFurnished3.js", this.createThreeRooms );
-		//loader.load( "models/ground_block/ground_block2.js", this.loadModel );
-
 		loader = new THREE.ColladaLoader();
 		loader.options.convertUpAxis = true;
 		loader.load( "res/models/ground_block/ground_block3.dae", this.loadGround );
@@ -107,41 +105,26 @@ var CastleSim = function() {
 		loader.options.convertUpAxis = true;
 		loader.load( 'res/models/room/roomFurnished16.dae', this.createRooms );
 
-/*
+		/*
 		var boundingBox = new THREE.Mesh(
 			new THREE.PlaneGeometry(165, 68, 3, 2), 
 			new THREE.MeshBasicMaterial( { color: 0xffaa00, wireframe: true } )
 			);
 		boundingBox.position.set(6, 34, 15);
 		this.scene.add(boundingBox);
-*/
+		*/
 
 		stats = new Stats();
 		this.container.appendChild( stats.domElement );
 	}
-/*
-	this.loadModel = function( geometry, materials ) {
-		var material = new THREE.MeshFaceMaterial( materials );
-		model = new THREE.SkinnedMesh( geometry, material, false );
 
-		model.position.set(0, -70, -100);
-		model.rotation.y = -1.57;
-
-		var shape = new Shape();
-		shape.model = model;
-
-		sim.shapes.push(shape);
-		sim.scene.add(model);	
-	}
-*/
 	this.loadGround = function( collada ) {
+
 		var ground = collada.scene;
 		ground = sim.makeLambert(ground);
 		var thing = ground.children[0].children[0].material;
 		console.log(thing);
 		thing.shininess = 0;
-//var _map = ground.children[0].children[0].material.map;
-//ground.children[0].children[0].material = new THREE.MeshLambertMaterial( {map: _map});
 
 		ground.position.set(0, -70, -100);
 		ground.rotation.y = -1.57;
@@ -156,13 +139,12 @@ var CastleSim = function() {
 	}
 
 	this.createRooms = function(collada) {
+
 		var dae = collada.scene;
 
 		for (var i = 0; i < 3; i++) {
 			var room = dae.clone();
 			room = sim.makeLambert(room);
-//var _map = room.children[5].children[0].material.materials[0].map;
-//room.children[5].children[0].material.materials[0] = new THREE.MeshLambertMaterial( {map: _map});
 
 
 			room.modify = function() {
@@ -171,8 +153,6 @@ var CastleSim = function() {
 			room.position.set(i * 56 - 50, 0, 0);
 			room.rotation.y = Math.PI * 1.5;
 			room.scale.x = room.scale.y = room.scale.z = 4;
-			//room.castShadow = true;
-			//room.receiveShadow = false;
 			room.updateMatrix();
 
 			sim.scene.add(room);
@@ -185,6 +165,7 @@ var CastleSim = function() {
 	}
 
 	this.makeLambert = function(object) {
+
 		for (var numShapes = 0; numShapes < object.children.length; numShapes++) {
 			var shape = object.children[numShapes];
 			for (var numObjects = shape.children.length - 1; numObjects >= 0; numObjects--) {
@@ -202,78 +183,25 @@ var CastleSim = function() {
 		return object;
 	};
 
-/*
-	this.createThreeRooms = function( geometry, materials ) {
-		var material = new THREE.MeshFaceMaterial( materials );
-
-		for (var i = 0; i < 3; i++) {
-			room = new THREE.SkinnedMesh( geometry, material, false );
-
-			room.scale.x = room.scale.y = room.scale.z = 4;
-			room.modify = function() {
-				this.position.z += 10;
-			};
-
-			room.position.set(i * 56 - 50, 0, 0);
-			room.rotation.y = 3.1459;
-
-			var shape = new Room();
-			shape.model = room;
-
-			sim.shapes.push(shape);
-			sim.scene.add( room );			
-		}
-		for (var i = 0; i < 3; i++) {
-			room = new THREE.SkinnedMesh( geometry, material, false );
-
-			room.scale.x = room.scale.y = room.scale.z = 4;
-			room.modify = function() {
-				this.position.z += 10;
-			};
-
-			room.position.set(i * 56 - 50, 35, 0);
-			room.rotation.y = 3.1459;
-
-			var shape = new Room();
-			shape.model = room;
-
-			sim.shapes.push(shape);
-			sim.scene.add( room );			
-		}
-	}
-*/
-
 	this.addCamera = function() {
-	
-		//this.camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 1, 5000 );
-		//this.camera.position.set( 0, 150, 250 );
-		//this.camera.lookAt(new THREE.Vector3( 0, 0, 0 ));
 
-					this.camera = new THREE.PerspectiveCamera( 55, window.innerWidth / window.innerHeight, 0.5, 3000000 );
-this.camera.position.set( 0, 50, 150 );
-					//this.camera.position.set( 0, Math.max( this.parameters.width * 1.5, this.parameters.height ) / 8, this.parameters.height );
-					this.camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
+		this.camera = new THREE.PerspectiveCamera( 55, window.innerWidth / window.innerHeight, 0.5, 3000000 );
+		this.camera.position.set( 0, 50, 150 );
+		this.camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
 	}
 
 	this.addLights = function() {
 		
-
 		var ambientLight = new THREE.AmbientLight( 0x808080 );
 		this.scene.add( ambientLight );
-
-		
-
-		//this.scene.add( new THREE.AmbientLight( 0xcccccc ) );
 
 		pointLight = new THREE.PointLight( 0xffcc00, .8, 30 );
 		pointLight.position.set( 0, 100, 0 );
 		this.scene.add( pointLight );
-
-
-
 	}
 
 	this.addRendered = function() {
+
 		this.renderer = new THREE.WebGLRenderer( { 
 			antialias: true, 
 			alpha: false, 
@@ -295,82 +223,60 @@ this.camera.position.set( 0, 50, 150 );
 	}
 
 	this.addSkyDome = function() {
-		
-				var cubeMap = new THREE.CubeTexture( [] );
-				cubeMap.format = THREE.RGBFormat;
-				cubeMap.flipY = false;
 
-				var loader = new THREE.ImageLoader();
-				loader.load( 'res/textures/skyboxsun25degtest.png', function ( image ) {
+		var cubeMap = new THREE.CubeTexture( [] );
+		cubeMap.format = THREE.RGBFormat;
+		cubeMap.flipY = false;
 
-					var getSide = function ( x, y ) {
+		var loader = new THREE.ImageLoader();
+		loader.load( 'res/textures/skyboxsun25degtest.png', function ( image ) {
 
-						var size = 1024;
+			var getSide = function ( x, y ) {
 
-						var canvas = document.createElement( 'canvas' );
-						canvas.width = size;
-						canvas.height = size;
+				var size = 1024;
 
-						var context = canvas.getContext( '2d' );
-						context.drawImage( image, - x * size, - y * size );
+				var canvas = document.createElement( 'canvas' );
+				canvas.width = size;
+				canvas.height = size;
 
-						return canvas;
+				var context = canvas.getContext( '2d' );
+				context.drawImage( image, - x * size, - y * size );
 
-					};
+				return canvas;
 
-					cubeMap.images[ 0 ] = getSide( 2, 1 ); // px
-					cubeMap.images[ 1 ] = getSide( 0, 1 ); // nx
-					cubeMap.images[ 2 ] = getSide( 1, 0 ); // py
-					cubeMap.images[ 3 ] = getSide( 1, 2 ); // ny
-					cubeMap.images[ 4 ] = getSide( 1, 1 ); // pz
-					cubeMap.images[ 5 ] = getSide( 3, 1 ); // nz
-					cubeMap.needsUpdate = true;
+			};
 
-				} );
+			cubeMap.images[ 0 ] = getSide( 2, 1 ); // px
+			cubeMap.images[ 1 ] = getSide( 0, 1 ); // nx
+			cubeMap.images[ 2 ] = getSide( 1, 0 ); // py
+			cubeMap.images[ 3 ] = getSide( 1, 2 ); // ny
+			cubeMap.images[ 4 ] = getSide( 1, 1 ); // pz
+			cubeMap.images[ 5 ] = getSide( 3, 1 ); // nz
+			cubeMap.needsUpdate = true;
 
-				var cubeShader = THREE.ShaderLib['cube'];
-				cubeShader.uniforms['tCube'].value = cubeMap;
+		} );
 
-				var skyBoxMaterial = new THREE.ShaderMaterial( {
-					fragmentShader: cubeShader.fragmentShader,
-					vertexShader: cubeShader.vertexShader,
-					uniforms: cubeShader.uniforms,
-					depthWrite: false,
-					side: THREE.BackSide
-				});
+		var cubeShader = THREE.ShaderLib['cube'];
+		cubeShader.uniforms['tCube'].value = cubeMap;
 
-				var skyBox = new THREE.Mesh(
-					new THREE.BoxGeometry( 1000000, 1000000, 1000000 ),
-					skyBoxMaterial
-				);
-				
-				this.scene.add( skyBox );
-	}
-
-/*
-	this.addCube = function(x, y, z, w, h, l) {
-		var material = new THREE.MeshLambertMaterial(
-		{
-			color: 0xCC00CC
+		var skyBoxMaterial = new THREE.ShaderMaterial( {
+			fragmentShader: cubeShader.fragmentShader,
+			vertexShader: cubeShader.vertexShader,
+			uniforms: cubeShader.uniforms,
+			depthWrite: false,
+			side: THREE.BackSide
 		});
 
-		var cube = new THREE.Mesh(
-			new THREE.CubeGeometry(w, h, l),
-			material
+		var skyBox = new THREE.Mesh(
+			new THREE.BoxGeometry( 1000000, 1000000, 1000000 ),
+			skyBoxMaterial
 		);
-
-		cube.position.set(x, y, z);
-		cube.modify = function() {
-			this.material.color.setHex( Math.random() * 0xffffff );
-		};
-
-		this.scene.add(cube);
-		this.shapes.push(cube);
-		return cube;
+		
+		this.scene.add( skyBox );
 	}
-*/
 
 	this.mouseMove = function(event) {
+
 		event.preventDefault();
 		var hoveredShape = null;
 
@@ -400,6 +306,7 @@ this.camera.position.set( 0, 50, 150 );
 	}
 
 	this.getParent = function(model) {
+
 		if (model.parent.parent != null ) {
 			return this.getParent(model.parent);
 		}
@@ -409,15 +316,7 @@ this.camera.position.set( 0, 50, 150 );
 	this.click = function( event ) {
 
 		event.preventDefault();
-/*
-		var vector = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, 
-			- ( event.clientY / window.innerHeight ) * 2 + 1, 0.5 );
-		this.projector.unprojectVector( vector, this.camera );
 
-		var raycaster = new THREE.Raycaster( this.camera.position, vector.sub( this.camera.position ).normalize() );
-
-		var intersects = raycaster.intersectObjects( this.shapes );
-*/
 		for (var i = this.shapes.length - 1; i >= 0; i--) {
 			if (this.shapes[i].hover) {
 				this.shapes[i].modify();
@@ -426,19 +325,21 @@ this.camera.position.set( 0, 50, 150 );
 	}
 
 	this.render = function() {
-		var delta = this.clock.getDelta();
 
+		var delta = this.clock.getDelta();
 
 		this.renderer.render( this.scene, this.camera );
 	}
 
 	this.update = function() {
+
 		for (var i = this.shapes.length - 1; i >= 0; i--) {
 			this.shapes[i].update();
 		};
 	}
 
 	this.onWindowResize = function() {
+
 		this.camera.aspect = window.innerWidth / window.innerHeight;
 		this.camera.updateProjectionMatrix();
 
@@ -446,6 +347,7 @@ this.camera.position.set( 0, 50, 150 );
 	}
 
 	this.getShapes = function() {
+
 		var shapes = [];
 
 		for (var i = this.shapes.length - 1; i >= 0; i--) {
