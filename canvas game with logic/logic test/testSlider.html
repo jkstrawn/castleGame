@@ -1,0 +1,43 @@
+<html>
+<head>
+	<style type="text/css">
+input[type=range] {
+    -webkit-appearance: none;
+    background-color: #999;
+    height: 10px;
+    width:200px;
+    box-shadow: inset 0 0 5px #333;
+    border-radius: 3px;
+
+}
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 15px;
+    height: 20px;
+    border-radius: 5px;
+    background-color: #AAA;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#EEE), to(#AAA));
+    border: 1px solid #999;
+}
+	</style>
+	<title>Test Slider</title>
+</head>
+<body>
+<input type="range" class="range" id="fff"/>
+
+<div id="lol">numba</div>
+
+	<script type="text/javascript" src="html/jquery-2.0.0.min.js"></script>
+<script type="text/javascript">
+
+var numba = $('#numba');
+
+$(".range").bind('change', function(){
+    var $range = $(this);
+    setTimeout(function(){
+        var i = 0;
+    }, 0);     
+});
+</script>
+</body>
+</html>

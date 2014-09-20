@@ -1,4 +1,4 @@
-castleGame
-==========
+three-js-test
+=============
 
-Browser-based castle sim game
+make something with three js

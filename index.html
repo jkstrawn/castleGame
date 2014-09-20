@@ -1,30 +1,72 @@
 <!DOCTYPE html>
-<html>
-<script src="scripts/jQuery/jquery.js"></script>
-<script src="scripts/jQuery/jquery.rightClick.js"></script>
-<style>
-*{
-margin:0px;
-padding:0px;
-}
+<html lang="en">
+	<head>
 
-canvas { image-rendering:optimizeSpeed;}
-</style>
-    <head>
-        <meta charset="utf-8">
-        <title>Colonies</title>
-    </head>
-    <body>
-        <div id="canvasContainer" class="wrapperNormal" tabindex="0">
-            <canvas id="surface" width="1024" height="660" style="position: absolute; z-index: 1; top:0; left:0;"></canvas>
-        </div>
+		<style>
+			#menu {
+				width: 250px;
+				height: 500px;
+				position: absolute;
+				background: black;
+				top: 15px;
+				left: 5px;
+				border-radius: 5px;
+			}
+		</style>
 
-        <script type="text/javascript" src="scripts/astar.js"></script>
-        <script type="text/javascript" src="scripts/gameEngine.js"></script>
-        <script type="text/javascript" src="scripts/map.js"></script>    
-        <script type="text/javascript" src="scripts/item.js"></script>  
-        <script type="text/javascript" src="scripts/entity.js"></script>  
-        <script type="text/javascript" src="scripts/animation.js"></script>  
-        <script type="text/javascript" src="scripts/gui.js"></script>
-    </body>
+		<script src="js/three.js"></script>
+		<script src="js/OBJLoader.js"></script>
+		<script src="js/stats.min.js"></script>
+		<script src="js/ColladaLoader.js"></script>
+
+		<script type="x-shader/x-vertex" id="vertexShader">
+			varying vec3 vWorldPosition;
+
+			void main() {
+				vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
+				vWorldPosition = worldPosition.xyz;
+
+				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+			}
+		</script>
+
+		<script type="x-shader/x-fragment" id="fragmentShader">
+			uniform vec3 topColor;
+			uniform vec3 bottomColor;
+			uniform float offset;
+			uniform float exponent;
+
+			varying vec3 vWorldPosition;
+
+			void main() {
+				float h = normalize( vWorldPosition + offset ).y;
+				gl_FragColor = vec4( mix( bottomColor, topColor, max( pow( h, exponent ), 0.0 ) ), 1.0 );
+			}
+		</script>
+
+		<title>three.js webgl - materials - lightmap</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				padding:0;
+				margin:0;
+				overflow:hidden;
+				font-family:georgia;
+				text-align:center;
+			}
+
+			#stats { position: absolute; top:0; left: 0 }
+			#stats #fps { background: transparent !important }
+			#stats #fps #fpsText { color: black !important }
+			#stats #fps #fpsGraph { display: none }
+		</style>
+	</head>
+
+	<body>
+
+		<script src="js/threeCastle.js"></script>
+
+
+	</body>
 </html>
