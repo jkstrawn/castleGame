@@ -29,6 +29,11 @@
 			#stats #fps #fpsText { color: black !important }
 			#stats #fps #fpsGraph { display: none }
 		</style>
+	</head>
+
+	<body>
+
+		<div id="container"></div>
 		
 		<script src="js/three.js"></script>
 		<script src="js/OBJLoader.js"></script>
@@ -38,7 +43,6 @@
 		<script src="js/castleUI.js"></script>
 		<script src="js/castleShapes.js"></script>
 		<script src="js/castleGraphicsEngine.js"></script>
-
 		<script type="x-shader/x-vertex" id="vertexShader">
 			varying vec3 vWorldPosition;
 
@@ -62,11 +66,6 @@
 				gl_FragColor = vec4( mix( bottomColor, topColor, max( pow( h, exponent ), 0.0 ) ), 1.0 );
 			}
 		</script>
-	</head>
-
-	<body>
-
-		<div id="container"></div>
 		<script src="js/castleSim.js"></script>
 
 	</body>
