@@ -51,12 +51,16 @@ function BlendCharacterGui(animations) {
 
 		controls.gui = new dat.GUI();
 
-		var settings = controls.gui.addFolder( 'Settings' );
+		var settings = controls.gui.addFolder( 'Rooms' );
+
+		settings.add( controls, "Create Hall" );
+
+		/*
 		var playback = controls.gui.addFolder( 'Playback' );
 		var blending = controls.gui.addFolder( 'Blend Tuning' );
 
 		settings.add( controls, "Lock Camera" ).onChange( controls.lockCameraChanged );
-		settings.add( controls, "Show Model" ).onChange( controls.showModelChanged );
+		settings.add( controls, "Show Model" ).onChange( controls.createHall );
 		settings.add( controls, "Show Skeleton" ).onChange( controls.showSkeletonChanged );
 		settings.add( controls, "Time Scale", 0, 1, 0.01 );
 		settings.add( controls, "Step Size", 0.01, 0.1, 0.01 );
@@ -73,11 +77,9 @@ function BlendCharacterGui(animations) {
 		blending.add( controls, "idle", 0, 1, 0.01).listen().onChange( controls.weight );
 		blending.add( controls, "walk", 0, 1, 0.01).listen().onChange( controls.weight );
 		blending.add( controls, "run", 0, 1, 0.01).listen().onChange( controls.weight );
+		*/
 
 		settings.open();
-		playback.open();
-		blending.open();
-
 	}
 
 	var getAnimationData = function() {
@@ -174,6 +176,12 @@ function BlendCharacterGui(animations) {
 
 	};
 
+	controls['Create Hall'] = function() {
+
+		window.dispatchEvent( new CustomEvent( 'create-room', {detail: {room: "hall"}} ) );
+
+	};
+
 	controls.lockCameraChanged = function() {
 
 		var data = {
@@ -197,15 +205,9 @@ function BlendCharacterGui(animations) {
 	}
 
 
-	controls.showModelChanged = function() {
+	controls.createRoom = function() {
 
-		var data = {
-			detail: {
-				shouldShow: controls['Show Model']
-			}
-		}
-
-		window.dispatchEvent( new CustomEvent( 'toggle-show-model', data ) );
+		window.dispatchEvent( new CustomEvent( 'create-room', {details: {room: "hall"}} ) );
 	}
 
 

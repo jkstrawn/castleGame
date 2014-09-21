@@ -5,22 +5,73 @@ var CastleSim = function() {
 	this.clock = new THREE.Clock();
 	this.stats = null;
 	this.graphics = new GraphicsEngine(this);
+	this.grid = [];
 
-	this.onStartAnimation = function() {
+	var that = this;
+
+	this.onStartAnimation = function(data) {
 		console.log("start");
+		console.log(data);
 	}
 
 	this.init = function() {
 
+		for (var x = 0; x < 4; x++) {
+			this.grid[x] = [];
+
+			for (var y = 0; y < 4; y++) {
+				this.grid[x][y] = {
+					x: x * 51 - 80, 
+					y: y * 26.4, 
+					z: 0,
+					used: false
+				};
+			}
+		};
+		this.grid[0][0].used = true;
+		this.grid[1][0].used = true;
+
+		console.log(this.grid[2][0]);
+
 		// listen for messages from the gui
-		window.addEventListener( 'start-animation', this.onStartAnimation );
+		window.addEventListener( 'create-room', this.clickRoomButton );
 
 		this.graphics.init();
 
 		gui = new BlendCharacterGui();
 	}
 
+	this.clickRoomButton = function(data) {
+		console.log(data.detail.room);
+
+
+		for (var x = that.grid.length - 1; x >= 0; x--) {
+				var box = that.grid[x][0];
+
+				if (!box.used) {
+					var boundingBox = new THREE.Mesh(
+						new THREE.BoxGeometry(51, 26.4, 32.5), 
+						new THREE.MeshBasicMaterial( { color: 0x44cc00, wireframe: true } )
+						);
+					boundingBox.position.set(box.x, box.y + 14, box.z);
+					that.graphics.scene.add(boundingBox);
+				}
+		};
+	};
+
 	this.addRoom = function(model) {
+
+
+/*		var helper = new THREE.BoundingBoxHelper(model, 0x33cc00);
+helper.update();
+console.log(helper);
+// If you want a visible bounding box
+this.graphics.scene.add(helper);
+console.log(helper.box.max.x - helper.box.min.x);
+console.log(helper.box.max.y - helper.box.min.y);
+console.log(helper.box.max.z - helper.box.min.z);
+*/
+		console.log(model);
 
 		var shape = new Room(this);
 		shape.model = model;

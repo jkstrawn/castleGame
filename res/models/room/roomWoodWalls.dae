@@ -5,82 +5,50 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.71.0 commit date:2014-06-25, commit time:18:36, hash:9337574</authoring_tool>
     </contributor>
-    <created>2014-09-19T18:49:37</created>
-    <modified>2014-09-19T18:49:37</modified>
+    <created>2014-09-20T23:41:42</created>
+    <modified>2014-09-20T23:41:42</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
-  <library_lights>
-    <light id="Hemi-light" name="Hemi">
-      <technique_common>
-        <ambient>
-          <color>1 1 1</color>
-        </ambient>
-      </technique_common>
-      <extra>
-        <technique profile="blender">
-          <adapt_thresh>0.000999987</adapt_thresh>
-          <area_shape>0</area_shape>
-          <area_size>0.1</area_size>
-          <area_sizey>0.1</area_sizey>
-          <area_sizez>0.1</area_sizez>
-          <atm_distance_factor>1</atm_distance_factor>
-          <atm_extinction_factor>1</atm_extinction_factor>
-          <atm_turbidity>2</atm_turbidity>
-          <att1>0</att1>
-          <att2>1</att2>
-          <backscattered_light>1</backscattered_light>
-          <bias>1</bias>
-          <blue>1</blue>
-          <buffers>1</buffers>
-          <bufflag>0</bufflag>
-          <bufsize>512</bufsize>
-          <buftype>2</buftype>
-          <clipend>40</clipend>
-          <clipsta>0.5</clipsta>
-          <compressthresh>0.04999995</compressthresh>
-          <dist sid="blender_dist">25</dist>
-          <energy sid="blender_energy">1</energy>
-          <falloff_type>2</falloff_type>
-          <filtertype>0</filtertype>
-          <flag>0</flag>
-          <gamma sid="blender_gamma">1</gamma>
-          <green>1</green>
-          <halo_intensity sid="blnder_halo_intensity">1</halo_intensity>
-          <horizon_brightness>1</horizon_brightness>
-          <mode>1</mode>
-          <ray_samp>1</ray_samp>
-          <ray_samp_method>1</ray_samp_method>
-          <ray_samp_type>0</ray_samp_type>
-          <ray_sampy>1</ray_sampy>
-          <ray_sampz>1</ray_sampz>
-          <red>1</red>
-          <samp>3</samp>
-          <shadhalostep>0</shadhalostep>
-          <shadow_b sid="blender_shadow_b">0</shadow_b>
-          <shadow_g sid="blender_shadow_g">0</shadow_g>
-          <shadow_r sid="blender_shadow_r">0</shadow_r>
-          <sky_colorspace>2</sky_colorspace>
-          <sky_exposure>1</sky_exposure>
-          <skyblendfac>1</skyblendfac>
-          <skyblendtype>1</skyblendtype>
-          <soft>3</soft>
-          <spotblend>0.15</spotblend>
-          <spotsize>45</spotsize>
-          <spread>1</spread>
-          <sun_brightness>1</sun_brightness>
-          <sun_effect_type>0</sun_effect_type>
-          <sun_intensity>1</sun_intensity>
-          <sun_size>1</sun_size>
-          <type>3</type>
-        </technique>
-      </extra>
-    </light>
-  </library_lights>
-  <library_images/>
+  <library_images>
+    <image id="wood_jpg" name="wood_jpg">
+      <init_from>wood.jpg</init_from>
+    </image>
+    <image id="tapestry_jpg" name="tapestry_jpg">
+      <init_from>tapestry.jpg</init_from>
+    </image>
+    <image id="whiteTexture" name="whiteTexture">
+      <init_from>whiteTexture.png</init_from>
+    </image>
+    <image id="quilt_jpg" name="quilt_jpg">
+      <init_from>quilt.jpg</init_from>
+    </image>
+    <image id="walls_jpg" name="walls_jpg">
+      <init_from>walls.jpg</init_from>
+    </image>
+    <image id="woodPanel_jpg" name="woodPanel_jpg">
+      <init_from>woodPanel.jpg</init_from>
+    </image>
+    <image id="rug_jpg" name="rug_jpg">
+      <init_from>rug.jpg</init_from>
+    </image>
+    <image id="wood_jpg_001" name="wood_jpg_001">
+      <init_from>wood.jpg.001.jpg</init_from>
+    </image>
+  </library_images>
   <library_effects>
     <effect id="wood-effect">
       <profile_COMMON>
+        <newparam sid="wood_jpg_001-surface">
+          <surface type="2D">
+            <init_from>wood_jpg_001</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="wood_jpg_001-sampler">
+          <sampler2D>
+            <source>wood_jpg_001-surface</source>
+          </sampler2D>
+        </newparam>
         <technique sid="common">
           <phong>
             <emission>
@@ -90,7 +58,7 @@
               <color sid="ambient">0 0 0 1</color>
             </ambient>
             <diffuse>
-              <color sid="diffuse">0.64 0.64 0.64 1</color>
+              <texture texture="wood_jpg_001-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
               <color sid="specular">0.5 0.5 0.5 1</color>
@@ -113,6 +81,16 @@
     </effect>
     <effect id="tapestry-effect">
       <profile_COMMON>
+        <newparam sid="tapestry_jpg-surface">
+          <surface type="2D">
+            <init_from>tapestry_jpg</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="tapestry_jpg-sampler">
+          <sampler2D>
+            <source>tapestry_jpg-surface</source>
+          </sampler2D>
+        </newparam>
         <technique sid="common">
           <phong>
             <emission>
@@ -122,7 +100,7 @@
               <color sid="ambient">0 0 0 1</color>
             </ambient>
             <diffuse>
-              <color sid="diffuse">0.64 0.64 0.64 1</color>
+              <texture texture="tapestry_jpg-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
               <color sid="specular">0.5 0.5 0.5 1</color>
@@ -145,6 +123,16 @@
     </effect>
     <effect id="white-effect">
       <profile_COMMON>
+        <newparam sid="whiteTexture-surface">
+          <surface type="2D">
+            <init_from>whiteTexture</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="whiteTexture-sampler">
+          <sampler2D>
+            <source>whiteTexture-surface</source>
+          </sampler2D>
+        </newparam>
         <technique sid="common">
           <phong>
             <emission>
@@ -154,7 +142,7 @@
               <color sid="ambient">0 0 0 1</color>
             </ambient>
             <diffuse>
-              <color sid="diffuse">0.64 0.64 0.64 1</color>
+              <texture texture="whiteTexture-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
               <color sid="specular">0.5 0.5 0.5 1</color>
@@ -177,6 +165,16 @@
     </effect>
     <effect id="quilt-effect">
       <profile_COMMON>
+        <newparam sid="quilt_jpg-surface">
+          <surface type="2D">
+            <init_from>quilt_jpg</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="quilt_jpg-sampler">
+          <sampler2D>
+            <source>quilt_jpg-surface</source>
+          </sampler2D>
+        </newparam>
         <technique sid="common">
           <phong>
             <emission>
@@ -186,7 +184,7 @@
               <color sid="ambient">0 0 0 1</color>
             </ambient>
             <diffuse>
-              <color sid="diffuse">0.2190648 0.09842215 0.1124026 1</color>
+              <texture texture="quilt_jpg-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
               <color sid="specular">0.5 0.5 0.5 1</color>
@@ -209,6 +207,16 @@
     </effect>
     <effect id="stone-effect">
       <profile_COMMON>
+        <newparam sid="walls_jpg-surface">
+          <surface type="2D">
+            <init_from>walls_jpg</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="walls_jpg-sampler">
+          <sampler2D>
+            <source>walls_jpg-surface</source>
+          </sampler2D>
+        </newparam>
         <technique sid="common">
           <phong>
             <emission>
@@ -218,7 +226,7 @@
               <color sid="ambient">0 0 0 1</color>
             </ambient>
             <diffuse>
-              <color sid="diffuse">0.64 0.64 0.64 1</color>
+              <texture texture="walls_jpg-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
               <color sid="specular">0.5 0.5 0.5 1</color>
@@ -273,6 +281,16 @@
     </effect>
     <effect id="rug-effect">
       <profile_COMMON>
+        <newparam sid="rug_jpg-surface">
+          <surface type="2D">
+            <init_from>rug_jpg</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="rug_jpg-sampler">
+          <sampler2D>
+            <source>rug_jpg-surface</source>
+          </sampler2D>
+        </newparam>
         <technique sid="common">
           <phong>
             <emission>
@@ -282,7 +300,7 @@
               <color sid="ambient">0 0 0 1</color>
             </ambient>
             <diffuse>
-              <color sid="diffuse">0.64 0.64 0.64 1</color>
+              <texture texture="rug_jpg-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
               <color sid="specular">0.5 0.5 0.5 1</color>
@@ -634,79 +652,91 @@
   <library_visual_scenes>
     <visual_scene id="Scene" name="Scene">
       <node id="table" name="table" type="NODE">
-        <matrix sid="transform">-6.12202e-6 0.3294114 0 -2.691739 -0.3294114 -6.12202e-6 0 -4.293586 0 0 0.3294114 0.254732 0 0 0 1</matrix>
+        <matrix sid="transform">-6.12202e-6 0.3294114 0 -1.693331 -0.3294114 -6.12202e-6 0 -4.287805 0 0 0.3294114 -3.060138 0 0 0 1</matrix>
         <instance_geometry url="#Cube_004-mesh">
           <bind_material>
             <technique_common>
-              <instance_material symbol="wood-material" target="#wood-material"/>
+              <instance_material symbol="wood-material" target="#wood-material">
+                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
             </technique_common>
           </bind_material>
         </instance_geometry>
       </node>
       <node id="tapestry" name="tapestry" type="NODE">
-        <matrix sid="transform">-3.96635e-5 0.02165741 0 -3.70223 -2.134197 -4.02497e-7 0 0.8104669 0 0 1.787709 2.716228 0 0 0 1</matrix>
+        <matrix sid="transform">-3.96635e-5 0.02165741 0 -2.703821 -2.134197 -4.02497e-7 0 0.8162475 0 0 1.787709 -0.5986428 0 0 0 1</matrix>
         <instance_geometry url="#Cube_003-mesh">
           <bind_material>
             <technique_common>
-              <instance_material symbol="tapestry-material" target="#tapestry-material"/>
+              <instance_material symbol="tapestry-material" target="#tapestry-material">
+                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
             </technique_common>
           </bind_material>
         </instance_geometry>
       </node>
       <node id="pillow" name="pillow" type="NODE">
-        <matrix sid="transform">0.8478072 0 0 0.3048296 0 0.4258777 0 5.44925 0 0 0.1212816 1.608916 0 0 0 1</matrix>
+        <matrix sid="transform">0.8478072 0 0 1.303238 0 0.4258777 0 5.455031 0 0 0.1212816 -1.705954 0 0 0 1</matrix>
         <instance_geometry url="#Cube_005-mesh">
           <bind_material>
             <technique_common>
-              <instance_material symbol="white-material" target="#white-material"/>
+              <instance_material symbol="white-material" target="#white-material">
+                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
             </technique_common>
           </bind_material>
         </instance_geometry>
       </node>
       <node id="mattress" name="mattress" type="NODE">
-        <matrix sid="transform">0.4258777 0 0 0.2687847 0 0.4258777 0 4.147139 0 0 0.4258777 0.2121166 0 0 0 1</matrix>
+        <matrix sid="transform">0.4258777 0 0 1.267193 0 0.4258777 0 4.152919 0 0 0.4258777 -3.102754 0 0 0 1</matrix>
         <instance_geometry url="#Circle-mesh">
           <bind_material>
             <technique_common>
-              <instance_material symbol="quilt-material" target="#quilt-material"/>
+              <instance_material symbol="quilt-material" target="#quilt-material">
+                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
             </technique_common>
           </bind_material>
         </instance_geometry>
       </node>
       <node id="frame" name="frame" type="NODE">
-        <matrix sid="transform">0.4258777 0 0 0.2687847 0 0.4258777 0 4.147139 0 0 0.4258777 0.2127646 0 0 0 1</matrix>
+        <matrix sid="transform">0.4258777 0 0 1.267193 0 0.4258777 0 4.152919 0 0 0.4258777 -3.102106 0 0 0 1</matrix>
         <instance_geometry url="#Circle_002-mesh">
           <bind_material>
             <technique_common>
-              <instance_material symbol="wood-material" target="#wood-material"/>
+              <instance_material symbol="wood-material" target="#wood-material">
+                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
             </technique_common>
           </bind_material>
         </instance_geometry>
       </node>
       <node id="room" name="room" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 3.33238 0 0 0 1</matrix>
+        <matrix sid="transform">1 0 0 0.001153469 0 1 0 0.005780697 0 0 1 0.007509461 0 0 0 1</matrix>
         <instance_geometry url="#Cube_002-mesh">
           <bind_material>
             <technique_common>
-              <instance_material symbol="stone-material" target="#stone-material"/>
-              <instance_material symbol="woodPanel-material" target="#woodPanel-material"/>
+              <instance_material symbol="stone-material" target="#stone-material">
+                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="woodPanel-material" target="#woodPanel-material">
+                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
             </technique_common>
           </bind_material>
         </instance_geometry>
       </node>
       <node id="rug" name="rug" type="NODE">
-        <matrix sid="transform">2.255863 0 0 0.5743417 0 3.415718 0 -0.3700741 0 0 0.02553357 0.3356839 0 0 0 1</matrix>
+        <matrix sid="transform">2.255863 0 0 1.57275 0 3.415718 0 -0.3642936 0 0 0.02553357 -2.979187 0 0 0 1</matrix>
         <instance_geometry url="#Cube-mesh">
           <bind_material>
             <technique_common>
-              <instance_material symbol="rug-material" target="#rug-material"/>
+              <instance_material symbol="rug-material" target="#rug-material">
+                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
             </technique_common>
           </bind_material>
         </instance_geometry>
-      </node>
-      <node id="Hemi" name="Hemi" type="NODE">
-        <matrix sid="transform">1 0 0 9.398352 0 1 0 -0.07999688 0 0 1 3.868182 0 0 0 1</matrix>
-        <instance_light url="#Hemi-light"/>
       </node>
     </visual_scene>
   </library_visual_scenes>

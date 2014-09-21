@@ -187,7 +187,7 @@ var GraphicsEngine = function(_sim) {
 
 		var dae = collada.scene;
 
-		for (var i = 0; i < 3; i++) {
+		for (var i = 0; i < 2; i++) {
 			var room = dae.clone();
 			room = that.makeLambert(room);
 
@@ -195,7 +195,7 @@ var GraphicsEngine = function(_sim) {
 			room.modify = function() {
 				this.position.z += 10;
 			};
-			room.position.set(i * 56 - 50, 0, 0);
+			room.position.set(i * 51 - 80, 0, 0);
 			room.rotation.y = Math.PI * 1.5;
 			room.scale.x = room.scale.y = room.scale.z = 4;
 			room.updateMatrix();
