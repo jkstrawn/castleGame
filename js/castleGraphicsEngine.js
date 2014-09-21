@@ -43,6 +43,7 @@ var GraphicsEngine = function(_sim) {
 		loader = new THREE.ColladaLoader();
 		loader.options.convertUpAxis = true;
 		loader.load( 'res/models/room/roomFurnished16.dae', this.createRooms );
+		loader.load( 'res/models/chair.dae', this.loadChair );
 
 		
 		/*
@@ -55,6 +56,21 @@ var GraphicsEngine = function(_sim) {
 		*/
 	}
 
+	this.loadChair = function(collada) {
+
+
+		var ground = collada.scene;
+		ground = that.makeLambert(ground);
+		var thing = ground.children[0].children[0].material;
+		console.log(thing);
+		thing.shininess = 0;
+
+		ground.position.set(0, 50, 0);
+		ground.rotation.y = -1.57;
+		ground.scale.x = ground.scale.y = ground.scale.z = 5;
+
+		that.scene.add(ground);
+	};
 
 	this.makeLambert = function(object) {
 
