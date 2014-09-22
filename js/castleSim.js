@@ -71,11 +71,16 @@ var CastleSim = function() {
 	this.clickRoomButton = function(data) {
 
 		for (var x = that.grid.length - 1; x >= 0; x--) {
-			var box = that.grid[x][0];
 
-			if (!box.used) {
-				that.addBoundable(box, x, 0);
+			for (var y = 0; y < that.grid[x].length; y++) {
+				var box = that.grid[x][y];
+
+				if (!box.used) {
+					that.addBoundable(box, x, y);
+					break;
+				}
 			}
+
 		};
 
 		var room = that.graphics.getModel(that.modelUrls[1]);
@@ -186,6 +191,7 @@ var CastleSim = function() {
 		if (this.draggingRoom != null) {
 			if (this.hoveredShape instanceof Boundable) {
 				var gridPosition = this.grid[this.hoveredShape.x][this.hoveredShape.y];
+				console.log(gridPosition.x + ", " + gridPosition.y + "    " + this.hoveredShape.x + ", " + this.hoveredShape.y);
 
 				this.draggingRoom.position.set(gridPosition.x, gridPosition.y, 0);
 			} else {
