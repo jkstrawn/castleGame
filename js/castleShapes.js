@@ -1,11 +1,9 @@
-var Shape = function(_sim) {
+var Shape = function(_sim, _model) {
 	this.sim = _sim;
-	this.model = null;
+	this.model = _model;
 	this.hover = false;
 
-	this.init = function(_model) {
-		this.model = _model;
-	}
+	this.init = function() {};
 
 	this.update = function() {
 		//this.model.rotation.y += .01;
@@ -29,8 +27,11 @@ var Shape = function(_sim) {
 	this.removeLight = function() {};
 }
 
-var Room = function(sim) {
-	Shape(sim);
+var Room = function(sim, model) {
+	//Shape(sim, model);
+	//console.log(this.__proto__);
+	this.__proto__.__proto__.constructor.call(this, sim, model);
+
 	this.light = null;
 
 	this.createLight = function() {
@@ -54,3 +55,12 @@ var Room = function(sim) {
 
 Room.prototype = new Shape();
 Room.prototype.constructor = Room;
+
+var Boundable = function(sim, model, _x, _y) {
+	this.__proto__.__proto__.constructor.call(this, sim, model);
+	this.x = _x;
+	this.y = _y;
+}
+
+Boundable.prototype = new Shape();
+Boundable.prototype.constructor = Boundable;

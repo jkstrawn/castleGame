@@ -11,6 +11,7 @@ var CastleSim = function() {
 		"res/models/room/roomFurnished19.dae"
 	];
 	this.draggingRoom = null;
+	this.hoveredShape = null;
 
 	var that = this;
 
@@ -73,12 +74,7 @@ var CastleSim = function() {
 			var box = that.grid[x][0];
 
 			if (!box.used) {
-				var boundingBox = new THREE.Mesh(
-					new THREE.BoxGeometry(51, 26.4, 32.5), 
-					new THREE.MeshBasicMaterial( { color: 0x44cc00, wireframe: true, transparent: true, opacity: 0.3 } )
-					);
-				boundingBox.position.set(box.x, box.y + 14, box.z);
-				that.graphics.addBoundingBox(boundingBox);
+				that.addBoundable(box, x, 0);
 			}
 		};
 
@@ -102,9 +98,44 @@ var CastleSim = function() {
 		that.graphics.addDraggingRoom(room);
 	};
 
+	this.placeRoom = function() {
+		var gridPosition = this.grid[this.hoveredShape.x][this.hoveredShape.y];
+		gridPosition.used = true;
+
+		var room = this.graphics.getModel(this.modelUrls[1]);
+
+		room.position.set(gridPosition.x, gridPosition.y, 0);
+		room.rotation.y = Math.PI * 1.5;
+		room.scale.x = room.scale.y = room.scale.z = 4;
+		
+		this.addRoom(room);	
+		this.graphics.addModel(room);
+
+		this.clearDragging();
+	};
+
 	this.clearDragging = function() {
+		for (var i = this.shapes.length - 1; i >= 0; i--) {
+			if (this.shapes[i] instanceof Boundable) {
+				this.shapes.splice(i, 1);
+			}
+		};
+
 		this.graphics.removeDraggingObjects();
 		this.draggingRoom = null;
+	};
+
+	this.addBoundable = function(box, x, y) {
+
+		var boundingBox = new THREE.Mesh(
+			new THREE.BoxGeometry(51, 26.4, 32.5), 
+			new THREE.MeshBasicMaterial( { color: 0x44cc00, wireframe: true, transparent: true, opacity: 0.3 } )
+			);
+		boundingBox.position.set(box.x, box.y + 14, box.z);
+		
+		var boundable = new Boundable(this, boundingBox, x, y);
+		this.shapes.push(boundable);
+		this.graphics.addBoundingBox(boundingBox);
 	};
 
 	this.addRoom = function(model) {
@@ -120,16 +151,14 @@ var CastleSim = function() {
 		*/
 		console.log(model);
 
-		var shape = new Room(this);
-		shape.model = model;
-
+		var shape = new Room(this, model);
+		console.log(shape);
 		this.shapes.push(shape);
 	};
 
 	this.addShape = function(model) {
 
-		var shape = new Shape(this);
-		shape.model = model;
+		var shape = new Shape(this, model);
 		this.shapes.push(shape);
 	}
 
@@ -138,22 +167,31 @@ var CastleSim = function() {
 		event.preventDefault();
 		var position = this.graphics.setMouse(event);
 
-		if (this.draggingRoom != null) {
-			this.draggingRoom.position.set(position.x, position.y, 0);
-		}
 
 		var hoveredShape = this.graphics.getHoveredShape(this.getShapes());
+		this.hoveredShape = null;
 
 		for (var i = this.shapes.length - 1; i >= 0; i--) {
 			var shape = this.shapes[i];
 
 			if (shape.model == hoveredShape) {
+				this.hoveredShape = shape;
 				shape.setHover(true);
 			}
 			else {
 				shape.setHover(false);
 			}
 		};
+
+		if (this.draggingRoom != null) {
+			if (this.hoveredShape instanceof Boundable) {
+				var gridPosition = this.grid[this.hoveredShape.x][this.hoveredShape.y];
+
+				this.draggingRoom.position.set(gridPosition.x, gridPosition.y, 0);
+			} else {
+				this.draggingRoom.position.set(position.x, position.y, 0);
+			}
+		}
 
 	}
 
@@ -166,6 +204,10 @@ var CastleSim = function() {
 					this.shapes[i].modify();
 				}
 			};
+
+			if (this.draggingRoom != null && this.hoveredShape instanceof Boundable) {
+				this.placeRoom();
+			}
 		}
 
 		if (event.button == 2) {
