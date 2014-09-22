@@ -225,10 +225,29 @@ var GraphicsEngine = function(_sim) {
 		return model;
 	};
 
-	this.setMouse = function(event) {
+	this.setRightMouseButtonDown = function(isDown) {
+		this.mouse.isRightDown = isDown;
+	};
 
-		this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-		this.mouse.y = - ( (event.clientY - 19) / window.innerHeight ) * 2 + 1;
+	this.mouseMove = function(event) {
+		var speedOfCameraScroll = 40;
+
+		var newX = ( event.clientX / window.innerWidth ) * 2 - 1;
+		var newY = - ( (event.clientY - 19) / window.innerHeight ) * 2 + 1;
+
+		var distanceX = this.mouse.x - newX;
+		var distanceY = this.mouse.y - newY;
+
+		this.mouse.x = newX;
+		this.mouse.y = newY;
+
+		if (this.mouse.isRightDown) {
+			this.camera.position.add(new THREE.Vector3(
+				distanceX * speedOfCameraScroll, 
+				distanceY * speedOfCameraScroll, 
+				0)
+			);
+		}
 
 		var vector = new THREE.Vector3(
 		    this.mouse.x,

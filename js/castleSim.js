@@ -170,7 +170,7 @@ var CastleSim = function() {
 	this.mouseMove = function(event) {
 
 		event.preventDefault();
-		var position = this.graphics.setMouse(event);
+		var position = this.graphics.mouseMove(event);
 
 		var hoveredShape = this.graphics.getHoveredShape(this.getShapes());
 		this.hoveredShape = null;
@@ -200,6 +200,12 @@ var CastleSim = function() {
 
 	}
 
+	this.mouseDown = function(event) {
+		if (event.button == 2) {
+			this.graphics.setRightMouseButtonDown(true);
+		}
+	};
+
 	this.click = function( event ) {
 
 		if (event.button == 0) {
@@ -217,6 +223,7 @@ var CastleSim = function() {
 
 		if (event.button == 2) {
 		//right click
+			this.graphics.setRightMouseButtonDown(false);
 			this.clearDragging();
 		}
 	}
@@ -282,7 +289,8 @@ sim.init();
 animate();
 
 window.addEventListener( 'resize', onWindowResize, false );
-document.addEventListener( 'mouseup', onDocumentMouseDown, false );
+document.addEventListener( 'mouseup', onDocumentMouseUp, false );
+document.addEventListener( 'mousedown', onDocumentMouseDown, false );
 document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 window.addEventListener("mousewheel", onWindowMouseWheel, false);
 window.addEventListener("DOMMouseScroll", onWindowMouseWheel, false);
@@ -293,8 +301,12 @@ document.addEventListener('contextmenu', function(e) {
     e.preventDefault();
 }, false);
 
-function onDocumentMouseDown(event) {
+function onDocumentMouseUp(event) {
 	sim.click(event);
+}
+
+function onDocumentMouseDown(event) {
+	sim.mouseDown(event);
 }
 
 function onDocumentMouseMove(event) {

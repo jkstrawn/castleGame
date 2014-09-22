@@ -292,6 +292,7 @@ Castle Sim Game
 
 ###### ThreeJS
 
+- Change grid to smaller boxes (half the size -> more square)
 - Shadows
 - Animate room snapping to position
 - Add glow to available-room-outline
