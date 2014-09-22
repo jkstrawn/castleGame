@@ -6,13 +6,13 @@ var CastleSim = function() {
 	this.stats = null;
 	this.graphics = new GraphicsEngine(this);
 	this.grid = [];
+	this.modelUrls = [
+		"res/models/ground_block/ground_block16.dae",
+		"res/models/room/roomFurnished19.dae"
+	];
+	this.draggingRoom = null;
 
 	var that = this;
-
-	this.onStartAnimation = function(data) {
-		console.log("start");
-		console.log(data);
-	}
 
 	this.init = function() {
 
@@ -36,41 +36,88 @@ var CastleSim = function() {
 		// listen for messages from the gui
 		window.addEventListener( 'create-room', this.clickRoomButton );
 
-		this.graphics.init();
+		this.graphics.init(this.modelUrls, this.loadedModels);
 
 		gui = new BlendCharacterGui();
 	}
 
-	this.clickRoomButton = function(data) {
-		console.log(data.detail.room);
+	this.loadedModels = function() {
 
+		var ground = that.graphics.getModel(that.modelUrls[0]);
+
+		ground.position.set(0, -70, -100);
+		ground.rotation.y = -1.57;
+		ground.scale.x = ground.scale.y = ground.scale.z = 17;
+
+
+		that.addShape(ground);
+		that.graphics.addModel(ground);
+
+
+		for (var i = 0; i < 2; i++) {
+
+			var room = that.graphics.getModel(that.modelUrls[1]);
+
+			room.position.set(i * 51 - 80, 0, 0);
+			room.rotation.y = Math.PI * 1.5;
+			room.scale.x = room.scale.y = room.scale.z = 4;
+
+			that.addRoom(room);
+			that.graphics.addModel(room);
+		}
+	};
+
+	this.clickRoomButton = function(data) {
 
 		for (var x = that.grid.length - 1; x >= 0; x--) {
-				var box = that.grid[x][0];
+			var box = that.grid[x][0];
 
-				if (!box.used) {
-					var boundingBox = new THREE.Mesh(
-						new THREE.BoxGeometry(51, 26.4, 32.5), 
-						new THREE.MeshBasicMaterial( { color: 0x44cc00, wireframe: true } )
-						);
-					boundingBox.position.set(box.x, box.y + 14, box.z);
-					that.graphics.scene.add(boundingBox);
-				}
+			if (!box.used) {
+				var boundingBox = new THREE.Mesh(
+					new THREE.BoxGeometry(51, 26.4, 32.5), 
+					new THREE.MeshBasicMaterial( { color: 0x44cc00, wireframe: true, transparent: true, opacity: 0.3 } )
+					);
+				boundingBox.position.set(box.x, box.y + 14, box.z);
+				that.graphics.addBoundingBox(boundingBox);
+			}
 		};
+
+		var room = that.graphics.getModel(that.modelUrls[1]);
+
+		room.position.set(150, 50, 0);
+		room.rotation.y = Math.PI * 1.5;
+		room.scale.x = room.scale.y = room.scale.z = 4;
+		room.traverse(function(thing) {
+			if (thing.material instanceof THREE.MeshLambertMaterial) {
+				var clonedMat = thing.material.clone();
+
+				thing.material = clonedMat;
+				thing.material.opacity = .4;
+				thing.material.transparent = true;
+			}
+		});
+
+
+		that.draggingRoom = room;
+		that.graphics.addDraggingRoom(room);
+	};
+
+	this.clearDragging = function() {
+		this.graphics.removeDraggingObjects();
+		this.draggingRoom = null;
 	};
 
 	this.addRoom = function(model) {
 
-
-/*		var helper = new THREE.BoundingBoxHelper(model, 0x33cc00);
-helper.update();
-console.log(helper);
-// If you want a visible bounding box
-this.graphics.scene.add(helper);
-console.log(helper.box.max.x - helper.box.min.x);
-console.log(helper.box.max.y - helper.box.min.y);
-console.log(helper.box.max.z - helper.box.min.z);
-*/
+		/*		var helper = new THREE.BoundingBoxHelper(model, 0x33cc00);
+		helper.update();
+		console.log(helper);
+		// If you want a visible bounding box
+		this.graphics.scene.add(helper);
+		console.log(helper.box.max.x - helper.box.min.x);
+		console.log(helper.box.max.y - helper.box.min.y);
+		console.log(helper.box.max.z - helper.box.min.z);
+		*/
 		console.log(model);
 
 		var shape = new Room(this);
@@ -89,7 +136,11 @@ console.log(helper.box.max.z - helper.box.min.z);
 	this.mouseMove = function(event) {
 
 		event.preventDefault();
-		this.graphics.setMouse(event);
+		var position = this.graphics.setMouse(event);
+
+		if (this.draggingRoom != null) {
+			this.draggingRoom.position.set(position.x, position.y, 0);
+		}
 
 		var hoveredShape = this.graphics.getHoveredShape(this.getShapes());
 
@@ -108,13 +159,19 @@ console.log(helper.box.max.z - helper.box.min.z);
 
 	this.click = function( event ) {
 
-		event.preventDefault();
+		if (event.button == 0) {
+		//left click
+			for (var i = this.shapes.length - 1; i >= 0; i--) {
+				if (this.shapes[i].hover) {
+					this.shapes[i].modify();
+				}
+			};
+		}
 
-		for (var i = this.shapes.length - 1; i >= 0; i--) {
-			if (this.shapes[i].hover) {
-				this.shapes[i].modify();
-			}
-		};
+		if (event.button == 2) {
+		//right click
+			this.clearDragging();
+		}
 	}
 
 	this.render = function() {
@@ -178,11 +235,16 @@ sim.init();
 animate();
 
 window.addEventListener( 'resize', onWindowResize, false );
-document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+document.addEventListener( 'mouseup', onDocumentMouseDown, false );
 document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 window.addEventListener("mousewheel", onWindowMouseWheel, false);
 window.addEventListener("DOMMouseScroll", onWindowMouseWheel, false);
-window.addEventListener("keypress", onWindowKeyPress, false)
+window.addEventListener("keypress", onWindowKeyPress, false);
+
+document.addEventListener('contextmenu', function(e) {
+	console.log(e);
+    e.preventDefault();
+}, false);
 
 function onDocumentMouseDown(event) {
 	sim.click(event);

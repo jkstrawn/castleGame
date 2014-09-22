@@ -8,6 +8,9 @@ var GraphicsEngine = function(_sim) {
 
 	this.raycaster = new THREE.Raycaster();
 	this.sim = _sim;
+	this.models = [];
+	this.numModelsToLoad = 0;
+	this.tempObjects = [];
 
 	this.parameters = {
 		width: 2000,
@@ -21,7 +24,7 @@ var GraphicsEngine = function(_sim) {
 
 	var that = this;
 
-	this.init = function() {
+	this.init = function(urls, callback) {
 
 		this.container = document.createElement( 'div' );
 		document.body.appendChild( this.container );
@@ -37,58 +40,60 @@ var GraphicsEngine = function(_sim) {
 		this.addRendered();
 		this.addSkyDome();
 
-		loader = new THREE.ColladaLoader();
-		loader.options.convertUpAxis = true;
-		loader.load( "res/models/ground_block/ground_block6.dae", this.loadGround );
-		loader = new THREE.ColladaLoader();
-		loader.options.convertUpAxis = true;
-		loader.load( 'res/models/room/roomFurnished16.dae', this.createRooms );
-		loader.load( 'res/models/chair.dae', this.loadChair );
+		this.numModelsToLoad = urls.length;
+		for (var i = urls.length - 1; i >= 0; i--) {
+			this.loadModel(urls[i], callback);
+		};
 
-		
-		/*
-		var boundingBox = new THREE.Mesh(
-			new THREE.PlaneGeometry(165, 68, 3, 2), 
-			new THREE.MeshBasicMaterial( { color: 0xffaa00, wireframe: true } )
-			);
-		boundingBox.position.set(6, 34, 15);
-		this.scene.add(boundingBox);
-		*/
 	}
 
-	this.loadChair = function(collada) {
+	this.loadModel = function(url, callback) {
 
+		loader = new THREE.ColladaLoader();
+		loader.options.convertUpAxis = true;
+		loader.load( url, function(collada) {
+			var model = collada.scene;
 
-		var ground = collada.scene;
-		ground = that.makeLambert(ground);
-		var thing = ground.children[0].children[0].material;
-		console.log(thing);
-		thing.shininess = 0;
+			//model = that.makeLambert(model);
+			that.models.push({
+				model: model,
+				url: url
+			});
 
-		ground.position.set(0, 50, 0);
-		ground.rotation.y = -1.57;
-		ground.scale.x = ground.scale.y = ground.scale.z = 5;
-
-		that.scene.add(ground);
+			that.numModelsToLoad--;
+			if (that.numModelsToLoad == 0) {
+				callback();
+			}
+		});
 	};
 
-	this.makeLambert = function(object) {
+	this.removeDraggingObjects = function() {
+		for (var i = this.tempObjects.length - 1; i >= 0; i--) {
+			this.scene.remove(this.tempObjects[i]);
+		};
 
-		for (var numShapes = 0; numShapes < object.children.length; numShapes++) {
-			var shape = object.children[numShapes];
-			for (var numObjects = shape.children.length - 1; numObjects >= 0; numObjects--) {
-				var material = shape.children[numObjects].material;
-				if (material.materials != null) {
-					for (var numMaterials = material.materials.length - 1; numMaterials >= 0; numMaterials--) {
-						material.materials[numMaterials].ambient = new THREE.Color(1, 1, 1);
-					};
-				} else {
-					material.ambient = new THREE.Color(1, 1, 1);
-				}
-			};
-		}
+		this.tempObjects = [];
+	};
 
-		return object;
+	this.addDraggingRoom = function(room) {
+		this.tempObjects.push(room);
+		this.scene.add(room);
+	};
+
+	this.addBoundingBox = function(box) {
+		this.tempObjects.push(box);
+		this.scene.add(box);
+	};
+
+	this.getModel = function(url) {
+
+		for (var i = this.models.length - 1; i >= 0; i--) {
+			if (this.models[i].url == url) {
+				return this.models[i].model.clone();
+			}
+		};
+
+		return null;
 	};
 
 	this.addCamera = function() {
@@ -99,7 +104,16 @@ var GraphicsEngine = function(_sim) {
 	}
 
 	this.addLights = function() {
-		
+		var hemiLight = new THREE.HemisphereLight(0xffe5bb, 0xFFBF00, .6);
+		hemiLight.position.set( 0, 500, 0 );
+		this.scene.add(hemiLight);
+
+		//var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.6 );
+		//hemiLight.color.setHSL( .5, .5, .5 );
+		//hemiLight.groundColor.setHSL( 0.095, 1, 0.75 );
+		//hemiLight.position.set( 0, 500, 0 );
+		//this.scene.add( hemiLight );
+
 		var ambientLight = new THREE.AmbientLight( 0x808080 );
 		this.scene.add( ambientLight );
 
@@ -183,44 +197,6 @@ var GraphicsEngine = function(_sim) {
 		this.scene.add( skyBox );
 	}
 
-	this.loadGround = function( collada ) {
-
-		var ground = collada.scene;
-		ground = that.makeLambert(ground);
-		var thing = ground.children[0].children[0].material;
-		console.log(thing);
-		thing.shininess = 0;
-
-		ground.position.set(0, -70, -100);
-		ground.rotation.y = -1.57;
-		ground.scale.x = ground.scale.y = ground.scale.z = 17;
-
-		that.sim.addShape(ground);
-		that.scene.add(ground);
-	}
-
-	this.createRooms = function(collada) {
-
-		var dae = collada.scene;
-
-		for (var i = 0; i < 2; i++) {
-			var room = dae.clone();
-			room = that.makeLambert(room);
-
-
-			room.modify = function() {
-				this.position.z += 10;
-			};
-			room.position.set(i * 51 - 80, 0, 0);
-			room.rotation.y = Math.PI * 1.5;
-			room.scale.x = room.scale.y = room.scale.z = 4;
-			room.updateMatrix();
-
-			that.sim.addRoom(room);
-			that.scene.add( room );
-		}
-	}
-
 	this.render = function() {
 		this.renderer.render( this.scene, this.camera );
 	};
@@ -253,6 +229,18 @@ var GraphicsEngine = function(_sim) {
 
 		this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 		this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+		var vector = new THREE.Vector3(
+		    this.mouse.x,
+		    this.mouse.y,
+		    0.5 );
+
+		this.projector.unprojectVector( vector, this.camera );
+		var dir = vector.sub( this.camera.position ).normalize();
+		var distance = - this.camera.position.z / dir.z;
+		var pos = this.camera.position.clone().add( dir.multiplyScalar( distance ) );
+
+		return pos;
 	};
 
 	this.resize = function() {
@@ -288,4 +276,8 @@ var GraphicsEngine = function(_sim) {
 				break
 		}
 	}
+
+	this.addModel = function(model) {
+		this.scene.add(model);
+	};
 };
