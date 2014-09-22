@@ -282,6 +282,37 @@ Castle Sim Game
 	* "visit the kingdom"? and do what?
 - Gray out / don't show other room tabs
 
+#### TODO
+
+###### Gameplay
+
+- Show resources (food, timber, gold)
+- Make awesome UI
+- Hire servant button
+
+###### ThreeJS
+
+- Shadows
+- Animate room snapping to position
+- Add glow to available-room-outline
+- Redo ground
+- Add grass sprites
+- Scroll camera up and down when hover over higher or lower rooms
+- BUG: Transparency on room looks weird
+- BUG: Light not showing up on floor or wall that is covered by tapestry or rug
+- BUG: Light casting to room above the selected room
+
+###### Models
+
+- Servant model
+- Animate servant model
+- More rooms...
+- Room furniture
+
+###### Other
+
+- Sound effects
+
 
 
 Credit for the wonderful skybox goes to http://reije081.home.xs4all.nl/skyboxes/

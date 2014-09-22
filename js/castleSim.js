@@ -172,7 +172,6 @@ var CastleSim = function() {
 		event.preventDefault();
 		var position = this.graphics.setMouse(event);
 
-
 		var hoveredShape = this.graphics.getHoveredShape(this.getShapes());
 		this.hoveredShape = null;
 

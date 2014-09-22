@@ -117,7 +117,7 @@ var GraphicsEngine = function(_sim) {
 		var ambientLight = new THREE.AmbientLight( 0x808080 );
 		this.scene.add( ambientLight );
 
-		sim.pointLight = new THREE.PointLight( 0xffcc00, .8, 30 );
+		sim.pointLight = new THREE.PointLight( 0xffcc00, 2, 30 );
 		sim.pointLight.position.set( 0, 100, 0 );
 		this.scene.add( sim.pointLight );
 	}
@@ -228,7 +228,7 @@ var GraphicsEngine = function(_sim) {
 	this.setMouse = function(event) {
 
 		this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-		this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+		this.mouse.y = - ( (event.clientY - 19) / window.innerHeight ) * 2 + 1;
 
 		var vector = new THREE.Vector3(
 		    this.mouse.x,
