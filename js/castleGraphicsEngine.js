@@ -199,6 +199,7 @@ var GraphicsEngine = function(_sim) {
 
 	this.render = function() {
 		this.renderer.render( this.scene, this.camera );
+		TWEEN.update();
 	};
 
 	this.update = function() {
@@ -269,6 +270,21 @@ var GraphicsEngine = function(_sim) {
 
 		this.renderer.setSize( window.innerWidth, window.innerHeight );
 	};
+
+	this.focusCamera = function(x, y, z) {
+		var cameraZ = this.camera.position.z;
+
+		var tween = new TWEEN.Tween(this.camera.position).to({
+		    x: x,
+		    y: y + (150/2),
+		    z: cameraZ
+		}, 500).easing(TWEEN.Easing.Linear.None).onUpdate(function (time) {
+			//console.log(test + " at " + new Date())
+		    //that.camera.lookAt(new THREE.Vector3(x,y,cameraZ));
+		}).onComplete(function () {
+		    //that.camera.lookAt(new THREE.Vector3(x,y,cameraZ));
+		}).start();
+	}
 
 	this.zoom = function (increase) {
 		if ((this.camera.fov - increase) > 0)

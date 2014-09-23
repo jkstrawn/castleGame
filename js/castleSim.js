@@ -12,6 +12,7 @@ var CastleSim = function() {
 	];
 	this.draggingRoom = null;
 	this.hoveredShape = null;
+	this.snappedShape = null;
 
 	var that = this;
 
@@ -188,14 +189,27 @@ var CastleSim = function() {
 		};
 
 		if (this.draggingRoom != null) {
-			if (this.hoveredShape instanceof Boundable) {
-				var gridPosition = this.grid[this.hoveredShape.x][this.hoveredShape.y];
-				console.log(gridPosition.x + ", " + gridPosition.y + "    " + this.hoveredShape.x + ", " + this.hoveredShape.y);
+			if (this.hoveredShape instanceof Boundable) { //Bounding box being hovered
+				if (this.hoveredShape != this.snappedShape) //Only resnap if not already being snapped here
+				{
+					console.log(this.snappedShape)
+					console.log(this.hoveredShape)
+					this.snappedShape = this.hoveredShape;
+					var gridPosition = this.grid[this.hoveredShape.x][this.hoveredShape.y];
+					console.log(gridPosition.x + ", " + gridPosition.y + "    " + this.hoveredShape.x + ", " + this.hoveredShape.y);
 
-				this.draggingRoom.position.set(gridPosition.x, gridPosition.y, 0);
+					this.draggingRoom.position.set(gridPosition.x, gridPosition.y, 0);
+
+					this.graphics.focusCamera(gridPosition.x, gridPosition.y, 0);					
+				}
 			} else {
 				this.draggingRoom.position.set(position.x, position.y, 0);
+				this.snappedShape = null;
 			}
+		}
+		else
+		{
+			this.snappedShape = null;
 		}
 
 	}
@@ -235,11 +249,13 @@ var CastleSim = function() {
 		this.graphics.render();
 	}
 
-	this.update = function() {
+	this.update = function(time) {
 
 		for (var i = this.shapes.length - 1; i >= 0; i--) {
 			this.shapes[i].update();
 		};
+
+		this.graphics.update(time);
 	}
 
 	this.onWindowResize = function() {
@@ -317,10 +333,10 @@ function onWindowResize() {
 	sim.onWindowResize();
 }
 
-function animate() {		
+function animate(time) {		
 	requestAnimationFrame( animate );
 
-	sim.update();
+	sim.update(time);
 	sim.render();
 	stats.update();
 }
