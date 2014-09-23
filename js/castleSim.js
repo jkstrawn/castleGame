@@ -198,7 +198,14 @@ var CastleSim = function() {
 					var gridPosition = this.grid[this.hoveredShape.x][this.hoveredShape.y];
 					console.log(gridPosition.x + ", " + gridPosition.y + "    " + this.hoveredShape.x + ", " + this.hoveredShape.y);
 
-					this.draggingRoom.position.set(gridPosition.x, gridPosition.y, 0);
+					
+					var tween = new TWEEN.Tween(this.draggingRoom.position).to({
+					    x: gridPosition.x,
+					    y: gridPosition.y,
+					    z: 0
+					}, 200).easing(TWEEN.Easing.Linear.None).start();
+
+					//this.draggingRoom.position.set(gridPosition.x, gridPosition.y, 0);
 
 					this.graphics.focusCamera(gridPosition.x, gridPosition.y, 0);					
 				}
