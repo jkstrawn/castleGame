@@ -11,6 +11,7 @@ var GraphicsEngine = function(_sim) {
 	this.models = [];
 	this.numModelsToLoad = 0;
 	this.tempObjects = [];
+	this.particles = new ParticleSystem();
 
 	this.parameters = {
 		width: 2000,
@@ -45,7 +46,12 @@ var GraphicsEngine = function(_sim) {
 			this.loadModel(urls[i], callback);
 		};
 
+		this.particles.init(this.scene);
 	}
+
+	this.addRoomSpotParticles = function(position, width, length) {
+		this.particles.addEmitter(position, width, length);
+	};
 
 	this.loadModel = function(url, callback) {
 
@@ -73,6 +79,7 @@ var GraphicsEngine = function(_sim) {
 		};
 
 		this.tempObjects = [];
+		this.particles.stop();
 	};
 
 	this.addDraggingRoom = function(room) {
@@ -198,6 +205,7 @@ var GraphicsEngine = function(_sim) {
 	}
 
 	this.render = function() {
+		this.particles.render();
 		this.renderer.render( this.scene, this.camera );
 		TWEEN.update();
 	};
@@ -231,7 +239,6 @@ var GraphicsEngine = function(_sim) {
 	};
 
 	this.mouseMove = function(event) {
-		var speedOfCameraScroll = 40;
 
 		var newX = ( event.clientX / window.innerWidth ) * 2 - 1;
 		var newY = - ( (event.clientY - 19) / window.innerHeight ) * 2 + 1;
@@ -244,8 +251,8 @@ var GraphicsEngine = function(_sim) {
 
 		if (this.mouse.isRightDown) {
 			this.camera.position.add(new THREE.Vector3(
-				distanceX * speedOfCameraScroll, 
-				distanceY * speedOfCameraScroll, 
+				distanceX * 70, 
+				distanceY * 40, 
 				0)
 			);
 		}

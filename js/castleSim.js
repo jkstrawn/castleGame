@@ -67,6 +67,7 @@ var CastleSim = function() {
 			that.addRoom(room);
 			that.graphics.addModel(room);
 		}
+					//that.graphics.addRoomSpotParticles(new THREE.Vector3(-105, 26.4, -10), 51, 26);
 	};
 
 	this.clickRoomButton = function(data) {
@@ -78,6 +79,7 @@ var CastleSim = function() {
 
 				if (!box.used) {
 					that.addBoundable(box, x, y);
+					that.graphics.addRoomSpotParticles(new THREE.Vector3(box.x - 25, box.y, -10), 51, 26);
 					break;
 				}
 			}

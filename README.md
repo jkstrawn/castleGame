@@ -137,18 +137,7 @@ Castle Sim Game
 
 #### Rooms
 
-##### Room List
-- courtroom (archives)
-- wash room (bath house?)
-	* increase hygiene
-- lavatory
-	* increase hygiene
-- 1/2 bedroom
-- bedroom
-	* allow noble to move in
-- alchemy lab (apothecary)
-- observatorium
-- enchanting room
+##### Rooms (Necessary)
 - hall
 	* Continue to level-up
 	* Unlocks more rooms
@@ -156,30 +145,14 @@ Castle Sim Game
 	* Increase food efficiency
 	* hygiene
 	* luxury
+- lavatory
+	* increase hygiene
+- bedroom
+	* allow noble to move in
 - servants quarters
 	* hygiene
 	* servants efficiency
 	* morale
-- air lift / stair
-- quarry
-- stables
-	* hygiene
-	* military
-- common room
-- theater
-	* luxury
-	* morale
-- chapel
-	* morale
-	* religion system?
-	* luxury
-- master bedroom (for king)
-	* luxury
-- lords chamber (suite)
-	* luxury
-- brothel
-- keep
-- barracks (and mess hall)
 - storeroom (non-food)
 	* store more resources?
 	* efficiency
@@ -187,49 +160,82 @@ Castle Sim Game
 	* store more resources?
 	* food efficiency
 	* hygiene
-- solar
+- common room
+- chapel
+	* morale
+	* religion system?
+	* luxury
+- stewards quarters
+	* luxury
+	* effeciency
+- bailey / ward / courtyard
+	* luxury
+	* morale
+	* required for certain events? or just make them more effective
+- drawing room (parlor)
+	* morale
+	* luxury
+- study (office)
+	* efficiency?
+- throne room
+	* luxury
+	* solving disputes have bigger gains (reputation, alignment, morale?)
+- cellar
+	* Wine?
+- closet
+- 1/2 bedroom
+
+##### Rooms (Luxury)
+- wash room (bath house?)
+	* increase hygiene
+- master bedroom (for king)
+	* luxury
+- lords chamber (suite)
+	* luxury
+- cesspit
+- theater
+	* luxury
+	* morale
+- courtroom (archives)
+- alchemy lab (apothecary)
+- observatorium
+- enchanting room
+- air lift / stair
+- quarry
 - wardrobe
 	* luxury
 - tailor
 - minstrels gallery
 - hospital
-- drawing room (parlor)
-	* morale
-	* luxury
-- throne room
-	* luxury
-	* solving disputes have bigger gains (reputation, alignment, morale?)
-- cellar
+- solar
 - buttery
 	* luxury
 - bottlery
 - library
 	* luxury
 	* research points?
-- oratory (private praying room)
-- dungeon
-- oubliette
-- casemate (musketry)
-- gatehouse
-- bailey / ward / courtyard
+- brewery
 	* luxury
-	* morale
-	* required for certain events? or just make them more effective
-- study (office)
-	* efficiency?
-- garden
 - treasury
 	* luxury
 	* increase gold max?
-- stewards quarters
-	* luxury
-	* effeciency
+- garden
+- oratory (private praying room)
+
+##### Rooms (Military)
+- brothel
+- stables
+	* hygiene
+	* military
+- keep
+- barracks (and mess hall)
+- casemate (musketry)
+- gatehouse
 - armory
-- brewery
-	* luxury
 - forge
-- cesspit
-- closet
+- dungeon
+- oubliette
+
 
 ##### Room Categories
 
