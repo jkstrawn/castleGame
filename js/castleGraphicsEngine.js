@@ -285,7 +285,7 @@ var GraphicsEngine = function(_sim) {
 		    x: x,
 		    y: y + (150/2),
 		    z: cameraZ
-		}, 500).easing(TWEEN.Easing.Linear.None).onUpdate(function (time) {
+		}, 800).easing(TWEEN.Easing.Linear.None).onUpdate(function (time) {
 			//console.log(test + " at " + new Date())
 		    //that.camera.lookAt(new THREE.Vector3(x,y,cameraZ));
 		}).onComplete(function () {
