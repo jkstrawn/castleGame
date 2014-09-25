@@ -13,6 +13,7 @@ var CastleSim = function() {
 	this.draggingRoom = null;
 	this.hoveredShape = null;
 	this.snappedShape = null;
+	this.tweenForBox = null;
 
 	var that = this;
 
@@ -194,14 +195,14 @@ var CastleSim = function() {
 			if (this.hoveredShape instanceof Boundable) { //Bounding box being hovered
 				if (this.hoveredShape != this.snappedShape) //Only resnap if not already being snapped here
 				{
-					console.log(this.snappedShape)
-					console.log(this.hoveredShape)
+					//console.log(this.snappedShape)
+					//console.log(this.hoveredShape)
 					this.snappedShape = this.hoveredShape;
 					var gridPosition = this.grid[this.hoveredShape.x][this.hoveredShape.y];
-					console.log(gridPosition.x + ", " + gridPosition.y + "    " + this.hoveredShape.x + ", " + this.hoveredShape.y);
+					//console.log(gridPosition.x + ", " + gridPosition.y + "    " + this.hoveredShape.x + ", " + this.hoveredShape.y);
 
 					
-					var tween = new TWEEN.Tween(this.draggingRoom.position).to({
+					this.draggingRoom.tween = new TWEEN.Tween(this.draggingRoom.position).to({
 					    x: gridPosition.x,
 					    y: gridPosition.y,
 					    z: 0
@@ -212,6 +213,9 @@ var CastleSim = function() {
 					this.graphics.focusCamera(gridPosition.x, gridPosition.y, 0);					
 				}
 			} else {
+				if (this.draggingRoom.tween) {
+					TWEEN.remove(this.draggingRoom.tween);
+				}
 				this.draggingRoom.position.set(position.x, position.y, 0);
 				this.snappedShape = null;
 			}
@@ -322,7 +326,6 @@ window.addEventListener("DOMMouseScroll", onWindowMouseWheel, false);
 window.addEventListener("keypress", onWindowKeyPress, false);
 
 document.addEventListener('contextmenu', function(e) {
-	console.log(e);
     e.preventDefault();
 }, false);
 

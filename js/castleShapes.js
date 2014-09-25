@@ -2,6 +2,7 @@ var Shape = function(_sim, _model) {
 	this.sim = _sim;
 	this.model = _model;
 	this.hover = false;
+	this.tween = null;
 
 	this.init = function() {};
 

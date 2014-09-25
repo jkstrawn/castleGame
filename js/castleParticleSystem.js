@@ -72,7 +72,7 @@ function ParticleSystem() {
 	}
 
 	this.getNewOrUsedEmitter = function() {
-		
+
 		for (var i = this.emitters.length - 1; i >= 0; i--) {
 			if (!this.emitters[i].using) {
 				emitter = this.emitters[i];
@@ -115,9 +115,16 @@ function ParticleSystem() {
 			this.emitters[i].using = false;
 			var particles = this.emitters[i].removeAll();
 			for (var p = particles.length - 1; p >= 0; p--) {
-				this.Pool.add(particles[p].target);
+				if (particles[p].target != null) {
+					this.Pool.add(particles[p].target);
+				}
 			};
 		};
+
+		if(this.Pool.__pool.length != this.numOfParticles) {
+			console.log("Uh oh... missing particles after we reset the emitters. We expected to have " +
+				this.numOfPartcles + " but we got " + this.Pool.__pool.length);
+		}
 	}
 
 	this.render = function() {

@@ -300,8 +300,6 @@ Castle Sim Game
 
 - Change grid to smaller boxes (half the size -> more square)
 - Shadows
-- Animate room snapping to position
-- Add glow to available-room-outline
 - Redo ground
 - Add grass sprites
 - Scroll camera up and down when hover over higher or lower rooms
