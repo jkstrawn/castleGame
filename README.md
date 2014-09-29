@@ -287,6 +287,7 @@ Castle Sim Game
 	* Clicking a button to get ahead
 	* "visit the kingdom"? and do what?
 - Gray out / don't show other room tabs
+- Juiciness (watch that video again)
 
 #### TODO
 

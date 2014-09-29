@@ -305,16 +305,16 @@ var GraphicsEngine = function(_sim) {
 	this.moveCamera = function (direction) {
 		switch (direction) {
 			case "up":
-				this.camera.position.y += 1
+				this.camera.position.y += 1;
 				break
 			case "down":
-				this.camera.position.y -= 1
+				this.camera.position.y -= 1;
 				break
 			case "left":
-				this.camera.position.x -= 1
+				this.camera.position.x -= 1;
 				break
 			case "right":
-				this.camera.position.x += 1
+				this.camera.position.x += 1;
 				break
 		}
 	}
