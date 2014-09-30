@@ -8,34 +8,21 @@ var CastleSim = function() {
 	this.grid = [];
 	this.modelUrls = [
 		"res/models/ground_block/ground_block16.dae",
-		"res/models/room/roomFurnished19.dae"
+		"res/models/room/roomBed.dae",
+		"res/models/room_hall/roomHall.dae"
 	];
 	this.draggingRoom = null;
 	this.hoveredShape = null;
 	this.snappedShape = null;
 	this.tweenForBox = null;
+	this.gridWidth = 30;
+	this.gridLength = 30;
 
 	var that = this;
 
 	this.init = function() {
 
-		for (var x = 0; x < 4; x++) {
-			this.grid[x] = [];
-
-			for (var y = 0; y < 4; y++) {
-				this.grid[x][y] = {
-					x: x * 51 - 80, 
-					y: y * 26.4, 
-					z: 0,
-					used: false
-				};
-			}
-		};
-		this.grid[0][0].used = true;
-		this.grid[1][0].used = true;
-
-		console.log(this.grid[2][0]);
-
+		this.initGrid();
 		// listen for messages from the gui
 		window.addEventListener( 'create-room', this.clickRoomButton );
 
@@ -44,54 +31,69 @@ var CastleSim = function() {
 		gui = new BlendCharacterGui();
 	}
 
+	this.initGrid = function() {
+		var startPoint = -110;
+		var numOfGridSide = 7;
+		var numOfGridUp = 4;
+
+		for (var x = 0; x < numOfGridSide; x++) {
+			this.grid[x] = [];
+
+			for (var y = 0; y < numOfGridUp; y++) {
+				this.grid[x][y] = {
+					x: x * this.gridLength + startPoint, 
+					y: y * this.gridWidth, 
+					z: 0,
+					used: false
+				};
+			}
+		};
+
+		this.grid[2][0].used = true;
+		this.grid[3][0].used = true;
+		this.grid[4][0].used = true;
+	}
+
 	this.loadedModels = function() {
 
+		//add ground
 		var ground = that.graphics.getModel(that.modelUrls[0]);
 
 		ground.position.set(0, -70, -100);
 		ground.rotation.y = -1.57;
 		ground.scale.x = ground.scale.y = ground.scale.z = 17;
 
-
 		that.addShape(ground);
 		that.graphics.addModel(ground);
 
+		//add initial hall
+		var grid = that.grid[2][0];
+		var room = that.graphics.getModel(that.modelUrls[2]);
 
-		for (var i = 0; i < 2; i++) {
+		room.position.set(grid.x, grid.y, 0);
+		room.rotation.y = Math.PI * 1.5;
+		room.scale.x = room.scale.y = room.scale.z = 3;
 
-			var room = that.graphics.getModel(that.modelUrls[1]);
-
-			room.position.set(i * 51 - 80, 0, 0);
-			room.rotation.y = Math.PI * 1.5;
-			room.scale.x = room.scale.y = room.scale.z = 4;
-
-			that.addRoom(room);
-			that.graphics.addModel(room);
-		}
-					//that.graphics.addRoomSpotParticles(new THREE.Vector3(-105, 26.4, -10), 51, 26);
+		that.addRoom(room);
+		that.graphics.addModel(room);
 	};
+
+	this.generateRoomModel = function(vector) {
+		var room = this.graphics.getModel(this.modelUrls[1]);
+
+		room.position.set(vector.x, vector.y, vector.z);
+		room.rotation.y = Math.PI * 1.5;
+		room.scale.x = room.scale.y = room.scale.z = 3;
+
+		return room;
+	}
 
 	this.clickRoomButton = function(data) {
 
-		for (var x = that.grid.length - 1; x >= 0; x--) {
+		that.drawGrid();
 
-			for (var y = 0; y < that.grid[x].length; y++) {
-				var box = that.grid[x][y];
-
-				if (!box.used) {
-					that.addBoundable(box, x, y);
-					that.graphics.addRoomSpotParticles(new THREE.Vector3(box.x - 25, box.y, -10), 51, 26);
-					break;
-				}
-			}
-
-		};
-
-		var room = that.graphics.getModel(that.modelUrls[1]);
-
-		room.position.set(150, 50, 0);
-		room.rotation.y = Math.PI * 1.5;
-		room.scale.x = room.scale.y = room.scale.z = 4;
+		var room = that.generateRoomModel(new THREE.Vector3(150, 50, 0));
+		
 		room.traverse(function(thing) {
 			if (thing.material instanceof THREE.MeshLambertMaterial) {
 				var clonedMat = thing.material.clone();
@@ -107,15 +109,27 @@ var CastleSim = function() {
 		that.graphics.addDraggingRoom(room);
 	};
 
+	this.drawGrid = function() {
+
+		for (var x = that.grid.length - 1; x >= 0; x--) {
+
+			for (var y = 0; y < that.grid[x].length; y++) {
+				var box = that.grid[x][y];
+
+				if (!box.used) {
+					that.addBoundable(box, x, y);
+					that.graphics.addRoomSpotParticles(new THREE.Vector3(box.x, box.y, 0), that.gridLength, that.gridWidth);
+					break;
+				}
+			}
+		};
+	}
+
 	this.placeRoom = function() {
 		var gridPosition = this.grid[this.hoveredShape.x][this.hoveredShape.y];
 		gridPosition.used = true;
 
-		var room = this.graphics.getModel(this.modelUrls[1]);
-
-		room.position.set(gridPosition.x, gridPosition.y, 0);
-		room.rotation.y = Math.PI * 1.5;
-		room.scale.x = room.scale.y = room.scale.z = 4;
+		var room = this.generateRoomModel(new THREE.Vector3(gridPosition.x, gridPosition.y, 0));
 		
 		this.addRoom(room);	
 		this.graphics.addModel(room);
@@ -137,10 +151,10 @@ var CastleSim = function() {
 	this.addBoundable = function(box, x, y) {
 
 		var boundingBox = new THREE.Mesh(
-			new THREE.BoxGeometry(51, 26.4, 32.5), 
+			new THREE.BoxGeometry(this.gridLength, this.gridWidth, this.gridWidth), 
 			new THREE.MeshBasicMaterial( { color: 0x44cc00, wireframe: true, transparent: true, opacity: 0.3 } )
 			);
-		boundingBox.position.set(box.x, box.y + 14, box.z);
+		boundingBox.position.set(box.x + 15, box.y + 15, box.z + 15);
 		
 		var boundable = new Boundable(this, boundingBox, x, y);
 		this.shapes.push(boundable);
@@ -148,8 +162,8 @@ var CastleSim = function() {
 	};
 
 	this.addRoom = function(model) {
-
-		/*		var helper = new THREE.BoundingBoxHelper(model, 0x33cc00);
+/*
+				var helper = new THREE.BoundingBoxHelper(model, 0x33cc00);
 		helper.update();
 		console.log(helper);
 		// If you want a visible bounding box
@@ -157,7 +171,7 @@ var CastleSim = function() {
 		console.log(helper.box.max.x - helper.box.min.x);
 		console.log(helper.box.max.y - helper.box.min.y);
 		console.log(helper.box.max.z - helper.box.min.z);
-		*/
+*/		
 		console.log(model);
 
 		var shape = new Room(this, model);

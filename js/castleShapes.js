@@ -36,11 +36,12 @@ var Room = function(sim, model) {
 	this.light = null;
 
 	this.createLight = function() {
-		sim.pointLight.position.set( this.model.position.x, this.model.position.y + 20, this.model.position.z + 10 );
+		sim.pointLight.position.set( this.model.position.x + 15, this.model.position.y + 15, this.model.position.z + 10 );
 	}
 
 	this.removeLight = function() {
-		if (sim.pointLight.position.x == this.model.position.x && sim.pointLight.position.y == (this.model.position.y + 20)) {
+		if (sim.pointLight.position.x == (this.model.position.x + 15)
+		 && sim.pointLight.position.y == (this.model.position.y + 15)) {
 			sim.pointLight.position.set( 0, -200, 0 );
 		}
 	};

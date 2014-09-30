@@ -4,7 +4,7 @@ function ParticleSystem() {
 	this.Pool;
 	this.particleCloud;
 	this.emitters = [];
-	this.numOfParticles = 200;
+	this.numOfParticles = 1000;
 
 	var that = this;
 

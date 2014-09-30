@@ -5,6 +5,8 @@ Castle Sim Game
 
 ##### Control a castle and all it's rooms and inhabitants. Keep your citizens and staff happy in the midst of enemy invasions, famine, and other disasters.
 
+To view the current version, go to: http://castlesim.azurewebsites.net/
+
 ### Notes
 
 #### Game Elements
