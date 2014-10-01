@@ -1,12 +1,13 @@
 var CastleSim = function() {
 	this.shapes = [];
 	this.pointLight = null;
+	this.stats = null;
 
 	this.clock = new THREE.Clock();
+	this.grid = new GridManager(this);
 	this.gui = null;
-	this.stats = null;
 	this.graphics = new GraphicsEngine(this);
-	this.grid = [];
+
 	this.modelUrls = [
 		"res/models/ground_block/ground_block16.dae",
 		"res/models/room/roomBed.dae",
@@ -16,8 +17,6 @@ var CastleSim = function() {
 	this.hoveredShape = null;
 	this.snappedShape = null;
 	this.tweenForBox = null;
-	this.gridWidth = 30;
-	this.gridLength = 30;
 
 	this.resources = {
 		servants: 1
@@ -27,37 +26,14 @@ var CastleSim = function() {
 
 	this.init = function() {
 
-		this.initGrid();
 		// listen for messages from the gui
 		window.addEventListener( 'create-room', this.clickRoomButton );
 		window.addEventListener( 'hire-servant', this.hireServant );
 
+		this.grid.init();
 		this.graphics.init(this.modelUrls, this.loadedModels);
-
 		this.gui = new BlendCharacterGui();
-	}
-
-	this.initGrid = function() {
-		var startPoint = -110;
-		var numOfGridSide = 7;
-		var numOfGridUp = 4;
-
-		for (var x = 0; x < numOfGridSide; x++) {
-			this.grid[x] = [];
-
-			for (var y = 0; y < numOfGridUp; y++) {
-				this.grid[x][y] = {
-					x: x * this.gridLength + startPoint, 
-					y: y * this.gridWidth, 
-					z: 0,
-					used: false
-				};
-			}
-		};
-
-		this.grid[2][0].used = true;
-		this.grid[3][0].used = true;
-		this.grid[4][0].used = true;
+		this.gui.setValue("Servants", this.resources.servants);
 	}
 
 	this.loadedModels = function() {
@@ -73,15 +49,28 @@ var CastleSim = function() {
 		that.graphics.addModel(ground);
 
 		//add initial hall
-		var grid = that.grid[2][0];
+		var gridLoc = that.grid.get(2, 0);
 		var room = that.graphics.getModel(that.modelUrls[2]);
 
-		room.position.set(grid.x, grid.y, 0);
+		room.position.set(gridLoc.x, gridLoc.y, 0);
 		room.rotation.y = Math.PI * 1.5;
 		room.scale.x = room.scale.y = room.scale.z = 3;
 
 		that.addRoom(room);
 		that.graphics.addModel(room);
+
+/*
+		//add initial servant
+		var mesh = new THREE.Mesh(
+			new THREE.BoxGeometry(5, 10, 5), 
+			new THREE.MeshBasicMaterial( { color: 0xFFFFFF } )
+			);
+
+		mesh.position.set(grid.x + 20, grid.y + 5, 10);
+
+		that.addShape(mesh);
+		that.graphics.addModel(mesh);
+		*/
 	};
 
 	this.generateRoomModel = function(vector) {
@@ -97,7 +86,7 @@ var CastleSim = function() {
 
 	this.clickRoomButton = function(data) {
 
-		that.drawGrid();
+		that.grid.show();
 
 		var room = that.generateRoomModel(new THREE.Vector3(150, 50, 0));
 		
@@ -121,28 +110,12 @@ var CastleSim = function() {
 		that.gui.setValue("Servants", that.resources.servants);
 	};
 
-	this.drawGrid = function() {
-
-		for (var x = that.grid.length - 1; x >= 0; x--) {
-
-			for (var y = 0; y < that.grid[x].length; y++) {
-				var box = that.grid[x][y];
-
-				if (!box.used) {
-					that.addBoundable(box, x, y);
-					that.graphics.addRoomSpotParticles(new THREE.Vector3(box.x, box.y, 0), that.gridLength, that.gridWidth);
-					break;
-				}
-			}
-		};
-	}
-
 	this.placeRoom = function() {
 
-		var gridPosition = this.grid[this.hoveredShape.x][this.hoveredShape.y];
-		gridPosition.used = true;
+		var gridLoc = this.grid.get(this.hoveredShape.x, this.hoveredShape.y);
+		gridLoc.used = true;
 
-		var room = this.generateRoomModel(new THREE.Vector3(gridPosition.x, gridPosition.y, 0));
+		var room = this.generateRoomModel(new THREE.Vector3(gridLoc.x, gridLoc.y, 0));
 		
 		this.addRoom(room);	
 		this.graphics.addModel(room);
@@ -152,26 +125,13 @@ var CastleSim = function() {
 
 	this.clearDragging = function() {
 		for (var i = this.shapes.length - 1; i >= 0; i--) {
-			if (this.shapes[i] instanceof Boundable) {
+			if (this.shapes[i] instanceof GridSection) {
 				this.shapes.splice(i, 1);
 			}
 		};
 
 		this.graphics.removeDraggingObjects();
 		this.draggingRoom = null;
-	};
-
-	this.addBoundable = function(box, x, y) {
-
-		var boundingBox = new THREE.Mesh(
-			new THREE.BoxGeometry(this.gridLength, this.gridWidth, this.gridWidth), 
-			new THREE.MeshBasicMaterial( { color: 0x44cc00, wireframe: true, transparent: true, opacity: 0.3 } )
-			);
-		boundingBox.position.set(box.x + 15, box.y + 15, box.z + 15);
-		
-		var boundable = new Boundable(this, boundingBox, x, y);
-		this.shapes.push(boundable);
-		this.graphics.addBoundingBox(boundingBox);
 	};
 
 	this.addRoom = function(model) {
@@ -225,25 +185,25 @@ var CastleSim = function() {
 		};
 
 		if (this.draggingRoom != null) {
-			if (this.hoveredShape instanceof Boundable) { //Bounding box being hovered
+			if (this.hoveredShape instanceof GridSection) { //Bounding box being hovered
 				if (this.hoveredShape != this.snappedShape) //Only resnap if not already being snapped here
 				{
 					//console.log(this.snappedShape)
 					//console.log(this.hoveredShape)
 					this.snappedShape = this.hoveredShape;
-					var gridPosition = this.grid[this.hoveredShape.x][this.hoveredShape.y];
-					//console.log(gridPosition.x + ", " + gridPosition.y + "    " + this.hoveredShape.x + ", " + this.hoveredShape.y);
+					var gridLoc = this.grid.get(this.hoveredShape.x, this.hoveredShape.y);
+					//console.log(gridLoc.x + ", " + gridLoc.y + "    " + this.hoveredShape.x + ", " + this.hoveredShape.y);
 
 					
 					this.draggingRoom.tween = new TWEEN.Tween(this.draggingRoom.position).to({
-					    x: gridPosition.x,
-					    y: gridPosition.y,
+					    x: gridLoc.x,
+					    y: gridLoc.y,
 					    z: 0
 					}, 200).easing(TWEEN.Easing.Linear.None).start();
 
-					//this.draggingRoom.position.set(gridPosition.x, gridPosition.y, 0);
+					//this.draggingRoom.position.set(gridLoc.x, gridLoc.y, 0);
 
-					this.graphics.focusCamera(gridPosition.x, gridPosition.y, 0);					
+					this.graphics.focusCamera(gridLoc.x, gridLoc.y, 0);					
 				}
 			} else {
 				if (this.draggingRoom.tween) {
@@ -276,7 +236,7 @@ var CastleSim = function() {
 				}
 			};
 
-			if (this.draggingRoom != null && this.hoveredShape instanceof Boundable) {
+			if (this.draggingRoom != null && this.hoveredShape instanceof GridSection) {
 				this.placeRoom();
 			}
 		}

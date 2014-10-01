@@ -57,11 +57,10 @@ var Room = function(sim, model) {
 Room.prototype = new Shape();
 Room.prototype.constructor = Room;
 
-var Boundable = function(sim, model, _x, _y) {
+
+var Servant = function(sim, model) {
 	this.__proto__.__proto__.constructor.call(this, sim, model);
-	this.x = _x;
-	this.y = _y;
 }
 
-Boundable.prototype = new Shape();
-Boundable.prototype.constructor = Boundable;
+Servant.prototype = new Shape();
+Servant.prototype.constructor = Servant;
