@@ -7,6 +7,7 @@ var CastleSim = function() {
 	this.grid = new GridManager(this);
 	this.gui = null;
 	this.graphics = new GraphicsEngine(this);
+	this.rooms = new RoomManager(this);
 
 	this.modelUrls = [
 		"res/models/ground_block/ground_block16.dae",
@@ -45,19 +46,11 @@ var CastleSim = function() {
 		ground.rotation.y = -1.57;
 		ground.scale.x = ground.scale.y = ground.scale.z = 17;
 
-		that.addShape(ground);
-		that.graphics.addModel(ground);
+		var shape = new Shape(this, ground);
+		that.addShape(shape);
 
 		//add initial hall
-		var gridLoc = that.grid.get(2, 0);
-		var room = that.graphics.getModel(that.modelUrls[2]);
-
-		room.position.set(gridLoc.x, gridLoc.y, 0);
-		room.rotation.y = Math.PI * 1.5;
-		room.scale.x = room.scale.y = room.scale.z = 3;
-
-		that.addRoom(room);
-		that.graphics.addModel(room);
+		that.rooms.addInitialHall();
 
 /*
 		//add initial servant
@@ -73,33 +66,11 @@ var CastleSim = function() {
 		*/
 	};
 
-	this.generateRoomModel = function(vector) {
-
-		var room = this.graphics.getModel(this.modelUrls[1]);
-
-		room.position.set(vector.x, vector.y, vector.z);
-		room.rotation.y = Math.PI * 1.5;
-		room.scale.x = room.scale.y = room.scale.z = 3;
-
-		return room;
-	}
-
 	this.clickRoomButton = function(data) {
 
 		that.grid.show();
 
-		var room = that.generateRoomModel(new THREE.Vector3(150, 50, 0));
-		
-		room.traverse(function(thing) {
-			if (thing.material instanceof THREE.MeshLambertMaterial) {
-				var clonedMat = thing.material.clone();
-
-				thing.material = clonedMat;
-				thing.material.opacity = .4;
-				thing.material.transparent = true;
-			}
-		});
-
+		var room = that.rooms.generateTransparentRoom();
 
 		that.draggingRoom = room;
 		that.graphics.addDraggingRoom(room);
@@ -108,19 +79,6 @@ var CastleSim = function() {
 	this.hireServant = function() {
 		that.resources.servants++;
 		that.gui.setValue("Servants", that.resources.servants);
-	};
-
-	this.placeRoom = function() {
-
-		var gridLoc = this.grid.get(this.hoveredShape.x, this.hoveredShape.y);
-		gridLoc.used = true;
-
-		var room = this.generateRoomModel(new THREE.Vector3(gridLoc.x, gridLoc.y, 0));
-		
-		this.addRoom(room);	
-		this.graphics.addModel(room);
-
-		this.clearDragging();
 	};
 
 	this.clearDragging = function() {
@@ -134,35 +92,20 @@ var CastleSim = function() {
 		this.draggingRoom = null;
 	};
 
-	this.addRoom = function(model) {
-/*
-				var helper = new THREE.BoundingBoxHelper(model, 0x33cc00);
-		helper.update();
-		console.log(helper);
-		// If you want a visible bounding box
-		this.graphics.scene.add(helper);
-		console.log(helper.box.max.x - helper.box.min.x);
-		console.log(helper.box.max.y - helper.box.min.y);
-		console.log(helper.box.max.z - helper.box.min.z);
-*/		
+	this.addShape = function(shape) {
 
-		//console.log("linear mag", THREE.LinearFilter);
-		//console.log("nearest", THREE.NearestFilter);
-		//console.log("linearmip min", THREE.LinearMipMapLinearFilter);
-		//console.log("nearestmip", THREE.NearestMipMapLinearFilter);
-
-		console.log(model);
-
-		var shape = new Room(this, model);
-		console.log(shape);
+		this.graphics.addModel(shape.model);
 		this.shapes.push(shape);
 	};
 
-	this.addShape = function(model) {
+	this.placeRoomOnHoverLocation = function() {
 
-		var shape = new Shape(this, model);
-		this.shapes.push(shape);
-	}
+		var gridSection = this.grid.get(this.hoveredShape.gridX, this.hoveredShape.gridY);
+		gridSection.used = true;
+		var room = this.rooms.generateRoom(gridSection);
+		this.addShape(room);
+		this.clearDragging();
+	};
 
 	this.mouseMove = function(event) {
 
@@ -191,7 +134,7 @@ var CastleSim = function() {
 					//console.log(this.snappedShape)
 					//console.log(this.hoveredShape)
 					this.snappedShape = this.hoveredShape;
-					var gridLoc = this.grid.get(this.hoveredShape.x, this.hoveredShape.y);
+					var gridLoc = this.grid.get(this.hoveredShape.gridX, this.hoveredShape.gridY);
 					//console.log(gridLoc.x + ", " + gridLoc.y + "    " + this.hoveredShape.x + ", " + this.hoveredShape.y);
 
 					
@@ -237,7 +180,7 @@ var CastleSim = function() {
 			};
 
 			if (this.draggingRoom != null && this.hoveredShape instanceof GridSection) {
-				this.placeRoom();
+				this.placeRoomOnHoverLocation(this.hoveredShape);
 			}
 		}
 

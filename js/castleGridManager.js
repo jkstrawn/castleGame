@@ -65,8 +65,8 @@ var GridManager = function(_sim) {
 
 var GridSection = function(sim, model, _x, _y) {
 	this.__proto__.__proto__.constructor.call(this, sim, model);
-	this.x = _x;
-	this.y = _y;
+	this.gridX = _x;
+	this.gridY = _y;
 }
 
 GridSection.prototype = new Shape();
