@@ -3,47 +3,56 @@
  */
 
 function BlendCharacterGui(animations) {
+	var that = this;
+
+	this.gui = new dat.GUI();
+	this.controls = {
+		Servants: 0, 
+		"Create Bedroom": function() {
+			window.dispatchEvent( new CustomEvent( 'create-room', {detail: {room: "hall"}} ) );
+		},
+		"Hire Servant": function() {
+			window.dispatchEvent( new CustomEvent( 'hire-servant'));
+		},
+		folderRooms: null,
+		folderResources: null
+	};
+
+	this.init = function() {
+
+		this.controls.folderRooms = this.gui.addFolder( "Rooms" );
+		this.controls.folderRooms.add( this.controls, "Create Bedroom" );
+		this.controls.folderRooms.open();
+
+		this.controls.folderResources = this.gui.addFolder( "Resources" );
+		this.controls.folderResources.add( this.controls, "Servants" );
+		this.controls.folderResources.add( this.controls, "Hire Servant" );
+		this.controls.folderResources.open();
+
+	};
+
+	this.setValue = function(name, value) {
+		this.controls[name] = value;
+
+		for (var i in this.controls.folderResources.__controllers) {
+			this.controls.folderResources.__controllers[i].updateDisplay();
+		}
+	};
+
+	this.init();
+/*
 
 	var controls = {
 
 		gui: null,
-		"Lock Camera": false,
-		"Show Model": true,
-		"Show Skeleton": false,
-		"Time Scale": 1.0,
-		"Step Size": 0.016,
-		"Crossfade Time": 3.5,
-		"idle": 0.33,
-		"walk": 0.33,
-		"run": 0.33
+		"Servants": 1,
+		"Peasants": 2
 
 	};
 
-	var animations = animations;
-
-	this.showModel = function() {
-
-		return controls['Show Model'];
-
-	};
-
-	this.showSkeleton = function() {
-
-		return controls['Show Skeleton'];
-
-	};
-
-	this.getTimeScale = function() {
-
-		return controls['Time Scale'];
-
-	};
+	this.settings2 = null;
 
 	this.update = function() {
-
-		controls[ 'idle'] = animations[ 'idle' ].weight;
-		controls[ 'walk'] = animations[ 'walk' ].weight;
-		controls[ 'run'] = animations[ 'run' ].weight;
 
 	};
 
@@ -51,9 +60,13 @@ function BlendCharacterGui(animations) {
 
 		controls.gui = new dat.GUI();
 
-		var settings = controls.gui.addFolder( 'Rooms' );
+		var settings1 = controls.gui.addFolder( 'Rooms' );
+		settings1.add( controls, "Create Bedroom" );
+		settings1.open();
 
-		settings.add( controls, "Create Hall" );
+		this.settings2 = controls.gui.addFolder( 'Resources' );
+		this.settings2.add( controls, "Servants" );
+		this.settings2.open();
 
 		/*
 		var playback = controls.gui.addFolder( 'Playback' );
@@ -78,132 +91,29 @@ function BlendCharacterGui(animations) {
 		blending.add( controls, "walk", 0, 1, 0.01).listen().onChange( controls.weight );
 		blending.add( controls, "run", 0, 1, 0.01).listen().onChange( controls.weight );
 		*/
-
-		settings.open();
+/*
 	}
 
-	var getAnimationData = function() {
+	this.setValue = function(name, value) {
+		controls["Servants"] = 4;
+		
+		for (var i in controls.gui.__controllers) {
+			controls.gui.__controllers[i].updateDisplay();
+		}
 
-		return {
-
-			detail: {
-
-				anims: [ "idle", "walk", "run" ],
-
-				weights: [ controls['idle'],
-						   controls['walk'],
-						   controls['run'] ]
-			}
-
-		};
+		console.log(controls["Peasants"]);
 	}
 
-	controls.start = function() {
+	this.dol = function() {
 
-		var startEvent = new CustomEvent( 'start-animation', getAnimationData() );
-		window.dispatchEvent(startEvent);
-
-	};
-
-	controls.stop = function() {
-
-		var stopEvent = new CustomEvent( 'stop-animation' );
-		window.dispatchEvent( stopEvent );
-
-	};
-
-	controls.pause = function() {
-
-		var pauseEvent = new CustomEvent( 'pause-animation' );
-		window.dispatchEvent( pauseEvent );
-
-	};
-
-	controls.step = function() {
-
-		var stepData = { detail: { stepSize: controls['Step Size'] } };
-		window.dispatchEvent( new CustomEvent('step-animation', stepData ));
-
-	};
-
-	controls.weight = function() {
-
-		// renormalize
-		var sum = controls['idle'] + controls['walk'] + controls['run'];
-		controls['idle'] /= sum;
-		controls['walk'] /= sum;
-		controls['run'] /= sum;
-
-		var weightEvent = new CustomEvent( 'weight-animation', getAnimationData() );
-		window.dispatchEvent(weightEvent);
-	};
-
-	controls.crossfade = function( from, to ) {
-
-		var fadeData = getAnimationData();
-		fadeData.detail.from = from;
-		fadeData.detail.to = to;
-		fadeData.detail.time = controls[ "Crossfade Time" ];
-
-		window.dispatchEvent( new CustomEvent( 'crossfade', fadeData ) );
+		//this.settings2.add( controls, "Peasants" );
+		this.setValue();
 	}
 
-	controls.warp = function( from, to ) {
-
-		var warpData = getAnimationData();
-		warpData.detail.from = 'walk';
-		warpData.detail.to = 'run';
-		warpData.detail.time = controls[ "Crossfade Time" ];
-
-		window.dispatchEvent( new CustomEvent( 'warp', warpData ) );
-	}
-
-	controls['idle to walk'] = function() {
-
-		controls.crossfade( 'idle', 'walk' );
-
-	};
-
-	controls['walk to run'] = function() {
-
-		controls.crossfade( 'walk', 'run' );
-
-	};
-
-	controls['warp walk to run'] = function() {
-
-		controls.warp( 'walk', 'run' );
-
-	};
-
-	controls['Create Hall'] = function() {
+	controls['Create Bedroom'] = function() {
 
 		window.dispatchEvent( new CustomEvent( 'create-room', {detail: {room: "hall"}} ) );
-
 	};
-
-	controls.lockCameraChanged = function() {
-
-		var data = {
-			detail: {
-				shouldLock: controls['Lock Camera']
-			}
-		}
-
-		window.dispatchEvent( new CustomEvent( 'toggle-lock-camera', data ) );
-	}
-
-	controls.showSkeletonChanged = function() {
-
-		var data = {
-			detail: {
-				shouldShow: controls['Show Skeleton']
-			}
-		}
-
-		window.dispatchEvent( new CustomEvent( 'toggle-show-skeleton', data ) );
-	}
-
 
 	controls.createRoom = function() {
 
@@ -212,5 +122,6 @@ function BlendCharacterGui(animations) {
 
 
 	init.call(this);
+	*/
 
 }

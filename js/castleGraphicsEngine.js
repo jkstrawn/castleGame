@@ -96,7 +96,17 @@ var GraphicsEngine = function(_sim) {
 
 		for (var i = this.models.length - 1; i >= 0; i--) {
 			if (this.models[i].url == url) {
-				return this.models[i].model.clone();
+				var model = this.models[i].model.clone();
+
+				model.traverse(function(thing) {
+					if (thing.material instanceof THREE.MeshLambertMaterial) {
+						//thing.material.map.magFilter = THREE.LinearFilter;
+						//thing.material.map.minFilter = THREE.NearestMipMapLinearFilter;
+						thing.material.map.anisotropy = 16;
+					}
+				});
+
+				return model;
 			}
 		};
 

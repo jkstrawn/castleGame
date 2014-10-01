@@ -87,7 +87,7 @@ To view the current version, go to: http://castlesim.azurewebsites.net/
 	* Servants over- or under-performing
 - Alignment
 	* How evil or good the king is
-	* Evil -> bloodlust, killing/starving servants, torture enemies, import slaves
+	* Evil -> bloodlust, killing/starving servants, torture enemies, import slaves, force peasants to work even when they are unhappy, force nobles to stay by kidnapping families
 	* Good -> fair to all, nice, not be evil
 - Peasant happiness
 	* trials / disputes
@@ -276,6 +276,7 @@ To view the current version, go to: http://castlesim.azurewebsites.net/
 - A new option appears to hire a servant
 - The food resource appears
 - ...
+- Advisors
 
 #### Keys to making it fun
 

@@ -37,19 +37,7 @@
 		<div id="info">
 			Castle Sim Game
 		</div>
-		
-		<script src="js/jquery.js"></script>
-		<script src="js/three.js"></script>
-		<script src="js/tween.js"></script>
-		<script src="js/sparks.js"></script>
-		<script src="js/OBJLoader.js"></script>
-		<script src="js/stats.min.js"></script>
-		<script src="js/dat.gui.min.js"></script>
-		<script src="js/ColladaLoader.js"></script>
-		<script src="js/castleUI.js"></script>
-		<script src="js/castleShapes.js"></script>
-		<script src="js/castleGraphicsEngine.js"></script>
-		<script src="js/castleParticleSystem.js"></script>
+
 		<script type="x-shader/x-vertex" id="vertexShader">
 			varying vec3 vWorldPosition;
 
@@ -60,6 +48,7 @@
 				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
 			}
 		</script>
+		
 		<script type="x-shader/x-fragment" id="fragmentShader">
 			uniform vec3 topColor;
 			uniform vec3 bottomColor;
@@ -76,31 +65,43 @@
 
 		<script type="x-shader/x-vertex" id="vertexshader">
 
-				attribute float size;
-				attribute vec3 pcolor;
-				varying vec3 vColor;
-				void main() {
+			attribute float size;
+			attribute vec3 pcolor;
+			varying vec3 vColor;
+			void main() {
 
-					vColor = pcolor;
-					vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-					gl_PointSize = size * ( 200.0 / length( mvPosition.xyz ) );
-					gl_Position = projectionMatrix * mvPosition;
-				}
+				vColor = pcolor;
+				vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+				gl_PointSize = size * ( 200.0 / length( mvPosition.xyz ) );
+				gl_Position = projectionMatrix * mvPosition;
+			}
 
-			</script>
+		</script>
 
-			<script type="x-shader/x-fragment" id="fragmentshader">
+		<script type="x-shader/x-fragment" id="fragmentshader">
 
-				uniform sampler2D texture;
-				varying vec3 vColor;
+			uniform sampler2D texture;
+			varying vec3 vColor;
 
-				void main() {
-					vec4 outColor = texture2D( texture, gl_PointCoord );
-					gl_FragColor = outColor * vec4( vColor, 1.0 );
-				}
+			void main() {
+				vec4 outColor = texture2D( texture, gl_PointCoord );
+				gl_FragColor = outColor * vec4( vColor, 1.0 );
+			}
 
-			</script>
+		</script>
+
+		<script src="js/jquery.js"></script> 
+		<script src="js/three.js"></script>
+		<script src="js/tween.js"></script>
+		<script src="js/sparks.js"></script>
+		<script src="js/OBJLoader.js"></script>
+		<script src="js/stats.min.js"></script>
+		<script src="js/dat.gui.js"></script>
+		<script src="js/ColladaLoader.js"></script>
+		<script src="js/castleUI.js"></script>
+		<script src="js/castleShapes.js"></script>
+		<script src="js/castleGraphicsEngine.js"></script>
+		<script src="js/castleParticleSystem.js"></script>
 		<script src="js/castleSim.js"></script>
-
 	</body>
 </html>

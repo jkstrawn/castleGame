@@ -3,6 +3,7 @@ var CastleSim = function() {
 	this.pointLight = null;
 
 	this.clock = new THREE.Clock();
+	this.gui = null;
 	this.stats = null;
 	this.graphics = new GraphicsEngine(this);
 	this.grid = [];
@@ -18,6 +19,10 @@ var CastleSim = function() {
 	this.gridWidth = 30;
 	this.gridLength = 30;
 
+	this.resources = {
+		servants: 1
+	};
+
 	var that = this;
 
 	this.init = function() {
@@ -25,10 +30,11 @@ var CastleSim = function() {
 		this.initGrid();
 		// listen for messages from the gui
 		window.addEventListener( 'create-room', this.clickRoomButton );
+		window.addEventListener( 'hire-servant', this.hireServant );
 
 		this.graphics.init(this.modelUrls, this.loadedModels);
 
-		gui = new BlendCharacterGui();
+		this.gui = new BlendCharacterGui();
 	}
 
 	this.initGrid = function() {
@@ -79,6 +85,7 @@ var CastleSim = function() {
 	};
 
 	this.generateRoomModel = function(vector) {
+
 		var room = this.graphics.getModel(this.modelUrls[1]);
 
 		room.position.set(vector.x, vector.y, vector.z);
@@ -109,6 +116,11 @@ var CastleSim = function() {
 		that.graphics.addDraggingRoom(room);
 	};
 
+	this.hireServant = function() {
+		that.resources.servants++;
+		that.gui.setValue("Servants", that.resources.servants);
+	};
+
 	this.drawGrid = function() {
 
 		for (var x = that.grid.length - 1; x >= 0; x--) {
@@ -126,6 +138,7 @@ var CastleSim = function() {
 	}
 
 	this.placeRoom = function() {
+
 		var gridPosition = this.grid[this.hoveredShape.x][this.hoveredShape.y];
 		gridPosition.used = true;
 
@@ -172,6 +185,12 @@ var CastleSim = function() {
 		console.log(helper.box.max.y - helper.box.min.y);
 		console.log(helper.box.max.z - helper.box.min.z);
 */		
+
+		//console.log("linear mag", THREE.LinearFilter);
+		//console.log("nearest", THREE.NearestFilter);
+		//console.log("linearmip min", THREE.LinearMipMapLinearFilter);
+		//console.log("nearestmip", THREE.NearestMipMapLinearFilter);
+
 		console.log(model);
 
 		var shape = new Room(this, model);
