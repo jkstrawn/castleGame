@@ -21,7 +21,15 @@ var CastleSim = function() {
 	this.tweenForBox = null;
 
 	this.resources = {
-		servants: 0
+		food: 10,
+		servants: 0,
+		peasants: 0,
+	};
+
+	this.loadingBar = {
+		max: 0,
+		current: 0,
+		finished: null
 	};
 
 	var that = this;
@@ -31,11 +39,13 @@ var CastleSim = function() {
 		// listen for messages from the gui
 		window.addEventListener( 'create-room', this.clickRoomButton );
 		window.addEventListener( 'hire-servant', this.hireServant );
+		window.addEventListener( 'build-peasant', this.buildPeasantHouse );
 
 		this.grid.init();
 		this.graphics.init(this.modelUrls, this.loadedModels);
 		this.gui = new BlendCharacterGui();
 		this.gui.setValue("Servants", this.resources.servants);
+		this.gui.setValue("Food", this.resources.food);
 	}
 
 	this.loadedModels = function() {
@@ -55,7 +65,7 @@ var CastleSim = function() {
 
 
 		//add initial servant
-		that.hireServant();
+		that.finishedHireServant();
 	};
 
 	this.clickRoomButton = function(data) {
@@ -68,7 +78,20 @@ var CastleSim = function() {
 		that.graphics.addDraggingRoom(room);
 	};
 
+	this.setLoadingBar = function(time, name, callback) {
+
+		that.loadingBar.max = time * 1000;
+		that.loadingBar.finished = callback;
+		that.gui.createLoadingBar(name, time);
+	};
+
 	this.hireServant = function() {
+
+		that.setLoadingBar(3, "Getting Servant", that.finishedHireServant);
+	};
+
+	this.finishedHireServant = function() {
+
 		that.resources.servants++;
 		that.gui.setValue("Servants", that.resources.servants);
 
@@ -82,6 +105,17 @@ var CastleSim = function() {
 		
 		var servant = new Servant(that, mesh, that.shapes[1]);
 		that.addShape(servant);
+	};
+
+	this.buildPeasantHouse = function() {
+
+		that.setLoadingBar(3, "Getting Peasant", that.finishedBuildPeasantHouse);
+	};
+
+	this.finishedBuildPeasantHouse = function() {
+
+		that.resources.peasants++;
+		that.gui.setValue("Peasants", that.resources.peasants);		
 	};
 
 	this.clearDragging = function() {
@@ -207,7 +241,25 @@ var CastleSim = function() {
 			this.shapes[i].update(dt);
 		};
 
+		this.updateLoadingBar(dt);
+
 		this.graphics.update(dt);
+	}
+
+	this.updateLoadingBar = function(dt) {
+
+		if (this.loadingBar.max) {
+
+			this.loadingBar.current += dt;
+			this.gui.setLoadingBar(this.loadingBar.current / 1000);
+
+			if (this.loadingBar.current > this.loadingBar.max) {
+				this.loadingBar.max = 0;
+				this.loadingBar.current = 0;
+				this.gui.removeLoadingBar();
+				this.loadingBar.finished();
+			}
+		}
 	}
 
 	this.onWindowResize = function() {

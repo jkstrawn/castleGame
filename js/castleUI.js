@@ -5,18 +5,26 @@
 function BlendCharacterGui(animations) {
 	var that = this;
 
+	this.loadingBarName = "";
 	this.gui = new dat.GUI();
 	this.controls = {
 		Servants: 0, 
+		Peasants: 0,
+		Food: 0,
 		"Create Bedroom": function() {
 			window.dispatchEvent( new CustomEvent( 'create-room', {detail: {room: "hall"}} ) );
 		},
 		"Hire Servant": function() {
 			window.dispatchEvent( new CustomEvent( 'hire-servant'));
 		},
+		"Get Peasant": function() {
+			window.dispatchEvent( new CustomEvent( 'build-peasant'));
+		},
 		folderRooms: null,
 		folderResources: null
 	};
+
+	this.loadingBar = null;
 
 	this.init = function() {
 
@@ -25,13 +33,37 @@ function BlendCharacterGui(animations) {
 		this.controls.folderRooms.open();
 
 		this.controls.folderResources = this.gui.addFolder( "Resources" );
+		this.controls.folderResources.add( this.controls, "Food" );
 		this.controls.folderResources.add( this.controls, "Servants" );
+		this.controls.folderResources.add( this.controls, "Peasants" );
 		this.controls.folderResources.add( this.controls, "Hire Servant" );
+		this.controls.folderResources.add( this.controls, "Get Peasant" );
 		this.controls.folderResources.open();
 
 	};
 
+	this.createLoadingBar = function(name, max) {
+
+		this.loadingBarName = name;
+		this.controls[name] = 0;
+		this.loadingBar = this.gui.add( this.controls, name, 0, max);
+	};
+
+	this.removeLoadingBar = function() {
+		this.gui.remove(this.loadingBar);
+	};
+
+	this.setLoadingBar = function(value) {
+
+		this.controls[this.loadingBarName] = value;
+
+		for (var i in this.gui.__controllers) {
+			this.gui.__controllers[i].updateDisplay();
+		}
+	};
+
 	this.setValue = function(name, value) {
+
 		this.controls[name] = value;
 
 		for (var i in this.controls.folderResources.__controllers) {
