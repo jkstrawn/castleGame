@@ -1,13 +1,18 @@
 var RoomManager = function(_sim) {
 	this.sim = _sim;
 	this.rooms = [];
+	this.roomTypes = [];
+
+	this.roomTypes.push({name: "Bedroom", width: 1, modelIndex: 1});
+	this.roomTypes.push({name: "Hall", width: 3, modelIndex: 2});
 
 
+	this.generateTransparentRoomModel = function(typeName) {
 
-	this.generateTransparentRoom = function() {
-		var room = this.generateRoomModel(new THREE.Vector3(150, 50, 0));
+		var roomType = this.getRoomFromType(typeName);
+		var roomModel = this.generateRoomModel(roomType, new THREE.Vector3(500, 500, 0));
 		
-		room.traverse(function(thing) {
+		roomModel.traverse(function(thing) {
 			if (thing.material instanceof THREE.MeshLambertMaterial) {
 				var clonedMat = thing.material.clone();
 
@@ -17,12 +22,23 @@ var RoomManager = function(_sim) {
 			}
 		});
 
+		return roomModel;
+	};
+
+	this.generateRoom = function(typeName, gridSection) {
+
+		var roomType = this.getRoomFromType(typeName);
+		var roomModel = this.generateRoomModel(roomType, new THREE.Vector3(gridSection.x, gridSection.y, 0));
+		var room = new Room(this.sim, roomModel);
+
+		room.type = roomType;
+
 		return room;
 	};
 
-	this.generateRoomModel = function(vector) {
+	this.generateRoomModel = function(roomType, vector) {
 
-		var room = this.sim.graphics.getModel(this.sim.modelUrls[1]);
+		var room = this.sim.graphics.getModel(this.sim.modelUrls[roomType.modelIndex]);
 
 		room.position.set(vector.x, vector.y, vector.z);
 		room.rotation.y = Math.PI * 1.5;
@@ -31,15 +47,16 @@ var RoomManager = function(_sim) {
 		return room;
 	};
 
+	this.getRoomFromType = function(typeName) {
+		for (var i = this.roomTypes.length - 1; i >= 0; i--) {
+			if (this.roomTypes[i].name == typeName) {
+				return this.roomTypes[i];
+			}
+		};
 
-	this.generateRoom = function(gridSection) {
-
-		var roomModel = this.generateRoomModel(new THREE.Vector3(gridSection.x, gridSection.y, 0));
-		var room = new Room(this.sim, roomModel);
-
-		return room;
+		console.log("ERROR: Invalid room type name:", typeName);
+		return null;
 	};
-
 
 
 	this.addRoom = function(model) {
@@ -68,14 +85,10 @@ var RoomManager = function(_sim) {
 
 	this.addInitialHall = function() {
 		var gridLoc = this.sim.grid.get(2, 0);
-		var room = this.sim.graphics.getModel(this.sim.modelUrls[2]);
+		var room = this.generateRoom("Hall", gridLoc);
 
-		room.position.set(gridLoc.x, gridLoc.y, 0);
-		room.rotation.y = Math.PI * 1.5;
-		room.scale.x = room.scale.y = room.scale.z = 3;
-
-		this.addRoom(room);
-		this.sim.graphics.addModel(room);
+		this.sim.grid.setRoom(2, 0, room);
+		this.sim.addShape(room);
 	};
 
 };
@@ -87,6 +100,7 @@ var Room = function(sim, model) {
 	this.__proto__.__proto__.constructor.call(this, sim, model);
 
 	this.light = null;
+	this.type = null;
 
 	this.createLight = function() {
 		sim.pointLight.position.set( this.model.position.x + 15, this.model.position.y + 15, this.model.position.z + 10 );
@@ -105,6 +119,17 @@ var Room = function(sim, model) {
 
 		sim.pointLight.position.set( this.model.position.x, this.model.position.y + 20, this.model.position.z + 10 );
 	}
+
+	this.getDimensions = function() {
+
+		var width = this.type.width * this.sim.grid.gridWidth;
+		var length = this.sim.grid.gridLength;
+
+		return {
+			start: this.model.position,
+			size: new THREE.Vector3(width, 30, length)
+		};
+	};
 }
 
 Room.prototype = new Shape();

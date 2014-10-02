@@ -7,13 +7,13 @@ var GridManager = function(_sim) {
 	this.init = function() {
 
 		var startPoint = -110;
-		var numOfGridSide = 7;
-		var numOfGridUp = 4;
+		var numOfSectionsX = 7;
+		var numOfSectionsY = 4;
 
-		for (var x = 0; x < numOfGridSide; x++) {
+		for (var x = 0; x < numOfSectionsX; x++) {
 			this.grid[x] = [];
 
-			for (var y = 0; y < numOfGridUp; y++) {
+			for (var y = 0; y < numOfSectionsY; y++) {
 				this.grid[x][y] = {
 					x: x * this.gridLength + startPoint, 
 					y: y * this.gridWidth, 
@@ -22,10 +22,6 @@ var GridManager = function(_sim) {
 				};
 			}
 		};
-
-		this.grid[2][0].used = true;
-		this.grid[3][0].used = true;
-		this.grid[4][0].used = true;
 	}
 
 	this.get = function(x, y) {
@@ -60,13 +56,25 @@ var GridManager = function(_sim) {
 		var gridSection = new GridSection(this, boundingBox, x, y);
 		this.sim.shapes.push(gridSection);
 		this.sim.graphics.addBoundingBox(boundingBox);
-	}
+	};
+
+	this.setRoom = function(x, y, room) {
+		
+		var width = room.type.width;
+
+		for (var i = x; i < x + width; i++) {
+			var section = this.get(i, y);
+			section.used = true;
+			section.room = room;
+		}
+	};
 }
 
 var GridSection = function(sim, model, _x, _y) {
 	this.__proto__.__proto__.constructor.call(this, sim, model);
 	this.gridX = _x;
 	this.gridY = _y;
+	this.room = null;
 }
 
 GridSection.prototype = new Shape();

@@ -1,4 +1,5 @@
 var CastleSim = function() {
+
 	this.shapes = [];
 	this.pointLight = null;
 	this.stats = null;
@@ -20,7 +21,7 @@ var CastleSim = function() {
 	this.tweenForBox = null;
 
 	this.resources = {
-		servants: 1
+		servants: 0
 	};
 
 	var that = this;
@@ -52,25 +53,16 @@ var CastleSim = function() {
 		//add initial hall
 		that.rooms.addInitialHall();
 
-/*
+
 		//add initial servant
-		var mesh = new THREE.Mesh(
-			new THREE.BoxGeometry(5, 10, 5), 
-			new THREE.MeshBasicMaterial( { color: 0xFFFFFF } )
-			);
-
-		mesh.position.set(grid.x + 20, grid.y + 5, 10);
-
-		that.addShape(mesh);
-		that.graphics.addModel(mesh);
-		*/
+		that.hireServant();
 	};
 
 	this.clickRoomButton = function(data) {
 
 		that.grid.show();
 
-		var room = that.rooms.generateTransparentRoom();
+		var room = that.rooms.generateTransparentRoomModel("Bedroom");
 
 		that.draggingRoom = room;
 		that.graphics.addDraggingRoom(room);
@@ -79,6 +71,17 @@ var CastleSim = function() {
 	this.hireServant = function() {
 		that.resources.servants++;
 		that.gui.setValue("Servants", that.resources.servants);
+
+		var gridSection = that.grid.get(2, 0);
+		var mesh = new THREE.Mesh(
+			new THREE.BoxGeometry(5, 10, 5), 
+			new THREE.MeshBasicMaterial( { color: 0xFFFFFF } )
+			);
+
+		mesh.position.set(gridSection.x + 20, gridSection.y + 5, 10);
+		
+		var servant = new Servant(that, mesh, that.shapes[1]);
+		that.addShape(servant);
 	};
 
 	this.clearDragging = function() {
@@ -101,8 +104,8 @@ var CastleSim = function() {
 	this.placeRoomOnHoverLocation = function() {
 
 		var gridSection = this.grid.get(this.hoveredShape.gridX, this.hoveredShape.gridY);
-		gridSection.used = true;
-		var room = this.rooms.generateRoom(gridSection);
+		var room = this.rooms.generateRoom("Bedroom", gridSection);
+		this.grid.setRoom(this.hoveredShape.gridX, this.hoveredShape.gridY, room);
 		this.addShape(room);
 		this.clearDragging();
 	};
@@ -198,13 +201,13 @@ var CastleSim = function() {
 		this.graphics.render();
 	}
 
-	this.update = function(time) {
+	this.update = function(dt) {
 
 		for (var i = this.shapes.length - 1; i >= 0; i--) {
-			this.shapes[i].update();
+			this.shapes[i].update(dt);
 		};
 
-		this.graphics.update(time);
+		this.graphics.update(dt);
 	}
 
 	this.onWindowResize = function() {
@@ -247,16 +250,17 @@ var CastleSim = function() {
 	}
 }
 
+var oldTime = 0;
 var stats;
 var sim = new CastleSim();
 
 sim.init();
 animate();
 
-window.addEventListener( 'resize', onWindowResize, false );
 document.addEventListener( 'mouseup', onDocumentMouseUp, false );
 document.addEventListener( 'mousedown', onDocumentMouseDown, false );
 document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+window.addEventListener( 'resize', onWindowResize, false );
 window.addEventListener("mousewheel", onWindowMouseWheel, false);
 window.addEventListener("DOMMouseScroll", onWindowMouseWheel, false);
 window.addEventListener("keypress", onWindowKeyPress, false);
@@ -284,7 +288,10 @@ function onWindowResize() {
 function animate(time) {		
 	requestAnimationFrame( animate );
 
-	sim.update(time);
+	var dt = time - oldTime;
+	oldTime = time;
+
+	sim.update(dt);
 	sim.render();
 	stats.update();
 }
