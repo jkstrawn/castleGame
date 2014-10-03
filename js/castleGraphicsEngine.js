@@ -150,6 +150,7 @@ var GraphicsEngine = function(_sim) {
 			shadowMapType: THREE.PCFSoftShadowMap
 
 		} );
+
 		this.renderer.setSize( window.innerWidth, window.innerHeight );
 		this.renderer.domElement.style.position = "relative";
 		this.container.appendChild( this.renderer.domElement );
@@ -281,7 +282,7 @@ var GraphicsEngine = function(_sim) {
 	};
 
 	this.resize = function() {
-
+		
 		this.camera.aspect = window.innerWidth / window.innerHeight;
 		this.camera.updateProjectionMatrix();
 

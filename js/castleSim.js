@@ -22,8 +22,13 @@ var CastleSim = function() {
 
 	this.resources = {
 		food: 10,
+		stone: 10,
 		servants: 0,
 		peasants: 0,
+		peasantProduction: {
+			food: 0,
+			stone: 10
+		}
 	};
 
 	this.loadingBar = {
@@ -40,12 +45,14 @@ var CastleSim = function() {
 		window.addEventListener( 'create-room', this.clickRoomButton );
 		window.addEventListener( 'hire-servant', this.hireServant );
 		window.addEventListener( 'build-peasant', this.buildPeasantHouse );
+		window.addEventListener( 'slider', this.sliderChanged );
 
 		this.grid.init();
 		this.graphics.init(this.modelUrls, this.loadedModels);
 		this.gui = new BlendCharacterGui();
 		this.gui.setValue("Servants", this.resources.servants);
 		this.gui.setValue("Food", this.resources.food);
+		this.gui.setValue("Stone", this.resources.food);
 	}
 
 	this.loadedModels = function() {
@@ -68,26 +75,69 @@ var CastleSim = function() {
 		that.finishedHireServant();
 	};
 
+	// EVENTS
 	this.clickRoomButton = function(data) {
 
-		that.grid.show();
+		if (that.resources.stone >= 2) {
+			that.grid.show();
 
-		var room = that.rooms.generateTransparentRoomModel("Bedroom");
+			var room = that.rooms.generateTransparentRoomModel("Bedroom");
 
-		that.draggingRoom = room;
-		that.graphics.addDraggingRoom(room);
-	};
-
-	this.setLoadingBar = function(time, name, callback) {
-
-		that.loadingBar.max = time * 1000;
-		that.loadingBar.finished = callback;
-		that.gui.createLoadingBar(name, time);
+			that.draggingRoom = room;
+			that.graphics.addDraggingRoom(room);
+		}
 	};
 
 	this.hireServant = function() {
 
-		that.setLoadingBar(3, "Getting Servant", that.finishedHireServant);
+		if (that.resources.food >= 2) {
+			that.setLoadingBar(3, "Getting Servant", that.finishedHireServant, function() {
+				that.changeResourceValue("Food", -2);
+			});
+		}
+	};
+
+	this.buildPeasantHouse = function() {
+
+		that.setLoadingBar(3, "Getting Peasant", that.finishedBuildPeasantHouse, function() {});
+	};
+
+	this.sliderChanged = function(data) {
+
+		that.resources.peasantProduction.food = data.detail.food;
+		that.resources.peasantProduction.stone = data.detail.stone;
+	};
+
+	// PROCESS EVENTS
+
+	this.changeResourceValue = function(name, value) {
+
+		if (!value) {
+			return;
+		}
+
+		var newValue = 0;
+
+		if (name == "Food") {
+			newValue = that.resources.food += value;	
+		}
+		if (name == "Stone") {
+			newValue = that.resources.stone += value;	
+		}
+
+		that.gui.setValue(name, newValue);
+	};
+
+	this.setLoadingBar = function(time, name, callback, successful) {
+
+		if (this.loadingBar.current) {
+			return;
+		}
+
+		successful();
+		this.loadingBar.max = time * 1000;
+		this.loadingBar.finished = callback;
+		this.gui.createLoadingBar(name, time);
 	};
 
 	this.finishedHireServant = function() {
@@ -105,11 +155,6 @@ var CastleSim = function() {
 		
 		var servant = new Servant(that, mesh, that.shapes[1]);
 		that.addShape(servant);
-	};
-
-	this.buildPeasantHouse = function() {
-
-		that.setLoadingBar(3, "Getting Peasant", that.finishedBuildPeasantHouse);
 	};
 
 	this.finishedBuildPeasantHouse = function() {
@@ -137,12 +182,29 @@ var CastleSim = function() {
 
 	this.placeRoomOnHoverLocation = function() {
 
+		this.resources.stone -= 2;
+		this.gui.setValue("Stone", this.resources.stone);
 		var gridSection = this.grid.get(this.hoveredShape.gridX, this.hoveredShape.gridY);
 		var room = this.rooms.generateRoom("Bedroom", gridSection);
 		this.grid.setRoom(this.hoveredShape.gridX, this.hoveredShape.gridY, room);
 		this.addShape(room);
 		this.clearDragging();
 	};
+
+	// OTHER
+
+	this.getShapes = function() {
+
+		var shapes = [];
+
+		for (var i = this.shapes.length - 1; i >= 0; i--) {
+			shapes.push(this.shapes[i].model);
+		};
+
+		return shapes;
+	};
+
+	// USER INPUT
 
 	this.mouseMove = function(event) {
 
@@ -228,56 +290,6 @@ var CastleSim = function() {
 		}
 	}
 
-	this.render = function() {
-
-		var delta = this.clock.getDelta();
-
-		this.graphics.render();
-	}
-
-	this.update = function(dt) {
-
-		for (var i = this.shapes.length - 1; i >= 0; i--) {
-			this.shapes[i].update(dt);
-		};
-
-		this.updateLoadingBar(dt);
-
-		this.graphics.update(dt);
-	}
-
-	this.updateLoadingBar = function(dt) {
-
-		if (this.loadingBar.max) {
-
-			this.loadingBar.current += dt;
-			this.gui.setLoadingBar(this.loadingBar.current / 1000);
-
-			if (this.loadingBar.current > this.loadingBar.max) {
-				this.loadingBar.max = 0;
-				this.loadingBar.current = 0;
-				this.gui.removeLoadingBar();
-				this.loadingBar.finished();
-			}
-		}
-	}
-
-	this.onWindowResize = function() {
-
-		this.graphics.resize();
-	}
-
-	this.getShapes = function() {
-
-		var shapes = [];
-
-		for (var i = this.shapes.length - 1; i >= 0; i--) {
-			shapes.push(this.shapes[i].model);
-		};
-
-		return shapes;
-	};
-
 	this.keypress = function (event) {
 		var character = String.fromCharCode(event.keyCode)
 
@@ -299,6 +311,59 @@ var CastleSim = function() {
 
 	this.zoom = function(dt) {
 		this.graphics.zoom(dt);
+	}
+
+	// UPDATING
+
+	this.render = function() {
+
+		var delta = this.clock.getDelta();
+
+		this.graphics.render();
+	}
+
+	this.update = function(dt) {
+
+		for (var i = this.shapes.length - 1; i >= 0; i--) {
+			this.shapes[i].update(dt);
+		};
+
+		this.updateResources(dt);
+
+		this.updateLoadingBar(dt);
+
+		this.graphics.update(dt);
+	}
+
+	this.updateResources = function(dt) {
+		var productionPower = this.resources.peasants * dt / 100000;
+
+		var foodProd = this.resources.peasantProduction.food * productionPower;
+		var stoneProd = this.resources.peasantProduction.stone * productionPower;
+		
+		this.changeResourceValue("Food", foodProd);
+		this.changeResourceValue("Stone", stoneProd);
+	};
+
+	this.updateLoadingBar = function(dt) {
+
+		if (this.loadingBar.max) {
+
+			this.loadingBar.current += dt;
+			this.gui.setLoadingBar(this.loadingBar.current / 1000);
+
+			if (this.loadingBar.current > this.loadingBar.max) {
+				this.loadingBar.max = 0;
+				this.loadingBar.current = 0;
+				this.gui.removeLoadingBar();
+				this.loadingBar.finished();
+			}
+		}
+	}
+
+	this.onWindowResize = function() {
+
+		this.graphics.resize();
 	}
 }
 
@@ -358,5 +423,3 @@ function onWindowMouseWheel(event) {
 function onWindowKeyPress(event) {
 	sim.keypress(event)
 }
-
-

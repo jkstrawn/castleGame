@@ -10,18 +10,22 @@ function BlendCharacterGui(animations) {
 	this.controls = {
 		Servants: 0, 
 		Peasants: 0,
+		Stone: 0,
 		Food: 0,
-		"Create Bedroom": function() {
+		"Food Prod.": 0,
+		"Stone Prod.": 10,
+		"Build Bedroom - 2 stone": function() {
 			window.dispatchEvent( new CustomEvent( 'create-room', {detail: {room: "hall"}} ) );
 		},
-		"Hire Servant": function() {
+		"Hire Servant - 2 food": function() {
 			window.dispatchEvent( new CustomEvent( 'hire-servant'));
 		},
 		"Get Peasant": function() {
 			window.dispatchEvent( new CustomEvent( 'build-peasant'));
 		},
 		folderRooms: null,
-		folderResources: null
+		folderResources: null,
+		folderActions: null
 	};
 
 	this.loadingBar = null;
@@ -29,17 +33,56 @@ function BlendCharacterGui(animations) {
 	this.init = function() {
 
 		this.controls.folderRooms = this.gui.addFolder( "Rooms" );
-		this.controls.folderRooms.add( this.controls, "Create Bedroom" );
+		this.controls.folderRooms.add( this.controls, "Build Bedroom - 2 stone" );
 		this.controls.folderRooms.open();
 
 		this.controls.folderResources = this.gui.addFolder( "Resources" );
 		this.controls.folderResources.add( this.controls, "Food" );
+		this.controls.folderResources.add( this.controls, "Stone" );
 		this.controls.folderResources.add( this.controls, "Servants" );
 		this.controls.folderResources.add( this.controls, "Peasants" );
-		this.controls.folderResources.add( this.controls, "Hire Servant" );
-		this.controls.folderResources.add( this.controls, "Get Peasant" );
 		this.controls.folderResources.open();
 
+		this.controls.folderActions = this.gui.addFolder( "Actions" );
+		var foodSlider = this.controls.folderActions.add( this.controls, "Food Prod.", 0, 10 );
+		var stoneSlider = this.controls.folderActions.add( this.controls, "Stone Prod.", 0, 10 );
+		this.controls.folderActions.add( this.controls, "Hire Servant - 2 food" );
+		this.controls.folderActions.add( this.controls, "Get Peasant" );
+		this.controls.folderActions.open();
+
+		foodSlider.onChange(this.foodSliderChanged);
+		stoneSlider.onChange(this.stoneSliderChanged);
+
+	};
+
+	this.foodSliderChanged = function(value) {
+
+		that.updateSliders("food", value);
+	};
+
+	this.stoneSliderChanged = function(value) {
+
+		that.updateSliders("stone", value);
+	};
+
+	this.updateSliders = function(type, value) {
+		var inverse = 10 - value;
+
+		if (type == "food") {
+			this.controls["Stone Prod."] = inverse;
+		} else {
+			this.controls["Food Prod."] = inverse;
+		}
+
+		
+		for (var i in this.controls.folderActions.__controllers) {
+			this.controls.folderActions.__controllers[i].updateDisplay();
+		}
+
+		window.dispatchEvent( new CustomEvent( 'slider', {detail: {
+			food: this.controls["Food Prod."],
+			stone: this.controls["Stone Prod."]
+		}}));
 	};
 
 	this.createLoadingBar = function(name, max) {

@@ -2320,7 +2320,12 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
     dom.addClass(controller.domElement, 'c');
 
     var name = document.createElement('span');
-    dom.addClass(name, 'property-name');
+
+    if (controller instanceof dat.controllers.FunctionController) {
+
+    } else {
+      dom.addClass(name, 'property-name');
+    }
     name.innerHTML = controller.property;
 
     var container = document.createElement('div');

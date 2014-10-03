@@ -317,10 +317,16 @@ To view the current version, go to: http://castlesim.azurewebsites.net/
 - Animate servant model
 - More rooms...
 - Room furniture
+- Update models to use JPGs intead of PNGs
 
 ###### Other
 
 - Sound effects
+
+##### Microtransactions
+
+- Skin packs
+	+ Holloween skin pack with ghost servants
 
 
 
