@@ -14,10 +14,10 @@ function BlendCharacterGui(animations) {
 		Food: 0,
 		"Food Prod.": 0,
 		"Stone Prod.": 10,
-		"Build Bedroom - 2 stone": function() {
+		"Build Bedroom, cost: 2 stone": function() {
 			window.dispatchEvent( new CustomEvent( 'create-room', {detail: {room: "hall"}} ) );
 		},
-		"Hire Servant - 2 food": function() {
+		"Hire Servant, cost: 2 food": function() {
 			window.dispatchEvent( new CustomEvent( 'hire-servant'));
 		},
 		"Get Peasant": function() {
@@ -33,7 +33,7 @@ function BlendCharacterGui(animations) {
 	this.init = function() {
 
 		this.controls.folderRooms = this.gui.addFolder( "Rooms" );
-		this.controls.folderRooms.add( this.controls, "Build Bedroom - 2 stone" );
+		this.controls.folderRooms.add( this.controls, "Build Bedroom, cost: 2 stone" );
 		this.controls.folderRooms.open();
 
 		this.controls.folderResources = this.gui.addFolder( "Resources" );
@@ -46,7 +46,7 @@ function BlendCharacterGui(animations) {
 		this.controls.folderActions = this.gui.addFolder( "Actions" );
 		var foodSlider = this.controls.folderActions.add( this.controls, "Food Prod.", 0, 10 );
 		var stoneSlider = this.controls.folderActions.add( this.controls, "Stone Prod.", 0, 10 );
-		this.controls.folderActions.add( this.controls, "Hire Servant - 2 food" );
+		this.controls.folderActions.add( this.controls, "Hire Servant, cost: 2 food" );
 		this.controls.folderActions.add( this.controls, "Get Peasant" );
 		this.controls.folderActions.open();
 
@@ -74,7 +74,7 @@ function BlendCharacterGui(animations) {
 			this.controls["Food Prod."] = inverse;
 		}
 
-		
+
 		for (var i in this.controls.folderActions.__controllers) {
 			this.controls.folderActions.__controllers[i].updateDisplay();
 		}
