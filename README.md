@@ -76,6 +76,11 @@ To view the current version, go to: http://castlesim.azurewebsites.net/
 	* How tired are the servants (or peasants?)
 	* Workers make mistakes when tired
 	* Chance of rioting
+	* Too much work decreases morale
+	* Too many servants in small space decreases morale
+	* Working servants harder decreases morale
+	* Servants quarters inclease morale
+	* Higher hygiene increases morale
 - Reputation
 	* View from the outside world
 	* Chance of getting loan or help during war
@@ -249,7 +254,7 @@ To view the current version, go to: http://castlesim.azurewebsites.net/
 - Advanced
 - Luxury?
 
-#### Tyes of Nobles
+#### Types of Nobles
 
 - Baron
 - Earl / Count
@@ -296,19 +301,18 @@ To view the current version, go to: http://castlesim.azurewebsites.net/
 
 ###### Gameplay
 
-- Show resources (food, timber, gold)
+- Show resources (gold)
 - Make awesome UI
-- Hire servant button
+- Show stone subtraction on UI when select click room button
+- Add servant morale
+- Add castle dirtiness (show dirt and stuff around the castle?)
 
 ###### ThreeJS
 
-- Change grid to smaller boxes (half the size -> more square)
 - Shadows
 - Redo ground
 - Add grass sprites
-- Scroll camera up and down when hover over higher or lower rooms
 - BUG: Transparency on room looks weird
-- BUG: Light not showing up on floor or wall that is covered by tapestry or rug
 - BUG: Light casting to room above the selected room
 
 ###### Models
@@ -323,7 +327,7 @@ To view the current version, go to: http://castlesim.azurewebsites.net/
 
 - Sound effects
 
-##### Microtransactions
+#### Microtransactions
 
 - Skin packs
 	+ Holloween skin pack with ghost servants
