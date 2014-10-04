@@ -25,6 +25,8 @@ var CastleSim = function() {
 		stone: 10,
 		servants: 0,
 		peasants: 0,
+		hygiene: 50,
+		morale: 50,
 		peasantProduction: {
 			food: 0,
 			stone: 10
@@ -178,6 +180,20 @@ var CastleSim = function() {
 
 		this.graphics.addModel(shape.model);
 		this.shapes.push(shape);
+	};
+
+
+	this.removeShape = function(shape) {
+
+		for (var i = this.shapes.length - 1; i >= 0; i--) {
+			if (this.shapes[i] == shape) {
+				this.shapes.splice(i, 1);
+				this.graphics.removeModel(shape.model);
+				return;
+			}
+		};
+
+		console.log("ERROR: tried to delete non-existant shape", shape);
 	};
 
 	this.placeRoomOnHoverLocation = function() {

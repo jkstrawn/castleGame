@@ -333,4 +333,8 @@ var GraphicsEngine = function(_sim) {
 	this.addModel = function(model) {
 		this.scene.add(model);
 	};
+
+	this.removeModel = function(model) {
+		this.scene.remove(model);
+	};
 };

@@ -29,9 +29,7 @@ var RoomManager = function(_sim) {
 
 		var roomType = this.getRoomFromType(typeName);
 		var roomModel = this.generateRoomModel(roomType, new THREE.Vector3(gridSection.x, gridSection.y, 0));
-		var room = new Room(this.sim, roomModel);
-
-		room.type = roomType;
+		var room = new Room(this.sim, roomModel, roomType);
 
 		return room;
 	};
@@ -94,13 +92,17 @@ var RoomManager = function(_sim) {
 };
 
 
-var Room = function(sim, model) {
+var Room = function(sim, model, type) {
 	//Shape(sim, model);
 	//console.log(this.__proto__);
 	this.__proto__.__proto__.constructor.call(this, sim, model);
 
 	this.light = null;
-	this.type = null;
+	this.type = type;
+	this.trashTimer = 2000;
+	this.width = type.width * sim.grid.gridWidth;
+	this.length = sim.grid.gridLength;
+	this.trash = [];
 
 	this.createLight = function() {
 		sim.pointLight.position.set( this.model.position.x + 15, this.model.position.y + 15, this.model.position.z + 10 );
@@ -122,15 +124,89 @@ var Room = function(sim, model) {
 
 	this.getDimensions = function() {
 
-		var width = this.type.width * this.sim.grid.gridWidth;
-		var length = this.sim.grid.gridLength;
-
 		return {
 			start: this.model.position,
-			size: new THREE.Vector3(width, 30, length)
+			size: new THREE.Vector3(this.width, 30, this.length)
 		};
+	};
+
+	this.update = function(dt) {
+
+		this.trashTimer -= dt;
+
+		if (this.trashTimer < 0) {
+			this.trashTimer = 2000;
+
+			this.generateTrash();
+		}
+	};
+
+	this.generateTrash = function() {
+
+		var x = (this.width - 10) * Math.random() + this.model.position.x + 5;
+		var z = (this.length - 10) * Math.random() + this.model.position.z + 5;
+		var y = this.model.position.y + 2;
+
+		//var model = sim.graphics.getModel(sim.modelUrls[0]);
+
+		var mesh = new THREE.Mesh(
+			new THREE.BoxGeometry(2, 2, 2), 
+			new THREE.MeshBasicMaterial( { color: 0x606060 } )
+			);
+
+		mesh.position.set(x, y, z);
+		
+		var trash = new Trash(sim, mesh);
+		this.trash.push(trash);
+		sim.addShape(trash);
+	};
+
+	this.getClosestTrash = function(position) {
+
+		var closestTrash = null;
+		var smallestDistance = 0;
+
+		for (var i = this.trash.length - 1; i >= 0; i--) {
+			
+			var distance = this.trash[i].model.position.distanceTo(position);
+
+			if ((closestTrash == null || distance < smallestDistance) && !this.trash[i].claimed) {
+				closestTrash = this.trash[i];
+				smallestDistance = distance;
+			}
+		};
+
+		if (closestTrash) {
+			closestTrash.claimed = true;
+		}
+		return closestTrash;
+	};
+
+	this.removeTrash = function(trash) {
+
+		for (var i = this.trash.length - 1; i >= 0; i--) {
+			if (this.trash[i] == trash) {
+				sim.removeShape(this.trash[i]);
+				this.trash.splice(i, 1);
+				return;
+			}
+		};
+
+		console.log("ERROR: Tried to remove non-existant trash");
 	};
 }
 
 Room.prototype = new Shape();
 Room.prototype.constructor = Room;
+
+
+var Trash = function(sim, model) {
+	//Shape(sim, model);
+	//console.log(this.__proto__);
+	this.__proto__.__proto__.constructor.call(this, sim, model);
+
+	this.claimed = false;
+}
+
+Trash.prototype = new Shape();
+Trash.prototype.constructor = Trash;

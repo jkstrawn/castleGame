@@ -8,24 +8,34 @@ function BlendCharacterGui(animations) {
 	this.loadingBarName = "";
 	this.gui = new dat.GUI();
 	this.controls = {
+		//Resources
 		Servants: 0, 
 		Peasants: 0,
 		Stone: 0,
 		Food: 0,
+
+		//Ratings
+		Morale: 50,
+		Hygiene: 50,
+
+		//Actions
 		"Food Prod.": 0,
 		"Stone Prod.": 10,
-		"Build Bedroom, cost: 2 stone": function() {
+		"Build Bedroom (cost: 2 stone)": function() {
 			window.dispatchEvent( new CustomEvent( 'create-room', {detail: {room: "hall"}} ) );
 		},
-		"Hire Servant, cost: 2 food": function() {
+		"Hire Servant (cost: 2 food)": function() {
 			window.dispatchEvent( new CustomEvent( 'hire-servant'));
 		},
-		"Get Peasant": function() {
+		"Get Peasant (no cost)": function() {
 			window.dispatchEvent( new CustomEvent( 'build-peasant'));
 		},
+
+		//Folders
 		folderRooms: null,
 		folderResources: null,
-		folderActions: null
+		folderActions: null,
+		folderRatings: null
 	};
 
 	this.loadingBar = null;
@@ -33,7 +43,7 @@ function BlendCharacterGui(animations) {
 	this.init = function() {
 
 		this.controls.folderRooms = this.gui.addFolder( "Rooms" );
-		this.controls.folderRooms.add( this.controls, "Build Bedroom, cost: 2 stone" );
+		this.controls.folderRooms.add( this.controls, "Build Bedroom (cost: 2 stone)" );
 		this.controls.folderRooms.open();
 
 		this.controls.folderResources = this.gui.addFolder( "Resources" );
@@ -43,11 +53,16 @@ function BlendCharacterGui(animations) {
 		this.controls.folderResources.add( this.controls, "Peasants" );
 		this.controls.folderResources.open();
 
+		this.controls.folderRatings = this.gui.addFolder( "Ratings" );
+		this.controls.folderRatings.add( this.controls, "Morale", 0, 100 );
+		this.controls.folderRatings.add( this.controls, "Hygiene", 0, 100 );
+		this.controls.folderRatings.open();
+
 		this.controls.folderActions = this.gui.addFolder( "Actions" );
 		var foodSlider = this.controls.folderActions.add( this.controls, "Food Prod.", 0, 10 );
 		var stoneSlider = this.controls.folderActions.add( this.controls, "Stone Prod.", 0, 10 );
-		this.controls.folderActions.add( this.controls, "Hire Servant, cost: 2 food" );
-		this.controls.folderActions.add( this.controls, "Get Peasant" );
+		this.controls.folderActions.add( this.controls, "Hire Servant (cost: 2 food)" );
+		this.controls.folderActions.add( this.controls, "Get Peasant (no cost)" );
 		this.controls.folderActions.open();
 
 		foodSlider.onChange(this.foodSliderChanged);
