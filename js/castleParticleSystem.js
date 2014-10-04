@@ -113,6 +113,7 @@ function ParticleSystem() {
 		};
 		for (var i = this.emitters.length - 1; i >= 0; i--) {
 			this.emitters[i].using = false;
+			this.emitters[i].stop();
 			var particles = this.emitters[i].removeAll();
 			for (var p = particles.length - 1; p >= 0; p--) {
 				if (particles[p].target != null) {
