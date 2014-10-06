@@ -7,7 +7,7 @@ var RoomManager = function(_sim) {
 	this.roomTypes.push({name: "Hall", width: 3, modelIndex: 2});
 
 
-	this.generateTransparentRoomModel = function(typeName) {
+	this.generateDraggingRoom = function(typeName) {
 
 		var roomType = this.getRoomFromType(typeName);
 		var roomModel = this.generateRoomModel(roomType, new THREE.Vector3(500, 500, 0));
@@ -22,7 +22,9 @@ var RoomManager = function(_sim) {
 			}
 		});
 
-		return roomModel;
+		var room = new DraggingRoom(this.sim, roomModel, roomType);
+
+		return room;
 	};
 
 	this.generateRoom = function(typeName, gridSection) {
@@ -31,6 +33,7 @@ var RoomManager = function(_sim) {
 		var roomModel = this.generateRoomModel(roomType, new THREE.Vector3(gridSection.x, gridSection.y, 0));
 		var room = new Room(this.sim, roomModel, roomType);
 
+		this.rooms.push(room);
 		return room;
 	};
 
@@ -82,20 +85,63 @@ var RoomManager = function(_sim) {
 	};
 
 	this.addInitialHall = function() {
-		var gridLoc = this.sim.grid.get(2, 0);
-		var room = this.generateRoom("Hall", gridLoc);
+		var gridSection = this.sim.grid.get(2, 0);
+		var room = this.generateRoom("Hall", gridSection);
 
 		this.sim.grid.setRoom(2, 0, room);
 		this.sim.addShape(room);
+
+		return room;
+	};
+
+	this.snapHoveredRoomToGrid = function(room, hoveredGrid) {
+
+		if (room.gridSectionToSnapTo == hoveredGrid) {
+			return;
+		}
+
+		room.gridSectionToSnapTo = hoveredGrid;
+		var gridSection = this.sim.grid.get(hoveredGrid.gridX, hoveredGrid.gridY);
+	
+		room.tween = new TWEEN.Tween(room.model.position).to({
+		    x: gridSection.x,
+		    y: gridSection.y,
+		    z: 0
+		}, 100).easing(TWEEN.Easing.Sinusoidal.In).start();
+
+		this.sim.graphics.focusCamera(gridSection.x, gridSection.y, 0);	
+	};
+
+	this.moveAndUnsnapRoom = function(room, mousePosition) {
+
+		if (room.tween) {
+			TWEEN.remove(room.tween);
+		}
+		room.model.position.set(mousePosition.x - room.width / 2, mousePosition.y - 15, 0);
+		room.gridSectionToSnapTo = null;
+	};
+
+	this.getContainingRoom = function(position) {
+
+		for (var i = this.rooms.length - 1; i >= 0; i--) {
+			if (this.rooms[i].isPointInsideRoom(position)) {
+				return this.rooms[i];
+			}
+		};
+
+		return null;
 	};
 
 };
 
 
 var Room = function(sim, model, type) {
+	if (!sim) return;
 	//Shape(sim, model);
 	//console.log(this.__proto__);
-	this.__proto__.__proto__.constructor.call(this, sim, model);
+	console.log(type)
+	//this.__proto__.__proto__.constructor.call(this, sim, model);
+	Shape.call(this, sim, model);
 
 	this.light = null;
 	this.type = type;
@@ -115,11 +161,10 @@ var Room = function(sim, model, type) {
 		}
 	};
 
-	this.modify = function() {
+	this.clicked = function() {
 
-		this.model.position.z += 10;
-
-		sim.pointLight.position.set( this.model.position.x, this.model.position.y + 20, this.model.position.z + 10 );
+		//this.model.position.z += 10;
+		//sim.pointLight.position.set( this.model.position.x, this.model.position.y + 20, this.model.position.z + 10 );
 	}
 
 	this.getDimensions = function() {
@@ -194,16 +239,35 @@ var Room = function(sim, model, type) {
 
 		console.log("ERROR: Tried to remove non-existant trash");
 	};
+
+	this.isPointInsideRoom = function(point) {
+		return point.x > this.model.position.x && point.x < (this.model.position.x + this.width) &&
+				point.y > this.model.position.y && point.y < (this.model.position.y + 30) &&
+				point.z > this.model.position.z && point.z < (this.model.position.z + this.length);
+	};
 }
 
 Room.prototype = new Shape();
 Room.prototype.constructor = Room;
 
 
-var Trash = function(sim, model) {
+var DraggingRoom = function(sim, model, type) {
 	//Shape(sim, model);
 	//console.log(this.__proto__);
-	this.__proto__.__proto__.constructor.call(this, sim, model);
+	Room.call(this, sim, model, type);
+	//this.__proto__.__proto__.constructor.call(this, sim, model);
+
+	this.gridSectionToSnapTo = null;
+}
+
+DraggingRoom.prototype = new Room();
+DraggingRoom.prototype.constructor = DraggingRoom;
+
+
+var Trash = function(sim, model) {
+	Shape.call(this, sim, model);
+	//console.log(this.__proto__);
+	//this.__proto__.__proto__.constructor.call(this, sim, model);
 
 	this.claimed = false;
 }

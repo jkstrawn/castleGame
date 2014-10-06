@@ -281,6 +281,24 @@ var GraphicsEngine = function(_sim) {
 		return pos;
 	};
 
+	this.getMousePositionByZ = function(event, z) {
+
+		var x = ( event.clientX / window.innerWidth ) * 2 - 1;
+		var y = - ( (event.clientY - 19) / window.innerHeight ) * 2 + 1;
+
+		var vector = new THREE.Vector3(x, y, 0.5);
+		this.projector.unprojectVector( vector, this.camera );
+		this.raycaster.set( this.camera.position, vector.sub( this.camera.position ).normalize() );
+		var factor = (z - this.camera.position.z) / this.raycaster.ray.direction.z;
+        var position = new THREE.Vector3(
+            this.camera.position.x + this.raycaster.ray.direction.x * factor,
+            this.camera.position.y + this.raycaster.ray.direction.y * factor,
+            this.camera.position.z + this.raycaster.ray.direction.z * factor
+        );
+
+		return position;
+	};
+
 	this.resize = function() {
 		
 		this.camera.aspect = window.innerWidth / window.innerHeight;

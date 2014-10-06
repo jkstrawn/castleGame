@@ -15,9 +15,8 @@ var CastleSim = function() {
 		"res/models/room/roomBed.dae",
 		"res/models/room_hall/roomHall.dae"
 	];
-	this.draggingRoom = null;
+	this.draggingShape = null;
 	this.hoveredShape = null;
-	this.snappedShape = null;
 	this.tweenForBox = null;
 
 	this.resources = {
@@ -70,8 +69,7 @@ var CastleSim = function() {
 		that.addShape(shape);
 
 		//add initial hall
-		that.rooms.addInitialHall();
-
+		that.initialHall = that.rooms.addInitialHall();
 
 		//add initial servant
 		that.finishedHireServant();
@@ -83,10 +81,10 @@ var CastleSim = function() {
 		if (that.resources.stone >= 2) {
 			that.grid.show();
 
-			var room = that.rooms.generateTransparentRoomModel("Bedroom");
+			var room = that.rooms.generateDraggingRoom("Bedroom");
 
-			that.draggingRoom = room;
-			that.graphics.addDraggingRoom(room);
+			that.draggingShape = room;
+			that.graphics.addDraggingRoom(room.model);
 		}
 	};
 
@@ -155,7 +153,7 @@ var CastleSim = function() {
 
 		mesh.position.set(gridSection.x + 20, gridSection.y + 5, 10);
 		
-		var servant = new Servant(that, mesh, that.shapes[1]);
+		var servant = new Servant(that, mesh, that.initialHall);
 		that.addShape(servant);
 	};
 
@@ -173,7 +171,7 @@ var CastleSim = function() {
 		};
 
 		this.graphics.removeDraggingObjects();
-		this.draggingRoom = null;
+		this.draggingShape = null;
 	};
 
 	this.addShape = function(shape) {
@@ -220,12 +218,7 @@ var CastleSim = function() {
 		return shapes;
 	};
 
-	// USER INPUT
-
-	this.mouseMove = function(event) {
-
-		event.preventDefault();
-		var position = this.graphics.mouseMove(event);
+	this.updateShapeHoverStates = function() {
 
 		var hoveredShape = this.graphics.getHoveredShape(this.getShapes());
 		this.hoveredShape = null;
@@ -241,45 +234,45 @@ var CastleSim = function() {
 				shape.setHover(false);
 			}
 		};
+	};
 
-		if (this.draggingRoom != null) {
-			if (this.hoveredShape instanceof GridSection) { //Bounding box being hovered
-				if (this.hoveredShape != this.snappedShape) //Only resnap if not already being snapped here
-				{
-					//console.log(this.snappedShape)
-					//console.log(this.hoveredShape)
-					this.snappedShape = this.hoveredShape;
-					var gridLoc = this.grid.get(this.hoveredShape.gridX, this.hoveredShape.gridY);
-					//console.log(gridLoc.x + ", " + gridLoc.y + "    " + this.hoveredShape.x + ", " + this.hoveredShape.y);
+	// USER INPUT
 
-					
-					this.draggingRoom.tween = new TWEEN.Tween(this.draggingRoom.position).to({
-					    x: gridLoc.x,
-					    y: gridLoc.y,
-					    z: 0
-					}, 200).easing(TWEEN.Easing.Linear.None).start();
+	this.mouseMove = function(event) {
 
-					//this.draggingRoom.position.set(gridLoc.x, gridLoc.y, 0);
+		event.preventDefault();
+		var mousePosition = this.graphics.mouseMove(event);
+			//this.test.model.position.set(mousePosition.x, mousePosition.y, mousePosition.z);
 
-					this.graphics.focusCamera(gridLoc.x, gridLoc.y, 0);					
-				}
+		this.updateShapeHoverStates();
+
+		if (this.draggingShape instanceof Room) {
+			if (this.hoveredShape instanceof GridSection) {
+				this.rooms.snapHoveredRoomToGrid(this.draggingShape, this.hoveredShape);	
 			} else {
-				if (this.draggingRoom.tween) {
-					TWEEN.remove(this.draggingRoom.tween);
-				}
-				this.draggingRoom.position.set(position.x, position.y, 0);
-				this.snappedShape = null;
+				this.rooms.moveAndUnsnapRoom(this.draggingShape, mousePosition);
 			}
 		}
-		else
-		{
-			this.snappedShape = null;
+		else if (this.draggingShape instanceof Servant) {
+			var z = this.draggingShape.getZ();
+			var mousePositionAtZ = this.graphics.getMousePositionByZ(event, z);
+			this.draggingShape.setPosition(mousePositionAtZ.x, mousePositionAtZ.y, z);
 		}
 
 	}
 
 	this.mouseDown = function(event) {
+
+		if (event.button == 0) {
+		//left click
+			if (this.hoveredShape instanceof Servant) {
+				this.hoveredShape.stop();
+				this.draggingShape = this.hoveredShape;
+			}
+		}
+
 		if (event.button == 2) {
+		//right click
 			this.graphics.setRightMouseButtonDown(true);
 		}
 	};
@@ -288,13 +281,19 @@ var CastleSim = function() {
 
 		if (event.button == 0) {
 		//left click
+			if (this.draggingShape instanceof Servant) {
+				this.draggingShape.stopDragging();
+				this.draggingShape = null;
+				return;
+			}
+
 			for (var i = this.shapes.length - 1; i >= 0; i--) {
 				if (this.shapes[i].hover) {
-					this.shapes[i].modify();
+					this.shapes[i].clicked();
 				}
 			};
 
-			if (this.draggingRoom != null && this.hoveredShape instanceof GridSection) {
+			if (this.hoveredShape instanceof GridSection) {
 				this.placeRoomOnHoverLocation(this.hoveredShape);
 			}
 		}

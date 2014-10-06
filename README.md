@@ -309,6 +309,8 @@ To view the current version, go to: http://castlesim.azurewebsites.net/
 
 ###### ThreeJS
 
+- Rotate servants as they move
+- Add torch flames and light
 - Shadows
 - Redo ground
 - Add grass sprites

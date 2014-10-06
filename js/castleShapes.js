@@ -21,7 +21,27 @@ var Shape = function(_sim, _model) {
 		this.hover = _hover;
 	}
 
-	this.modify = function() {
+	this.clicked = function() {
+	};
+
+	this.getX = function() {
+		return this.model.position.x;
+	};
+
+	this.getY = function() {
+		return this.model.position.y;
+	};
+
+	this.getZ = function() {
+		return this.model.position.z;
+	};
+
+	this.getPosition = function() {
+		return this.model.position;
+	};
+
+	this.setPosition = function(x, y, z) {
+		this.model.position.set(x, y, z);
 	};
 
 	this.createLight = function() {};
@@ -29,7 +49,8 @@ var Shape = function(_sim, _model) {
 }
 
 var Servant = function(sim, model, room) {
-	this.__proto__.__proto__.constructor.call(this, sim, model);
+	Shape.call(this, sim, model);
+
 	this.idleTimer = 0;
 	this.room = room;
 	this.moving = false;
@@ -37,16 +58,47 @@ var Servant = function(sim, model, room) {
 	this.speed = 15;
 	this.idleSpeed = 10;
 	this.tween = null;
+	this.dragging = false;
+	this.fallingSpeed = 0;
+	this.falling = false;
+	this.lastPositionInRoom = null;
 
 	var that = this;
 
+	init();
+
+	function init() {
+		if (!this.room instanceof Room) {
+			console.log("ERROR: Initiated servant with non-room object");
+		}
+	}
+
 	this.update = function(dt) {
+		if (this.dragging) return;
+
+		if (this.falling) {
+			this.fall(dt);
+			return;
+		}
+
 		this.idleTimer -= dt;
 
 		this.moveIfTrashToClean();
 
 		if (this.idleTimer < 0 && !this.moving) {
 			this.goToRandomLocation();
+		}
+	};
+
+	this.fall = function(dt) {
+
+		this.model.position.y -= this.fallingSpeed * dt / 100;
+
+		this.fallingSpeed += .01 * dt;
+
+		if (this.model.position.y < (this.room.getY() + 6)) {
+			this.model.position.y = this.room.getY() + 6;
+			this.falling = false;
 		}
 	};
 
@@ -86,7 +138,8 @@ var Servant = function(sim, model, room) {
 
 	this.moveTo = function(position, speed) {
 
-		TWEEN.remove(this.tween);
+		if (this.tween)
+			TWEEN.remove(this.tween);
 
 		var oldPosition = this.model.position;
 		var distance = oldPosition.distanceTo(position);
@@ -95,7 +148,7 @@ var Servant = function(sim, model, room) {
 		    x: position.x,
 		    y: position.y,
 		    z: position.z
-		}, time).onComplete(this.stopMoving).start();
+		}, time).onComplete(this.hasStoppedMoving).start();
 
 		//need to adjust shorter distances to take longer in order to use sine easing
 		//.easing(TWEEN.Easing.Sinusoidal.InOut)
@@ -105,13 +158,43 @@ var Servant = function(sim, model, room) {
 
 	};
 
-	this.stopMoving = function() {
+	this.hasStoppedMoving = function() {
 		that.moving = false;
 
 		if (that.trashToCollect) {
 			that.room.removeTrash(that.trashToCollect);
 			that.trashToCollect = null;
 		}
+	};
+
+	this.stop = function() {
+
+		this.dragging = true;
+		this.moving = false;
+		this.lastPositionInRoom = this.getPosition().clone();
+
+		if (this.trashToCollect) {
+			this.trashToCollect.claimed = false;
+			this.trashToCollect = null;
+		}
+		if (this.tween)
+			TWEEN.remove(this.tween);
+	};
+
+	this.stopDragging = function() {
+		var room = this.sim.rooms.getContainingRoom(this.model.position);
+
+		if (room) {
+			this.room = room;
+			//this.model.position.y = room.getY();
+			this.falling = true;
+			this.fallingSpeed = 0;
+		} else {
+			this.setPosition(this.lastPositionInRoom.x, this.lastPositionInRoom.y, this.lastPositionInRoom.z);
+		}
+
+		this.dragging = false;
+		this.lastPositionInRoom = null;
 	};
 }
 
