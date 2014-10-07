@@ -140,6 +140,7 @@ var Servant = function(sim, model, room) {
 
 		if (this.tween)
 			TWEEN.remove(this.tween);
+		this.rotateToPosition(position.x, position.z);
 
 		var oldPosition = this.model.position;
 		var distance = oldPosition.distanceTo(position);
@@ -156,6 +157,14 @@ var Servant = function(sim, model, room) {
 		this.moving = true;
 		this.idleTimer = Math.random() * 2000 + 3000;
 
+	};
+
+	this.rotateToPosition = function(x, z) {
+
+		var dx = x - this.getX();
+		var dz = z - this.getZ();
+		var rotation = - Math.atan2(dz, dx);
+		this.model.rotation.y = rotation;
 	};
 
 	this.hasStoppedMoving = function() {
