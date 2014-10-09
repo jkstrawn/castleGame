@@ -74,6 +74,11 @@ var CastleSim = function() {
 
 		//add initial servant
 		that.finishedHireServant();
+		that.graphics.addFlame(new THREE.Vector3(-9.3, 9.5, 5.2));
+		that.graphics.addFlame(new THREE.Vector3(-30, 9.5, 5.2));
+		that.graphics.addFlame(new THREE.Vector3(-48, 9.5, 5.2));
+		that.graphics.addFlame(new THREE.Vector3(12, 9.5, 5.2));
+		that.graphics.addFlame(new THREE.Vector3(34, 9.5, 5.2));
 	};
 
 	// EVENTS
@@ -297,7 +302,9 @@ var CastleSim = function() {
 		if (event.button == 2) {
 		//right click
 			this.graphics.setRightMouseButtonDown(false);
-			this.clearDragging();
+			if (this.draggingShape instanceof Room) {
+				this.clearDragging();
+			}
 		}
 	}
 

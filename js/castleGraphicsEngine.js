@@ -47,10 +47,36 @@ var GraphicsEngine = function(_sim) {
 		};
 
 		this.particles.init(this.scene);
+
+		//add hall flames
+
+		var flame1 = new THREE.PointLight( 0xffcc00, 1.5, 20 );
+		flame1.position.set( -9.3, 9.5, 5.2 );
+		this.scene.add( flame1 );
+
+		var flame2 = new THREE.PointLight( 0xffcc00, 1.5, 20 );
+		flame2.position.set( -30, 9.5, 5.2 );
+		this.scene.add( flame2 );
+
+		var flame3 = new THREE.PointLight( 0xffcc00, 1.5, 20 );
+		flame3.position.set( -48, 9.5, 5.2 );
+		this.scene.add( flame3 );
+
+		var flame4 = new THREE.PointLight( 0xffcc00, 1.5, 20 );
+		flame4.position.set( 12, 9.5, 5.2 );
+		this.scene.add( flame4 );
+
+		var flame5 = new THREE.PointLight( 0xffcc00, 1.5, 20 );
+		flame5.position.set( 34, 9.5, 5.2 );
+		this.scene.add( flame5 );
 	}
 
 	this.addRoomSpotParticles = function(position, width, length) {
-		this.particles.addEmitter(position, width, length);
+		this.particles.addBoundingEmitter(position, width, length);
+	};
+
+	this.addFlame = function(position) {
+		this.particles.addFlameEmitter(position);
 	};
 
 	this.loadModel = function(url, callback) {
@@ -79,7 +105,7 @@ var GraphicsEngine = function(_sim) {
 		};
 
 		this.tempObjects = [];
-		this.particles.stop();
+		this.particles.stopParticles("Bounding");
 	};
 
 	this.addDraggingRoom = function(room) {
@@ -325,7 +351,12 @@ var GraphicsEngine = function(_sim) {
 	this.zoom = function (increase) {
 		if ((this.camera.fov - increase) > 0)
 		{
-			this.camera.fov -= increase
+			var vector = new THREE.Vector3( 0, 0, -1 );
+
+			vector.applyQuaternion( this.camera.quaternion );
+
+			this.camera.position.add( vector.multiplyScalar( increase * 4 ));
+			//this.camera.fov -= increase
 		}
 
 		this.camera.updateProjectionMatrix(); 
