@@ -62,6 +62,7 @@ var Servant = function(sim, model, room) {
 	this.fallingSpeed = 0;
 	this.falling = false;
 	this.lastPositionInRoom = null;
+	this.height = 12;
 
 	var that = this;
 

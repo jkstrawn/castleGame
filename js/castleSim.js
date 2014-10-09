@@ -13,7 +13,8 @@ var CastleSim = function() {
 	this.modelUrls = [
 		"res/models/ground_block/ground_block16.dae",
 		"res/models/room/roomBed.dae",
-		"res/models/room_hall/roomHall.dae"
+		"res/models/room_hall/roomHall.dae",
+		"res/models/servant/servant.dae"
 	];
 	this.draggingShape = null;
 	this.hoveredShape = null;
@@ -116,16 +117,9 @@ var CastleSim = function() {
 			return;
 		}
 
-		var newValue = 0;
+		var newValue = that.resources[name.toLowerCase()] += value;	
 
-		if (name == "Food") {
-			newValue = that.resources.food += value;	
-		}
-		if (name == "Stone") {
-			newValue = that.resources.stone += value;	
-		}
-
-		that.gui.setValue(name, newValue);
+		that.gui.setValue(name, Math.floor(newValue));
 	};
 
 	this.setLoadingBar = function(time, name, callback, successful) {
@@ -151,8 +145,11 @@ var CastleSim = function() {
 			new THREE.MeshBasicMaterial( { color: 0xFFFFFF } )
 			);
 
+		mesh = that.graphics.getModel(that.modelUrls[3]);
+		mesh.scale.x = mesh.scale.y = mesh.scale.z = .7;
 		mesh.position.set(gridSection.x + 20, gridSection.y + 5, 10);
 		
+
 		var servant = new Servant(that, mesh, that.initialHall);
 		that.addShape(servant);
 	};
@@ -196,8 +193,7 @@ var CastleSim = function() {
 
 	this.placeRoomOnHoverLocation = function() {
 
-		this.resources.stone -= 2;
-		this.gui.setValue("Stone", this.resources.stone);
+		this.changeResourceValue("Stone", -2);
 		var gridSection = this.grid.get(this.hoveredShape.gridX, this.hoveredShape.gridY);
 		var room = this.rooms.generateRoom("Bedroom", gridSection);
 		this.grid.setRoom(this.hoveredShape.gridX, this.hoveredShape.gridY, room);
