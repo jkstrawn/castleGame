@@ -145,7 +145,7 @@ var Room = function(sim, model, type) {
 
 	this.light = null;
 	this.type = type;
-	this.trashTimer = 2000;
+	this.trashTimer = 4000;
 	this.width = type.width * sim.grid.gridWidth;
 	this.length = sim.grid.gridLength;
 	this.trash = [];

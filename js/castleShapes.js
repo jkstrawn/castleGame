@@ -51,18 +51,26 @@ var Shape = function(_sim, _model) {
 var Servant = function(sim, model, room) {
 	Shape.call(this, sim, model);
 
-	this.idleTimer = 0;
 	this.room = room;
-	this.moving = false;
-	this.trashToCollect = null;
-	this.speed = 15;
-	this.idleSpeed = 10;
-	this.tween = null;
-	this.dragging = false;
-	this.fallingSpeed = 0;
-	this.falling = false;
-	this.lastPositionInRoom = null;
 	this.height = 12;
+
+	this.tween = null;
+	this.trashToCollect = null;
+	this.lastPositionInRoom = null;
+	this.idleTimer = 0;
+	this.cleaningTimer = 0;
+	this.walkingSpeed = 15;
+	this.idleSpeed = 8;
+	this.fallingSpeed = 0;
+
+	var states = {
+		IDLE: 0,
+		MOVING: 1,
+		CLEANING: 2,
+		FALLING: 3,
+		DRAGGING: 4,
+	};
+	this.state = states.IDLE;
 
 	var that = this;
 
@@ -75,10 +83,15 @@ var Servant = function(sim, model, room) {
 	}
 
 	this.update = function(dt) {
-		if (this.dragging) return;
+		if (this.state == states.DRAGGING) return;
 
-		if (this.falling) {
+		if (this.state == states.FALLING) {
 			this.fall(dt);
+			return;
+		}
+
+		if (this.state == states.CLEANING) {
+			this.cleanTrash(dt);
 			return;
 		}
 
@@ -99,7 +112,19 @@ var Servant = function(sim, model, room) {
 
 		if (this.model.position.y < (this.room.getY() + 6)) {
 			this.model.position.y = this.room.getY() + 6;
-			this.falling = false;
+			this.state = states.FALLING;
+		}
+	};
+
+	this.cleanTrash = function(dt) {
+
+		this.cleaningTimer -= dt;
+
+		if (this.cleaningTimer < 0) {
+			this.state = states.IDLE;
+			this.room.removeTrash(this.trashToCollect);
+			this.trashToCollect = null;
+			this.idleTimer = Math.random() * 2000 + 3000;
 		}
 	};
 
@@ -112,7 +137,7 @@ var Servant = function(sim, model, room) {
 
 		if (trash) {
 			this.trashToCollect = trash;
-			this.moveTo(new THREE.Vector3(trash.model.position.x, this.model.position.y, trash.model.position.z), this.speed);
+			this.moveTo(new THREE.Vector3(trash.model.position.x, this.model.position.y, trash.model.position.z), this.walkingSpeed);
 		}
 	};
 
@@ -150,12 +175,12 @@ var Servant = function(sim, model, room) {
 		    x: position.x,
 		    y: position.y,
 		    z: position.z
-		}, time).onComplete(this.hasStoppedMoving).start();
+		}, time).onComplete(this.arrivedAtDestination).start();
 
 		//need to adjust shorter distances to take longer in order to use sine easing
 		//.easing(TWEEN.Easing.Sinusoidal.InOut)
 
-		this.moving = true;
+		this.state = states.MOVING;
 		this.idleTimer = Math.random() * 2000 + 3000;
 
 	};
@@ -168,19 +193,18 @@ var Servant = function(sim, model, room) {
 		this.model.rotation.y = rotation;
 	};
 
-	this.hasStoppedMoving = function() {
-		that.moving = false;
+	this.arrivedAtDestination = function() {
+		that.state = states.IDLE;
 
 		if (that.trashToCollect) {
-			that.room.removeTrash(that.trashToCollect);
-			that.trashToCollect = null;
+			that.state = states.CLEANING;
+			that.cleaningTimer = 1000;
 		}
 	};
 
 	this.stop = function() {
 
-		this.dragging = true;
-		this.moving = false;
+		this.state = states.DRAGGING;
 		this.lastPositionInRoom = this.getPosition().clone();
 
 		if (this.trashToCollect) {
@@ -197,14 +221,12 @@ var Servant = function(sim, model, room) {
 		if (room) {
 			this.room = room;
 			//this.model.position.y = room.getY();
-			this.falling = true;
+			this.state = states.FALLING;
 			this.fallingSpeed = 0;
 		} else {
+			this.state = states.IDLE;
 			this.setPosition(this.lastPositionInRoom.x, this.lastPositionInRoom.y, this.lastPositionInRoom.z);
 		}
-
-		this.dragging = false;
-		this.lastPositionInRoom = null;
 	};
 }
 
