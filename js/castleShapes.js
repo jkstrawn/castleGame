@@ -112,7 +112,7 @@ var Servant = function(sim, model, room) {
 
 		if (this.model.position.y < (this.room.getY() + 6)) {
 			this.model.position.y = this.room.getY() + 6;
-			this.state = states.FALLING;
+			this.state = states.IDLE;
 		}
 	};
 
