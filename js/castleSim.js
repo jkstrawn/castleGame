@@ -30,7 +30,9 @@ var CastleSim = function() {
 		peasantProduction: {
 			food: 0,
 			stone: 10
-		}
+		},
+		hygieneTimer: 0,
+		idleTimer: 0
 	};
 
 	this.loadingBar = {
@@ -342,9 +344,15 @@ var CastleSim = function() {
 
 	this.update = function(dt) {
 
+		if (!dt || dt > 200) {
+			return;
+		}
+
 		for (var i = this.shapes.length - 1; i >= 0; i--) {
 			this.shapes[i].update(dt);
 		};
+
+		this.updateRatings(dt);
 
 		this.updateResources(dt);
 
@@ -352,6 +360,38 @@ var CastleSim = function() {
 
 		this.graphics.update(dt);
 	}
+
+	this.updateRatings = function(dt) {
+
+		this.resources.hygieneTimer -= dt;
+		this.resources.idleTimer -= dt;
+
+		if (this.resources.hygieneTimer < 0) {
+			this.resources.hygieneTimer = 10000;
+
+			var totalTrash = this.rooms.getNumberOfTrash();
+			this.hygiene = (50 - totalTrash) * 2;
+			this.gui.setRating("Hygiene", Math.floor(this.hygiene));	
+		}
+
+		if (this.resources.idleTimer < 0) {
+			this.resources.idleTimer = 10000;
+
+			var totalIdleTime = 0;
+			var totalServants = 0;
+
+			for (var i = this.shapes.length - 1; i >= 0; i--) {
+				if (this.shapes[i] instanceof Servant) {
+					totalServants++;
+					totalIdleTime += this.shapes[i].getIdleTime();
+				}
+			};
+
+			var averageIdleTime = totalIdleTime / totalServants;
+			this.morale = averageIdleTime / 100;
+			this.gui.setRating("Morale", Math.floor(this.morale));
+		}
+	};
 
 	this.updateResources = function(dt) {
 		var productionPower = this.resources.peasants * dt / 100000;

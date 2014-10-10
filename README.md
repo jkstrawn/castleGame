@@ -73,14 +73,24 @@ To view the current version, go to: http://castlesim.azurewebsites.net/
 	* Chance of disease
 	* based on # of rooms vs # of servants vs # of nobles
 - Morale
-	* How tired are the servants (or peasants?)
+	* Increase
+		+ Idle time
+		+ Nice rooms (servants quarters)
+		+ Increasing their tech
+		+ Nice resources?
+		+ Entertainment (feasts)
+	* Decrease
+		+ Working servants harder?
+		+ Crowding
+		+ Torture other servants
+		+ War
+		+ Oppression
 	* Workers make mistakes when tired
 	* Chance of rioting
-	* Too much work decreases morale
-	* Too many servants in small space decreases morale
-	* Working servants harder decreases morale
-	* Servants quarters inclease morale
-	* Higher hygiene increases morale
+	* Previous morale scores affect current morale
+	* Servants make demands? Then demands being met affects morale
+	* Court decisions?
+	* Religion?
 - Reputation
 	* View from the outside world
 	* Chance of getting loan or help during war
@@ -152,14 +162,14 @@ To view the current version, go to: http://castlesim.azurewebsites.net/
 	* Increase food efficiency
 	* hygiene
 	* luxury
-- lavatory
-	* increase hygiene
 - bedroom
 	* allow noble to move in
 - servants quarters
 	* hygiene
 	* servants efficiency
 	* morale
+- lavatory
+	* increase hygiene
 - storeroom (non-food)
 	* store more resources?
 	* efficiency

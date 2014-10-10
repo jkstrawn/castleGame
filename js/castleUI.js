@@ -129,6 +129,15 @@ function BlendCharacterGui(animations) {
 		}
 	};
 
+	this.setRating = function(name, value) {
+
+		this.controls[name] = value;
+
+		for (var i in this.controls.folderRatings.__controllers) {
+			this.controls.folderRatings.__controllers[i].updateDisplay();
+		}
+	};
+
 	this.init();
 /*
 

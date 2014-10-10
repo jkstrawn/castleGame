@@ -57,11 +57,12 @@ var Servant = function(sim, model, room) {
 	this.tween = null;
 	this.trashToCollect = null;
 	this.lastPositionInRoom = null;
-	this.idleTimer = 0;
+	this.timeTilWander = 0;
 	this.cleaningTimer = 0;
 	this.walkingSpeed = 15;
 	this.idleSpeed = 8;
 	this.fallingSpeed = 0;
+	this.idleTime = 0;
 
 	var states = {
 		IDLE: 0,
@@ -83,6 +84,7 @@ var Servant = function(sim, model, room) {
 	}
 
 	this.update = function(dt) {
+
 		if (this.state == states.DRAGGING) return;
 
 		if (this.state == states.FALLING) {
@@ -95,12 +97,15 @@ var Servant = function(sim, model, room) {
 			return;
 		}
 
-		this.idleTimer -= dt;
+		if (this.state == states.IDLE) {
 
-		this.moveIfTrashToClean();
+			this.idleTime += dt;
+			this.timeTilWander -= dt;
+			this.moveIfTrashToClean();
 
-		if (this.idleTimer < 0 && !this.moving) {
-			this.goToRandomLocation();
+			if (this.timeTilWander < 0) {
+				this.wanderToRandomLocation();
+			}
 		}
 	};
 
@@ -124,7 +129,7 @@ var Servant = function(sim, model, room) {
 			this.state = states.IDLE;
 			this.room.removeTrash(this.trashToCollect);
 			this.trashToCollect = null;
-			this.idleTimer = Math.random() * 2000 + 3000;
+			this.timeTilWander = Math.random() * 2000 + 3000;
 		}
 	};
 
@@ -136,30 +141,29 @@ var Servant = function(sim, model, room) {
 		var trash = this.room.getClosestTrash(this.model.position);
 
 		if (trash) {
+			this.state = states.MOVING;
 			this.trashToCollect = trash;
 			this.moveTo(new THREE.Vector3(trash.model.position.x, this.model.position.y, trash.model.position.z), this.walkingSpeed);
 		}
 	};
 
-	this.goToRandomLocation = function() {
+	this.wanderToRandomLocation = function() {
 
 		var roomDimensions = this.room.getDimensions();
 
-		var maxX = roomDimensions.start.x + roomDimensions.size.x - 5;
-		var minX = roomDimensions.start.x + 5;
-		var maxZ = roomDimensions.start.z + roomDimensions.size.z - 5;
-		var minZ = roomDimensions.start.z + 5;
-		var y = roomDimensions.start.y + 5;
-
 		var x = this.model.position.x + (Math.random() - .5) * 20;
 		var z = this.model.position.z + (Math.random() - .5) * 20;
+		var y = roomDimensions.start.y + 5;
 
-		x = Math.max(x, minX);
-		x = Math.min(x, maxX);
-		z = Math.max(z, minZ);
-		z = Math.min(z, maxZ);
+		x = this.makePointBetweenMinAndMax(x, roomDimensions.start.x + 5, roomDimensions.start.x + roomDimensions.size.x - 5);
+		z = this.makePointBetweenMinAndMax(z, roomDimensions.start.z + 5, roomDimensions.start.z + roomDimensions.size.z - 5);
 
 		this.moveTo(new THREE.Vector3(x, y, z), this.idleSpeed);
+	};
+
+	this.makePointBetweenMinAndMax = function(point, min, max) {
+
+		return Math.min(Math.max(point, min), max);
 	};
 
 	this.moveTo = function(position, speed) {
@@ -180,8 +184,7 @@ var Servant = function(sim, model, room) {
 		//need to adjust shorter distances to take longer in order to use sine easing
 		//.easing(TWEEN.Easing.Sinusoidal.InOut)
 
-		this.state = states.MOVING;
-		this.idleTimer = Math.random() * 2000 + 3000;
+		this.timeTilWander = Math.random() * 2000 + 1000 + time;
 
 	};
 
@@ -227,6 +230,13 @@ var Servant = function(sim, model, room) {
 			this.state = states.IDLE;
 			this.setPosition(this.lastPositionInRoom.x, this.lastPositionInRoom.y, this.lastPositionInRoom.z);
 		}
+	};
+
+	this.getIdleTime = function() {
+
+		var time = this.idleTime;
+		this.idleTime = 0;
+		return time; 
 	};
 }
 

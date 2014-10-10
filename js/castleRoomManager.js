@@ -85,6 +85,7 @@ var RoomManager = function(_sim) {
 	};
 
 	this.addInitialHall = function() {
+		console.log("add initial hall");
 		var gridSection = this.sim.grid.get(2, 0);
 		var room = this.generateRoom("Hall", gridSection);
 
@@ -132,21 +133,33 @@ var RoomManager = function(_sim) {
 		return null;
 	};
 
+	this.getNumberOfTrash = function() {
+
+		var number = 0;
+
+		for (var i = this.rooms.length - 1; i >= 0; i--) {
+			number += this.rooms[i].getNumberOfTrash();
+		};
+
+		return number;
+	};
+
 };
 
 
-var Room = function(sim, model, type) {
-	if (!sim) return;
+var Room = function(_sim, _model, _type) {
+	if (!_sim) return;
 	//Shape(sim, model);
 	//console.log(this.__proto__);
-	console.log(type)
+	console.log("new " + _type.name);
 	//this.__proto__.__proto__.constructor.call(this, sim, model);
-	Shape.call(this, sim, model);
+	Shape.call(this, _sim, _model);
 
 	this.light = null;
-	this.type = type;
-	this.trashTimer = 4000;
-	this.width = type.width * sim.grid.gridWidth;
+	this.type = _type;
+	this.trashSpawnSpeed = 4000;
+	this.trashTimer = 8000;
+	this.width = _type.width * sim.grid.gridWidth;
 	this.length = sim.grid.gridLength;
 	this.trash = [];
 
@@ -180,7 +193,7 @@ var Room = function(sim, model, type) {
 		this.trashTimer -= dt;
 
 		if (this.trashTimer < 0) {
-			this.trashTimer = 2000;
+			this.trashTimer = this.trashSpawnSpeed;
 
 			this.generateTrash();
 		}
@@ -244,6 +257,10 @@ var Room = function(sim, model, type) {
 		return point.x > this.model.position.x && point.x < (this.model.position.x + this.width) &&
 				point.y > this.model.position.y && point.y < (this.model.position.y + 30) &&
 				point.z > this.model.position.z && point.z < (this.model.position.z + this.length);
+	};
+
+	this.getNumberOfTrash = function() {
+		return this.trash.length;
 	};
 }
 
