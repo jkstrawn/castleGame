@@ -62,7 +62,7 @@ var Servant = function(sim, model, room) {
 	this.walkingSpeed = 15;
 	this.idleSpeed = 8;
 	this.fallingSpeed = 0;
-	this.idleTime = 0;
+	this.idleTime = 10000;
 
 	var states = {
 		IDLE: 0,
@@ -201,7 +201,7 @@ var Servant = function(sim, model, room) {
 
 		if (that.trashToCollect) {
 			that.state = states.CLEANING;
-			that.cleaningTimer = 1000;
+			that.cleaningTimer = 2000;
 		}
 	};
 
@@ -237,6 +237,14 @@ var Servant = function(sim, model, room) {
 		var time = this.idleTime;
 		this.idleTime = 0;
 		return time; 
+	};
+
+	this.turnRed = function() {
+console.log("enrage!!!");
+		var redMaterial = new THREE.MeshBasicMaterial({color: 0xFF0000});
+
+		this.model.children[0].children[0].material = redMaterial;
+		console.log(this.model.children[0].children[0].material);
 	};
 }
 

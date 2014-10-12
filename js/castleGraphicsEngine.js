@@ -50,6 +50,31 @@ var GraphicsEngine = function(_sim) {
 
 		//add hall flames
 
+		var width = 500;
+		var length = 800;
+		var geometry = new THREE.PlaneGeometry(length, width, 9, 9);
+
+		for (var i = 0, l = geometry.vertices.length - 40; i < l; i++) {
+			geometry.vertices[i].z = Math.random() * 50;
+		}
+
+		var texture = '../res/textures/grass.png';
+		var textureObject = THREE.ImageUtils.loadTexture(texture);
+		textureObject.wrapS = THREE.RepeatWrapping;
+		textureObject.wrapT = THREE.RepeatWrapping;
+		textureObject.anisotropy = 16;
+		var textureRepeatX = Math.ceil(length / 80);
+		var textureRepeatY = Math.ceil(width / 80);
+		textureObject.repeat.set(textureRepeatX, textureRepeatY);
+
+		var material4 = new THREE.MeshBasicMaterial({
+			map: textureObject
+		});
+		var plane = new THREE.Mesh(geometry, material4);
+		plane.rotation.x = -1/2 * Math.PI;
+		plane.position.set(0, 0, -100);
+		this.scene.add(plane);
+
 		var flame1 = new THREE.PointLight( 0xffcc00, 1.5, 20 );
 		flame1.position.set( -9.3, 9.5, 5.2 );
 		this.scene.add( flame1 );

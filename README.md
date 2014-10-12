@@ -56,6 +56,12 @@ To view the current version, go to: http://castlesim.azurewebsites.net/
 - Servants
 	* Provide service inside of the castle
 	* Need food and happiness
+	* Riot if morale is too low
+		+ Kill or frighten nobles
+		+ Kill military?
+		+ Then leave
+		+ Have to bring in militia to dissolve riot
+		+ Some servants die in the toussle
 - Peasants
 	* Provide food from farming
 	* Provide timber
@@ -80,6 +86,7 @@ To view the current version, go to: http://castlesim.azurewebsites.net/
 		+ Nice resources?
 		+ Entertainment (feasts)
 	* Decrease
+		+ Starvation
 		+ Working servants harder?
 		+ Crowding
 		+ Torture other servants
@@ -311,16 +318,21 @@ To view the current version, go to: http://castlesim.azurewebsites.net/
 
 ###### Gameplay
 
+- Servants move to other rooms to clean
+- stairs
+- nobles move in
+- hire militia
+- Each servant chooses his morale?
+- Starvation affects morale
+- Shrink trash model when cleaned
+- Servants should eat food
 - Show resources (gold)
 - Make awesome UI
 - Show stone subtraction on UI when select click room button
-- Add servant morale
-- Add castle dirtiness (show dirt and stuff around the castle?)
 
 ###### ThreeJS
 
-- Rotate servants as they move
-- Add torch flames and light
+- Add terrain
 - Shadows
 - Redo ground
 - Add grass sprites
@@ -329,8 +341,8 @@ To view the current version, go to: http://castlesim.azurewebsites.net/
 
 ###### Models
 
-- Servant model
 - Animate servant model
+- Trash model
 - More rooms...
 - Room furniture
 - Update models to use JPGs intead of PNGs

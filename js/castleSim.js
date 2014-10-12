@@ -61,16 +61,6 @@ var CastleSim = function() {
 
 	this.loadedModels = function() {
 
-		//add ground
-		var ground = that.graphics.getModel(that.modelUrls[0]);
-
-		ground.position.set(0, -70, -100);
-		ground.rotation.y = -1.57;
-		ground.scale.x = ground.scale.y = ground.scale.z = 17;
-
-		var shape = new Shape(this, ground);
-		that.addShape(shape);
-
 		//add initial hall
 		that.initialHall = that.rooms.addInitialHall();
 
@@ -239,6 +229,15 @@ var CastleSim = function() {
 		};
 	};
 
+	this.turnServantsRed = function() {
+
+		for (var i = this.shapes.length - 1; i >= 0; i--) {
+			if (this.shapes[i] instanceof Servant) {
+				this.shapes[i].turnRed();
+			}
+		};
+	};
+
 	// USER INPUT
 
 	this.mouseMove = function(event) {
@@ -388,8 +387,12 @@ var CastleSim = function() {
 			};
 
 			var averageIdleTime = totalIdleTime / totalServants;
-			this.morale = averageIdleTime / 100;
-			this.gui.setRating("Morale", Math.floor(this.morale));
+			this.resources.morale = averageIdleTime / 100;
+			if (this.resources.morale < 20) {
+				console.log("enraaage!");
+				this.turnServantsRed();
+			}
+			this.gui.setRating("Morale", Math.floor(this.resources.morale));
 		}
 	};
 
@@ -398,8 +401,16 @@ var CastleSim = function() {
 
 		var foodProd = this.resources.peasantProduction.food * productionPower;
 		var stoneProd = this.resources.peasantProduction.stone * productionPower;
+
+		var totalServants = 0;
+		for (var i = this.shapes.length - 1; i >= 0; i--) {
+			if (this.shapes[i] instanceof Servant) {
+				totalServants++;
+			}
+		};
 		
-		this.changeResourceValue("Food", foodProd);
+		var foodDifference = foodProd - totalServants * dt / 20000;
+		this.changeResourceValue("Food", foodDifference);
 		this.changeResourceValue("Stone", stoneProd);
 	};
 

@@ -157,7 +157,7 @@ var Room = function(_sim, _model, _type) {
 
 	this.light = null;
 	this.type = _type;
-	this.trashSpawnSpeed = 4000;
+	this.trashSpawnSpeed = 3000;
 	this.trashTimer = 8000;
 	this.width = _type.width * sim.grid.gridWidth;
 	this.length = sim.grid.gridLength;
