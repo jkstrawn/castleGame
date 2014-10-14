@@ -63,6 +63,7 @@ var Servant = function(sim, model, room) {
 	this.idleSpeed = 8;
 	this.fallingSpeed = 0;
 	this.idleTime = 10000;
+	this.newTrash = false;
 
 	var states = {
 		IDLE: 0,
@@ -71,6 +72,15 @@ var Servant = function(sim, model, room) {
 		FALLING: 3,
 		DRAGGING: 4,
 	};
+
+	var stateSounds = {
+		IDLE: [],
+		MOVING: [],
+		CLEANING: ["res/sounds/trashPickup2.mp3", "res/sounds/trashPickup3.mp3"], //"res/sounds/trashPickup1.mp3", 1 sucks
+		FALLING: [],
+		DRAGGING: []
+	}
+
 	this.state = states.IDLE;
 
 	var that = this;
@@ -109,6 +119,18 @@ var Servant = function(sim, model, room) {
 		}
 	};
 
+	this.getRandomStateSound = function (state) {
+		var sounds = stateSounds[state],
+			result = null;
+
+		if (sounds.length > 0)
+		{
+			result = sounds[Math.floor(Math.random() * sounds.length)];
+		}
+
+		return result;
+	}
+
 	this.fall = function(dt) {
 
 		this.model.position.y -= this.fallingSpeed * dt / 100;
@@ -131,6 +153,11 @@ var Servant = function(sim, model, room) {
 			this.trashToCollect = null;
 			this.timeTilWander = Math.random() * 2000 + 3000;
 		}
+		
+		if (this.state == states.CLEANING && this.newTrash) {
+			this.newTrash = false;
+			this.sim.audio.addSound([this.getRandomStateSound("CLEANING")], 200, 1, this.getPosition())
+		}
 	};
 
 	this.moveIfTrashToClean = function() {
@@ -143,6 +170,7 @@ var Servant = function(sim, model, room) {
 		if (trash) {
 			this.state = states.MOVING;
 			this.trashToCollect = trash;
+			this.newTrash = true;
 			this.moveTo(new THREE.Vector3(trash.model.position.x, this.model.position.y, trash.model.position.z), this.walkingSpeed);
 		}
 	};

@@ -9,6 +9,7 @@ var CastleSim = function() {
 	this.gui = null;
 	this.graphics = new GraphicsEngine(this);
 	this.rooms = new RoomManager(this);
+	this.audio = new AudioManager(this);
 
 	this.modelUrls = [
 		"res/models/ground_block/ground_block16.dae",
@@ -358,6 +359,8 @@ var CastleSim = function() {
 		this.updateLoadingBar(dt);
 
 		this.graphics.update(dt);
+
+		this.audio.update(dt, this.graphics.camera);
 	}
 
 	this.updateRatings = function(dt) {
