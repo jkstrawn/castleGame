@@ -16,6 +16,7 @@
 			this.gui = null;
 			this.graphics = new SIM.GraphicsEngine(this);
 			this.rooms = new SIM.RoomManager(this);
+			this.audio = new SIM.AudioManager(this);
 
 			this.modelUrls = [
 				"res/models/ground_block/ground_block16.dae",
@@ -365,6 +366,8 @@
 			this.updateLoadingBar(dt);
 
 			this.graphics.update(dt);
+
+			this.audio.update(dt, this.graphics.camera);
 		},
 
 		updateRatings: function(dt) {
