@@ -8,8 +8,8 @@
 			this.sounds = [];
 		},
 
-		addSound: function (sources, radius, volume, position) {
-			var sound = new Sound(sources, radius, volume);
+		addSound: function (sources, radius, volume, position, audioAttributes) {
+			var sound = new Sound(sources, radius, volume, audioAttributes);
 			sound.position.copy(position);
 			sound.play();
 
@@ -31,15 +31,32 @@
 
 	var Sound = my.Class({
 
-		constructor: function (sources, radius, volume) {
+		constructor: function (sources, radius, volume, audioAttributes) {
 			this.radius = radius;
 			this.volume = volume;
 			this.audio = document.createElement( 'audio' );
+
+			if (audioAttributes)
+			{
+				for(var key in audioAttributes)
+				{
+					if (key == "loop") { 
+						//Chrome is not good at looping for some reason, so need to handle this
+						this.audio.addEventListener("ended", function () {
+							this.load();
+						});
+					}
+					else {
+						this.audio.setAttribute(key, audioAttributes[key]);
+					}
+				}
+			}
+
 			this.position = new THREE.Vector3();
 
 			for ( var i = 0; i < sources.length; i ++ ) {
 				var source = document.createElement( 'source' );
-				source.src = sources[ i ];
+				source.src = "res/sounds/" + sources[i];
 
 				this.audio.appendChild( source );
 			}

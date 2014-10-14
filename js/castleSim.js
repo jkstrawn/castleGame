@@ -74,11 +74,15 @@
 
 			//add initial servant
 			this.finishedHireServant();
-			this.graphics.addFlame(new THREE.Vector3(-9.3, 9.5, 5.2));
-			this.graphics.addFlame(new THREE.Vector3(-30, 9.5, 5.2));
-			this.graphics.addFlame(new THREE.Vector3(-48, 9.5, 5.2));
-			this.graphics.addFlame(new THREE.Vector3(12, 9.5, 5.2));
-			this.graphics.addFlame(new THREE.Vector3(34, 9.5, 5.2));
+
+			var flameLocations = [new THREE.Vector3(-9.3, 9.5, 5.2), new THREE.Vector3(-30, 9.5, 5.2), 
+				new THREE.Vector3(-48, 9.5, 5.2), new THREE.Vector3(12, 9.5, 5.2), new THREE.Vector3(34, 9.5, 5.2)];
+
+			for(var i = 0; i < flameLocations.length; i++) {
+				this.graphics.addFlame(flameLocations[i]);
+				this.audio.addSound(["torch1.mp3"], 50, 1, flameLocations[i], 
+					{ loop: true, autoplay: true })
+			}
 		},
 
 		// EVENTS
