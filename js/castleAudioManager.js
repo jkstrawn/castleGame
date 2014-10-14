@@ -3,19 +3,28 @@
 	var AudioManager = my.Class({
 
 		constructor: function(_sim) {
-
 			this.sim = _sim;
 			this.sounds = [];
+			this.mute = false;
 		},
 
 		addSound: function (sources, radius, volume, position, audioAttributes) {
 			var sound = new Sound(sources, radius, volume, audioAttributes);
 			sound.position.copy(position);
 			sound.play();
+			sound.mute(this.mute);
 
 			this.sounds.push(sound);
 
 			return sound;
+		},
+
+		toggleSound: function () {
+			this.mute = !this.mute;
+
+			for (var i = 0; i < this.sounds.length; i++) {
+				this.sounds[i].mute(this.mute);
+			}
 		},
 
 		update: function (dt, camera) {
@@ -64,6 +73,10 @@
 
 		play: function () {
 			this.audio.play();
+		},
+
+		mute: function (muted) {
+			this.audio.muted = muted;
 		},
 
 		update: function (camera) {

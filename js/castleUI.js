@@ -30,12 +30,16 @@ function BlendCharacterGui(animations) {
 		"Get Peasant (no cost)": function() {
 			window.dispatchEvent( new CustomEvent( 'build-peasant'));
 		},
+		"Mute": function() {
+			window.dispatchEvent(new CustomEvent("toggleMute"));
+		},
 
 		//Folders
 		folderRooms: null,
 		folderResources: null,
 		folderActions: null,
-		folderRatings: null
+		folderRatings: null,
+		folderSettings: null
 	};
 
 	this.loadingBar = null;
@@ -64,6 +68,9 @@ function BlendCharacterGui(animations) {
 		this.controls.folderActions.add( this.controls, "Hire Servant (cost: 2 food)" );
 		this.controls.folderActions.add( this.controls, "Get Peasant (no cost)" );
 		this.controls.folderActions.open();
+
+		this.controls.folderSettings = this.gui.addFolder("Settings");
+		this.controls.folderSettings.add(this.controls, "Mute");
 
 		foodSlider.onChange(this.foodSliderChanged);
 		stoneSlider.onChange(this.stoneSliderChanged);

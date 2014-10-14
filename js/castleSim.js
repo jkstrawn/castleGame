@@ -58,6 +58,9 @@
 			window.addEventListener( 'hire-servant', $.proxy(this.hireServant, this) );
 			window.addEventListener( 'build-peasant', $.proxy(this.buildPeasantHouse, this) );
 			window.addEventListener( 'slider', $.proxy(this.sliderChanged, this) );
+			window.addEventListener("toggleMute", $.proxy(function() {
+				this.audio.toggleSound();
+			}, this));
 
 			this.grid.init();
 			this.graphics.init(this.modelUrls, $.proxy( this.loadedModels, this ));
