@@ -1,494 +1,448 @@
-var CastleSim = function() {
+(function() {
 
-	this.shapes = [];
-	this.pointLight = null;
-	this.stats = null;
+	var CastleSim = my.Class({
 
-	this.clock = new THREE.Clock();
-	this.grid = new GridManager(this);
-	this.gui = null;
-	this.graphics = new GraphicsEngine(this);
-	this.rooms = new RoomManager(this);
+		//http://javascriptissexy.com/understand-javascript-callback-functions-and-use-them/
+		that: this,
 
-	this.modelUrls = [
-		"res/models/ground_block/ground_block16.dae",
-		"res/models/room/roomBed.dae",
-		"res/models/room_hall/roomHall.dae",
-		"res/models/servant/servant.dae"
-	];
-	this.draggingShape = null;
-	this.hoveredShape = null;
-	this.tweenForBox = null;
+		constructor: function() {
 
-	this.resources = {
-		food: 10,
-		stone: 10,
-		servants: 0,
-		peasants: 0,
-		hygiene: 50,
-		morale: 50,
-		peasantProduction: {
-			food: 0,
-			stone: 10
+			this.shapes = [];
+			this.pointLight = null;
+			this.stats = null;
+
+			this.clock = new THREE.Clock();
+			this.grid = new SIM.GridManager(this);
+			this.gui = null;
+			this.graphics = new SIM.GraphicsEngine(this);
+			this.rooms = new SIM.RoomManager(this);
+
+			this.modelUrls = [
+				"res/models/ground_block/ground_block16.dae",
+				"res/models/room/roomBed.dae",
+				"res/models/room_hall/roomHall.dae",
+				"res/models/servant/servant.dae"
+			];
+			this.draggingShape = null;
+			this.hoveredShape = null;
+			this.tweenForBox = null;
+
+			this.resources = {
+				food: 10,
+				stone: 10,
+				servants: 0,
+				peasants: 0,
+				hygiene: 50,
+				morale: 50,
+				peasantProduction: {
+					food: 0,
+					stone: 10
+				},
+				hygieneTimer: 0,
+				idleTimer: 0
+			};
+
+			this.loadingBar = {
+				max: 0,
+				current: 0,
+				finished: null
+			};
+
 		},
-		hygieneTimer: 0,
-		idleTimer: 0
-	};
 
-	this.loadingBar = {
-		max: 0,
-		current: 0,
-		finished: null
-	};
+		init: function() {
 
-	var that = this;
+			// listen for messages from the gui
+			window.addEventListener( 'create-room', $.proxy(this.clickRoomButton, this) );
+			window.addEventListener( 'hire-servant', $.proxy(this.hireServant, this) );
+			window.addEventListener( 'build-peasant', $.proxy(this.buildPeasantHouse, this) );
+			window.addEventListener( 'slider', $.proxy(this.sliderChanged, this) );
 
-	this.init = function() {
+			this.grid.init();
+			this.graphics.init(this.modelUrls, $.proxy( this.loadedModels, this ));
+			this.gui = new BlendCharacterGui();
+			this.gui.setValue("Servants", this.resources.servants);
+			this.gui.setValue("Food", this.resources.food);
+			this.gui.setValue("Stone", this.resources.food);
+		},
 
-		// listen for messages from the gui
-		window.addEventListener( 'create-room', this.clickRoomButton );
-		window.addEventListener( 'hire-servant', this.hireServant );
-		window.addEventListener( 'build-peasant', this.buildPeasantHouse );
-		window.addEventListener( 'slider', this.sliderChanged );
+		loadedModels: function() {
 
-		this.grid.init();
-		this.graphics.init(this.modelUrls, this.loadedModels);
-		this.gui = new BlendCharacterGui();
-		this.gui.setValue("Servants", this.resources.servants);
-		this.gui.setValue("Food", this.resources.food);
-		this.gui.setValue("Stone", this.resources.food);
-	}
+			//add initial hall
+			this.initialHall = this.rooms.addInitialHall();
 
-	this.loadedModels = function() {
+			//add initial servant
+			this.finishedHireServant();
+			this.graphics.addFlame(new THREE.Vector3(-9.3, 9.5, 5.2));
+			this.graphics.addFlame(new THREE.Vector3(-30, 9.5, 5.2));
+			this.graphics.addFlame(new THREE.Vector3(-48, 9.5, 5.2));
+			this.graphics.addFlame(new THREE.Vector3(12, 9.5, 5.2));
+			this.graphics.addFlame(new THREE.Vector3(34, 9.5, 5.2));
+		},
 
-		//add initial hall
-		that.initialHall = that.rooms.addInitialHall();
+		// EVENTS
+		clickRoomButton: function(data) {
 
-		//add initial servant
-		that.finishedHireServant();
-		that.graphics.addFlame(new THREE.Vector3(-9.3, 9.5, 5.2));
-		that.graphics.addFlame(new THREE.Vector3(-30, 9.5, 5.2));
-		that.graphics.addFlame(new THREE.Vector3(-48, 9.5, 5.2));
-		that.graphics.addFlame(new THREE.Vector3(12, 9.5, 5.2));
-		that.graphics.addFlame(new THREE.Vector3(34, 9.5, 5.2));
-	};
+			if (this.resources.stone >= 2) {
+				this.grid.show();
 
-	// EVENTS
-	this.clickRoomButton = function(data) {
+				var room = this.rooms.generateDraggingRoom("Bedroom");
 
-		if (that.resources.stone >= 2) {
-			that.grid.show();
-
-			var room = that.rooms.generateDraggingRoom("Bedroom");
-
-			that.draggingShape = room;
-			that.graphics.addDraggingRoom(room.model);
-		}
-	};
-
-	this.hireServant = function() {
-
-		if (that.resources.food >= 2) {
-			that.setLoadingBar(3, "Getting Servant", that.finishedHireServant, function() {
-				that.changeResourceValue("Food", -2);
-			});
-		}
-	};
-
-	this.buildPeasantHouse = function() {
-
-		that.setLoadingBar(3, "Getting Peasant", that.finishedBuildPeasantHouse, function() {});
-	};
-
-	this.sliderChanged = function(data) {
-
-		that.resources.peasantProduction.food = data.detail.food;
-		that.resources.peasantProduction.stone = data.detail.stone;
-	};
-
-	// PROCESS EVENTS
-
-	this.changeResourceValue = function(name, value) {
-
-		if (!value) {
-			return;
-		}
-
-		var newValue = that.resources[name.toLowerCase()] += value;	
-
-		that.gui.setValue(name, Math.floor(newValue));
-	};
-
-	this.setLoadingBar = function(time, name, callback, successful) {
-
-		if (this.loadingBar.current) {
-			return;
-		}
-
-		successful();
-		this.loadingBar.max = time * 1000;
-		this.loadingBar.finished = callback;
-		this.gui.createLoadingBar(name, time);
-	};
-
-	this.finishedHireServant = function() {
-
-		that.resources.servants++;
-		that.gui.setValue("Servants", that.resources.servants);
-
-		var gridSection = that.grid.get(2, 0);
-		var mesh = new THREE.Mesh(
-			new THREE.BoxGeometry(5, 10, 5), 
-			new THREE.MeshBasicMaterial( { color: 0xFFFFFF } )
-			);
-
-		mesh = that.graphics.getModel(that.modelUrls[3]);
-		mesh.scale.x = mesh.scale.y = mesh.scale.z = .7;
-		mesh.position.set(gridSection.x + 20, gridSection.y + 5, 10);
-		
-
-		var servant = new Servant(that, mesh, that.initialHall);
-		that.addShape(servant);
-	};
-
-	this.finishedBuildPeasantHouse = function() {
-
-		that.resources.peasants++;
-		that.gui.setValue("Peasants", that.resources.peasants);		
-	};
-
-	this.clearDragging = function() {
-		for (var i = this.shapes.length - 1; i >= 0; i--) {
-			if (this.shapes[i] instanceof GridSection) {
-				this.shapes.splice(i, 1);
+				this.draggingShape = room;
+				this.graphics.addDraggingRoom(room.model);
 			}
-		};
+		},
 
-		this.graphics.removeDraggingObjects();
-		this.draggingShape = null;
-	};
+		hireServant: function() {
 
-	this.addShape = function(shape) {
+			if (this.resources.food >= 2) {
+				var that = this;
+				this.setLoadingBar(3, "Getting Servant", $.proxy(this.finishedHireServant, this), function() {
+					that.changeResourceValue("Food", -2);
+				});
+			}
+		},
 
-		this.graphics.addModel(shape.model);
-		this.shapes.push(shape);
-	};
+		buildPeasantHouse: function() {
 
+			this.setLoadingBar(3, "Getting Peasant", $.proxy(this.finishedBuildPeasantHouse, this), function() {});
+		},
 
-	this.removeShape = function(shape) {
+		sliderChanged: function(data) {
 
-		for (var i = this.shapes.length - 1; i >= 0; i--) {
-			if (this.shapes[i] == shape) {
-				this.shapes.splice(i, 1);
-				this.graphics.removeModel(shape.model);
+			this.resources.peasantProduction.food = data.detail.food;
+			this.resources.peasantProduction.stone = data.detail.stone;
+		},
+
+		// PROCESS EVENTS
+
+		changeResourceValue: function(name, value) {
+
+			if (!value) {
 				return;
 			}
-		};
 
-		console.log("ERROR: tried to delete non-existant shape", shape);
-	};
+			var newValue = this.resources[name.toLowerCase()] += value;	
 
-	this.placeRoomOnHoverLocation = function() {
+			this.gui.setValue(name, Math.floor(newValue));
+		},
 
-		this.changeResourceValue("Stone", -2);
-		var gridSection = this.grid.get(this.hoveredShape.gridX, this.hoveredShape.gridY);
-		var room = this.rooms.generateRoom("Bedroom", gridSection);
-		this.grid.setRoom(this.hoveredShape.gridX, this.hoveredShape.gridY, room);
-		this.addShape(room);
-		this.clearDragging();
-	};
+		setLoadingBar: function(time, name, callback, successful) {
 
-	// OTHER
-
-	this.getShapes = function() {
-
-		var shapes = [];
-
-		for (var i = this.shapes.length - 1; i >= 0; i--) {
-			shapes.push(this.shapes[i].model);
-		};
-
-		return shapes;
-	};
-
-	this.updateShapeHoverStates = function() {
-
-		var hoveredShape = this.graphics.getHoveredShape(this.getShapes());
-		this.hoveredShape = null;
-
-		for (var i = this.shapes.length - 1; i >= 0; i--) {
-			var shape = this.shapes[i];
-
-			if (shape.model == hoveredShape) {
-				this.hoveredShape = shape;
-				shape.setHover(true);
+			if (this.loadingBar.current) {
+				return;
 			}
-			else {
-				shape.setHover(false);
+
+			successful();
+			this.loadingBar.max = time * 1000;
+			this.loadingBar.finished = callback;
+			this.gui.createLoadingBar(name, time);
+		},
+
+		finishedHireServant: function() {
+
+			this.resources.servants++;
+			this.gui.setValue("Servants", this.resources.servants);
+
+			var gridSection = this.grid.get(2, 0);
+			var mesh = new THREE.Mesh(
+				new THREE.BoxGeometry(5, 10, 5), 
+				new THREE.MeshBasicMaterial( { color: 0xFFFFFF } )
+				);
+
+			mesh = this.graphics.getModel(this.modelUrls[3]);
+			mesh.scale.x = mesh.scale.y = mesh.scale.z = .7;
+			mesh.position.set(gridSection.x + 20, gridSection.y + 5, 10);
+			
+
+			var servant = new SIM.Servant(this, mesh, this.initialHall);
+			this.addShape(servant);
+		},
+
+		finishedBuildPeasantHouse: function() {
+
+			this.resources.peasants++;
+			this.gui.setValue("Peasants", this.resources.peasants);		
+		},
+
+		clearDragging: function() {
+			for (var i = this.shapes.length - 1; i >= 0; i--) {
+				if (this.shapes[i] instanceof SIM.GridSection) {
+					this.shapes.splice(i, 1);
+				}
+			};
+
+			this.graphics.removeDraggingObjects();
+			this.draggingShape = null;
+		},
+
+		addShape: function(shape) {
+
+			this.graphics.addModel(shape.model);
+			this.shapes.push(shape);
+		},
+
+		removeShape: function(shape) {
+
+			for (var i = this.shapes.length - 1; i >= 0; i--) {
+				if (this.shapes[i] == shape) {
+					this.shapes.splice(i, 1);
+					this.graphics.removeModel(shape.model);
+					return;
+				}
+			};
+
+			console.log("ERROR: tried to delete non-existant shape", shape);
+		},
+
+		placeRoomOnHoverLocation: function() {
+
+			this.changeResourceValue("Stone", -2);
+			var gridSection = this.grid.get(this.hoveredShape.gridX, this.hoveredShape.gridY);
+			var room = this.rooms.generateRoom("Bedroom", gridSection);
+			this.grid.setRoom(this.hoveredShape.gridX, this.hoveredShape.gridY, room);
+			this.addShape(room);
+			this.clearDragging();
+		},
+
+		// OTHER
+
+		getShapes: function() {
+
+			var shapes = [];
+
+			for (var i = this.shapes.length - 1; i >= 0; i--) {
+				shapes.push(this.shapes[i].model);
+			};
+
+			return shapes;
+		},
+
+		updateShapeHoverStates: function() {
+
+			var hoveredShape = this.graphics.getHoveredShape(this.getShapes());
+			this.hoveredShape = null;
+
+			for (var i = this.shapes.length - 1; i >= 0; i--) {
+				var shape = this.shapes[i];
+
+				if (shape.model == hoveredShape) {
+					this.hoveredShape = shape;
+					shape.setHover(true);
+				}
+				else {
+					shape.setHover(false);
+				}
+			};
+		},
+
+		turnServantsRed: function() {
+
+			for (var i = this.shapes.length - 1; i >= 0; i--) {
+				if (this.shapes[i] instanceof SIM.Servant) {
+					this.shapes[i].turnRed();
+				}
+			};
+		},
+
+		// USER INPUT
+
+		mouseMove: function(event) {
+
+			event.preventDefault();
+			var mousePosition = this.graphics.mouseMove(event);
+				//this.test.model.position.set(mousePosition.x, mousePosition.y, mousePosition.z);
+
+			this.updateShapeHoverStates();
+
+			if (this.draggingShape instanceof SIM.Room) {
+				if (this.hoveredShape instanceof SIM.GridSection) {
+					this.rooms.snapHoveredRoomToGrid(this.draggingShape, this.hoveredShape);	
+				} else {
+					this.rooms.moveAndUnsnapRoom(this.draggingShape, mousePosition);
+				}
 			}
-		};
-	};
-
-	this.turnServantsRed = function() {
-
-		for (var i = this.shapes.length - 1; i >= 0; i--) {
-			if (this.shapes[i] instanceof Servant) {
-				this.shapes[i].turnRed();
+			else if (this.draggingShape instanceof SIM.Servant) {
+				var z = this.draggingShape.getZ();
+				var mousePositionAtZ = this.graphics.getMousePositionByZ(event, z);
+				this.draggingShape.setPosition(mousePositionAtZ.x, mousePositionAtZ.y, z);
 			}
-		};
-	};
 
-	// USER INPUT
+		},
 
-	this.mouseMove = function(event) {
+		mouseDown: function(event) {
 
-		event.preventDefault();
-		var mousePosition = this.graphics.mouseMove(event);
-			//this.test.model.position.set(mousePosition.x, mousePosition.y, mousePosition.z);
-
-		this.updateShapeHoverStates();
-
-		if (this.draggingShape instanceof Room) {
-			if (this.hoveredShape instanceof GridSection) {
-				this.rooms.snapHoveredRoomToGrid(this.draggingShape, this.hoveredShape);	
-			} else {
-				this.rooms.moveAndUnsnapRoom(this.draggingShape, mousePosition);
+			if (event.button == 0) {
+			//left click
+				if (this.hoveredShape instanceof SIM.Servant) {
+					this.hoveredShape.stop();
+					this.draggingShape = this.hoveredShape;
+				}
 			}
-		}
-		else if (this.draggingShape instanceof Servant) {
-			var z = this.draggingShape.getZ();
-			var mousePositionAtZ = this.graphics.getMousePositionByZ(event, z);
-			this.draggingShape.setPosition(mousePositionAtZ.x, mousePositionAtZ.y, z);
-		}
 
-	}
-
-	this.mouseDown = function(event) {
-
-		if (event.button == 0) {
-		//left click
-			if (this.hoveredShape instanceof Servant) {
-				this.hoveredShape.stop();
-				this.draggingShape = this.hoveredShape;
+			if (event.button == 2) {
+			//right click
+				this.graphics.setRightMouseButtonDown(true);
 			}
-		}
+		},
 
-		if (event.button == 2) {
-		//right click
-			this.graphics.setRightMouseButtonDown(true);
-		}
-	};
+		click: function( event ) {
 
-	this.click = function( event ) {
+			if (event.button == 0) {
+			//left click
+				if (this.draggingShape instanceof SIM.Servant) {
+					this.draggingShape.stopDragging();
+					this.draggingShape = null;
+					return;
+				}
 
-		if (event.button == 0) {
-		//left click
-			if (this.draggingShape instanceof Servant) {
-				this.draggingShape.stopDragging();
-				this.draggingShape = null;
+				for (var i = this.shapes.length - 1; i >= 0; i--) {
+					if (this.shapes[i].hover) {
+						this.shapes[i].clicked();
+					}
+				};
+
+				if (this.hoveredShape instanceof SIM.GridSection) {
+					this.placeRoomOnHoverLocation(this.hoveredShape);
+				}
+			}
+
+			if (event.button == 2) {
+			//right click
+				this.graphics.setRightMouseButtonDown(false);
+				if (this.draggingShape instanceof SIM.Room) {
+					this.clearDragging();
+				}
+			}
+		},
+
+		keypress: function (event) {
+			var character = String.fromCharCode(event.keyCode)
+
+			switch (character) {
+				case "w":
+					this.graphics.moveCamera("up")
+					break
+				case "a":
+					this.graphics.moveCamera("left")
+					break
+				case "s":
+					this.graphics.moveCamera("down")
+					break
+				case "d":
+					this.graphics.moveCamera("right")
+					break
+			}
+		},
+
+		zoom: function(dt) {
+			this.graphics.zoom(dt);
+		},
+
+		// UPDATING
+
+		render: function() {
+
+			var delta = this.clock.getDelta();
+
+			this.graphics.render();
+		},
+
+		update: function(dt) {
+
+			if (!dt || dt > 200) {
 				return;
 			}
 
 			for (var i = this.shapes.length - 1; i >= 0; i--) {
-				if (this.shapes[i].hover) {
-					this.shapes[i].clicked();
-				}
+				this.shapes[i].update(dt);
 			};
 
-			if (this.hoveredShape instanceof GridSection) {
-				this.placeRoomOnHoverLocation(this.hoveredShape);
+			this.updateRatings(dt);
+
+			this.updateResources(dt);
+
+			this.updateLoadingBar(dt);
+
+			this.graphics.update(dt);
+		},
+
+		updateRatings: function(dt) {
+
+			this.resources.hygieneTimer -= dt;
+			this.resources.idleTimer -= dt;
+
+			if (this.resources.hygieneTimer < 0) {
+				this.resources.hygieneTimer = 10000;
+
+				var totalTrash = this.rooms.getNumberOfTrash();
+				this.hygiene = (50 - totalTrash) * 2;
+				this.gui.setRating("Hygiene", Math.floor(this.hygiene));	
 			}
-		}
 
-		if (event.button == 2) {
-		//right click
-			this.graphics.setRightMouseButtonDown(false);
-			if (this.draggingShape instanceof Room) {
-				this.clearDragging();
+			if (this.resources.idleTimer < 0) {
+				this.resources.idleTimer = 10000;
+
+				var totalIdleTime = 0;
+				var totalServants = 0;
+
+				for (var i = this.shapes.length - 1; i >= 0; i--) {
+					if (this.shapes[i] instanceof SIM.Servant) {
+						totalServants++;
+						totalIdleTime += this.shapes[i].getIdleTime();
+					}
+				};
+
+				var averageIdleTime = totalIdleTime / totalServants;
+				this.resources.morale = averageIdleTime / 100;
+				if (this.resources.morale < 20) {
+					this.turnServantsRed();
+				}
+				this.gui.setRating("Morale", Math.floor(this.resources.morale));
 			}
-		}
-	}
+		},
 
-	this.keypress = function (event) {
-		var character = String.fromCharCode(event.keyCode)
+		updateResources: function(dt) {
+			var productionPower = this.resources.peasants * dt / 100000;
 
-		switch (character) {
-			case "w":
-				this.graphics.moveCamera("up")
-				break
-			case "a":
-				this.graphics.moveCamera("left")
-				break
-			case "s":
-				this.graphics.moveCamera("down")
-				break
-			case "d":
-				this.graphics.moveCamera("right")
-				break
-		}
-	}
+			var foodProd = this.resources.peasantProduction.food * productionPower;
+			var stoneProd = this.resources.peasantProduction.stone * productionPower;
 
-	this.zoom = function(dt) {
-		this.graphics.zoom(dt);
-	}
-
-	// UPDATING
-
-	this.render = function() {
-
-		var delta = this.clock.getDelta();
-
-		this.graphics.render();
-	}
-
-	this.update = function(dt) {
-
-		if (!dt || dt > 200) {
-			return;
-		}
-
-		for (var i = this.shapes.length - 1; i >= 0; i--) {
-			this.shapes[i].update(dt);
-		};
-
-		this.updateRatings(dt);
-
-		this.updateResources(dt);
-
-		this.updateLoadingBar(dt);
-
-		this.graphics.update(dt);
-	}
-
-	this.updateRatings = function(dt) {
-
-		this.resources.hygieneTimer -= dt;
-		this.resources.idleTimer -= dt;
-
-		if (this.resources.hygieneTimer < 0) {
-			this.resources.hygieneTimer = 10000;
-
-			var totalTrash = this.rooms.getNumberOfTrash();
-			this.hygiene = (50 - totalTrash) * 2;
-			this.gui.setRating("Hygiene", Math.floor(this.hygiene));	
-		}
-
-		if (this.resources.idleTimer < 0) {
-			this.resources.idleTimer = 10000;
-
-			var totalIdleTime = 0;
 			var totalServants = 0;
-
 			for (var i = this.shapes.length - 1; i >= 0; i--) {
-				if (this.shapes[i] instanceof Servant) {
+				if (this.shapes[i] instanceof SIM.Servant) {
 					totalServants++;
-					totalIdleTime += this.shapes[i].getIdleTime();
 				}
 			};
+			
+			var foodDifference = foodProd - totalServants * dt / 20000;
+			this.changeResourceValue("Food", foodDifference);
+			this.changeResourceValue("Stone", stoneProd);
+		},
 
-			var averageIdleTime = totalIdleTime / totalServants;
-			this.resources.morale = averageIdleTime / 100;
-			if (this.resources.morale < 20) {
-				console.log("enraaage!");
-				this.turnServantsRed();
+		updateLoadingBar: function(dt) {
+
+			if (this.loadingBar.max) {
+
+				this.loadingBar.current += dt;
+				this.gui.setLoadingBar(this.loadingBar.current / 1000);
+
+				if (this.loadingBar.current > this.loadingBar.max) {
+					this.loadingBar.max = 0;
+					this.loadingBar.current = 0;
+					this.gui.removeLoadingBar();
+					this.loadingBar.finished();
+				}
 			}
-			this.gui.setRating("Morale", Math.floor(this.resources.morale));
-		}
-	};
+		},
 
-	this.updateResources = function(dt) {
-		var productionPower = this.resources.peasants * dt / 100000;
+		onWindowResize: function() {
 
-		var foodProd = this.resources.peasantProduction.food * productionPower;
-		var stoneProd = this.resources.peasantProduction.stone * productionPower;
+			this.graphics.resize();
+		},
 
-		var totalServants = 0;
-		for (var i = this.shapes.length - 1; i >= 0; i--) {
-			if (this.shapes[i] instanceof Servant) {
-				totalServants++;
-			}
-		};
-		
-		var foodDifference = foodProd - totalServants * dt / 20000;
-		this.changeResourceValue("Food", foodDifference);
-		this.changeResourceValue("Stone", stoneProd);
-	};
+	});
 
-	this.updateLoadingBar = function(dt) {
+	SIM.CastleSim = CastleSim;
 
-		if (this.loadingBar.max) {
-
-			this.loadingBar.current += dt;
-			this.gui.setLoadingBar(this.loadingBar.current / 1000);
-
-			if (this.loadingBar.current > this.loadingBar.max) {
-				this.loadingBar.max = 0;
-				this.loadingBar.current = 0;
-				this.gui.removeLoadingBar();
-				this.loadingBar.finished();
-			}
-		}
-	}
-
-	this.onWindowResize = function() {
-
-		this.graphics.resize();
-	}
-}
-
-var oldTime = 0;
-var stats;
-var sim = new CastleSim();
-
-sim.init();
-animate();
-
-document.addEventListener( 'mouseup', onDocumentMouseUp, false );
-document.addEventListener( 'mousedown', onDocumentMouseDown, false );
-document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-window.addEventListener( 'resize', onWindowResize, false );
-window.addEventListener("mousewheel", onWindowMouseWheel, false);
-window.addEventListener("DOMMouseScroll", onWindowMouseWheel, false);
-window.addEventListener("keypress", onWindowKeyPress, false);
-
-document.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
-}, false);
-
-function onDocumentMouseUp(event) {
-	sim.click(event);
-}
-
-function onDocumentMouseDown(event) {
-	sim.mouseDown(event);
-}
-
-function onDocumentMouseMove(event) {
-	sim.mouseMove(event);
-}
-
-function onWindowResize() {
-	sim.onWindowResize();
-}
-
-function animate(time) {		
-	requestAnimationFrame( animate );
-
-	var dt = time - oldTime;
-	oldTime = time;
-
-	sim.update(dt);
-	sim.render();
-	stats.update();
-}
-
-function onWindowMouseWheel(event) {
-	var event = window.event || event; // old IE support
-	var delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
-	//console.log(delta)
-	sim.zoom(delta);
-}
-
-function onWindowKeyPress(event) {
-	sim.keypress(event)
-}
+})()
