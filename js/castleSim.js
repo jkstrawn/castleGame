@@ -49,6 +49,10 @@
 				finished: null
 			};
 
+			this.events = {
+				wind: false
+			}
+
 		},
 
 		init: function() {
@@ -375,6 +379,10 @@
 			this.graphics.update(dt);
 
 			this.audio.update(dt, this.graphics.camera);
+		},
+
+		randomizeWind: function() {
+
 		},
 
 		updateRatings: function(dt) {
