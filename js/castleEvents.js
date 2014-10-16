@@ -6,48 +6,61 @@
 			this.sim = _sim;
 			this.events = [];
 			this.randomEventsOn = true;
+			this.timeSinceLastEvent = null;
 		},
 
-		addSound: function (sources, radius, volume, position, audioAttributes) {
-			var sound = new Sound(sources, radius, volume, position, audioAttributes);
-			sound.play();
-			sound.mute(this.mute);
+		update: function (dt) {
+			this.timeSinceLastEvent += dt;
 
-			this.sounds.push(sound);
+			if (this.randomEventsOn) {
+				var random = Math.random() * (1 - .1) + .1;
+				var fireEvent = random < (.01 + (this.timeSinceLastEvent /1000000));
 
-			return sound;
-		},
+				if (fireEvent) {
+					//In the future, have a random chance of each type of event, 
+					//for now just fire wind.  Each event will have different chance
+					//of happening, but need to work on this
 
-		update: function (dt, camera) {
-			for(var i = 0; i < this.sounds.length; i++) {
-				this.sounds[i].update(camera);
+					var newEvent = new Wind(this.sim);
+					newEvent.start();
+					this.events.push(newEvent);
+					this.timeSinceLastEvent = 0;
+				}
 			}
-		},
+
+			for(var i = 0; i < this.events.length; i++) {
+				this.events[i].update(dt);
+			}
+		}
 
 	});
 
 	SIM.EventManager = EventManager;
 
-
 	var Event = my.Class({
-
-		constructor: function () {
+		constructor: function (sim) {
 			this.running = false;
-			this.lastRunTime = null;
+			this.sim = sim;
+			this.duration = 1000;
 		},
 
-		update: function (camera) {
-			if (position) {
-				var distance = this.position.distanceTo( camera.position );
+		start: function() {
+			this.running = true;
+		},
 
-				if ( distance <= this.radius ) {
-					this.audio.volume = this.volume * ( 1 - distance / this.radius );
-				} else {
-					this.audio.volume = 0;
-				}				
-			}
-			else {
-				this.audio.volume = this.volume;
+		stop: function () {
+			this.running = false;
+
+		},
+
+		update: function (dt) {
+			if (this.running) {
+				this.duration -= dt;
+
+				if (this.duration <= 0)
+				{
+					this.stop();
+				}
 			}
 		}
 	});
@@ -56,9 +69,29 @@
 
 	var Wind = my.Class(SIM.Event, {
 		constructor: function(sim) {
-			Wind.Super.call(this, sim, model, type);
+			Wind.Super.call(this, sim);
+
+			this.duration = 20000;
 		},
 
+		start: function() {
+			Wind.Super.prototype.start.call(this);
+
+			console.log("wind started");
+			this.sound = this.sim.audio.addSound(["wind.mp3"], 0, 1, null, { loop: true })
+		},
+
+		stop: function () {
+			Wind.Super.prototype.stop.call(this);
+			console.log("wind stopped");
+
+			this.sound.stop();
+		},
+
+		update: function (dt) {
+			Wind.Super.prototype.update.call(this, dt);
+			
+		}
 	});
 
 	SIM.Wind = Wind;

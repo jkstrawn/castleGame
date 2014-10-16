@@ -43,6 +43,7 @@
 			this.radius = radius;
 			this.volume = volume;
 			this.audio = document.createElement( 'audio' );
+			this.running = false;
 
 			if (audioAttributes)
 			{
@@ -76,6 +77,13 @@
 
 		play: function () {
 			this.audio.play();
+			this.running = true;
+		},
+
+		stop: function () {
+			this.audio.pause();
+			this.audio.currentTime = 0;
+			this.running = false;
 		},
 
 		mute: function (muted) {
@@ -83,17 +91,20 @@
 		},
 
 		update: function (camera) {
-			if (position) {
-				var distance = this.position.distanceTo( camera.position );
+			if (this.running)
+			{
+				if (this.position) {
+					var distance = this.position.distanceTo( camera.position );
 
-				if ( distance <= this.radius ) {
-					this.audio.volume = this.volume * ( 1 - distance / this.radius );
-				} else {
-					this.audio.volume = 0;
+					if ( distance <= this.radius ) {
+						this.audio.volume = this.volume * ( 1 - distance / this.radius );
+					} else {
+						this.audio.volume = 0;
+					}				
+				}
+				else {
+					this.audio.volume = this.volume;
 				}				
-			}
-			else {
-				this.audio.volume = this.volume;
 			}
 		}
 	});
