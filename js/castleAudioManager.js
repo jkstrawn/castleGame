@@ -9,8 +9,7 @@
 		},
 
 		addSound: function (sources, radius, volume, position, audioAttributes) {
-			var sound = new Sound(sources, radius, volume, audioAttributes);
-			sound.position.copy(position);
+			var sound = new Sound(sources, radius, volume, position, audioAttributes);
 			sound.play();
 			sound.mute(this.mute);
 
@@ -40,10 +39,11 @@
 
 	var Sound = my.Class({
 
-		constructor: function (sources, radius, volume, audioAttributes) {
+		constructor: function (sources, radius, volume, position, audioAttributes) {
 			this.radius = radius;
 			this.volume = volume;
 			this.audio = document.createElement( 'audio' );
+			this.running = false;
 
 			if (audioAttributes)
 			{
@@ -61,7 +61,11 @@
 				}
 			}
 
-			this.position = new THREE.Vector3();
+			if (position)
+			{
+				this.position = new THREE.Vector3();
+				this.position.copy(position);
+			}			
 
 			for ( var i = 0; i < sources.length; i ++ ) {
 				var source = document.createElement( 'source' );
@@ -73,6 +77,13 @@
 
 		play: function () {
 			this.audio.play();
+			this.running = true;
+		},
+
+		stop: function () {
+			this.audio.pause();
+			this.audio.currentTime = 0;
+			this.running = false;
 		},
 
 		mute: function (muted) {
@@ -80,12 +91,20 @@
 		},
 
 		update: function (camera) {
-			var distance = this.position.distanceTo( camera.position );
+			if (this.running)
+			{
+				if (this.position) {
+					var distance = this.position.distanceTo( camera.position );
 
-			if ( distance <= this.radius ) {
-				this.audio.volume = this.volume * ( 1 - distance / this.radius );
-			} else {
-				this.audio.volume = 0;
+					if ( distance <= this.radius ) {
+						this.audio.volume = this.volume * ( 1 - distance / this.radius );
+					} else {
+						this.audio.volume = 0;
+					}				
+				}
+				else {
+					this.audio.volume = this.volume;
+				}				
 			}
 		}
 	});

@@ -17,6 +17,7 @@
 			this.graphics = new SIM.GraphicsEngine(this);
 			this.rooms = new SIM.RoomManager(this);
 			this.audio = new SIM.AudioManager(this);
+			this.events = new SIM.EventManager(this);
 
 			this.modelUrls = [
 				"res/models/ground_block/ground_block16.dae",
@@ -48,7 +49,6 @@
 				current: 0,
 				finished: null
 			};
-
 		},
 
 		init: function() {
@@ -375,6 +375,12 @@
 			this.graphics.update(dt);
 
 			this.audio.update(dt, this.graphics.camera);
+
+			this.events.update(dt);
+		},
+
+		randomizeWind: function() {
+
 		},
 
 		updateRatings: function(dt) {
