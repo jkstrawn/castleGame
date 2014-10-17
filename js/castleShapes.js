@@ -73,7 +73,7 @@
 			this.stateSounds = {
 				IDLE: [],
 				MOVING: [],
-				CLEANING: ["res/sounds/trashPickup2.mp3", "res/sounds/trashPickup3.mp3"], //"res/sounds/trashPickup1.mp3", 1 sucks
+				CLEANING: ["trashPickup2.mp3", "trashPickup3.mp3"], //"res/sounds/trashPickup1.mp3", 1 sucks
 				FALLING: [],
 				DRAGGING: []
 			};

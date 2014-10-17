@@ -17,6 +17,7 @@
 			this.graphics = new SIM.GraphicsEngine(this);
 			this.rooms = new SIM.RoomManager(this);
 			this.audio = new SIM.AudioManager(this);
+			this.events = new SIM.EventManager(this);
 
 			this.modelUrls = [
 				"res/models/ground_block/ground_block16.dae",
@@ -48,7 +49,6 @@
 				current: 0,
 				finished: null
 			};
-
 		},
 
 		init: function() {
@@ -58,6 +58,9 @@
 			window.addEventListener( 'hire-servant', $.proxy(this.hireServant, this) );
 			window.addEventListener( 'build-peasant', $.proxy(this.buildPeasantHouse, this) );
 			window.addEventListener( 'slider', $.proxy(this.sliderChanged, this) );
+			window.addEventListener("toggleMute", $.proxy(function() {
+				this.audio.toggleSound();
+			}, this));
 
 			this.grid.init();
 			this.graphics.init(this.modelUrls, $.proxy( this.loadedModels, this ));
@@ -74,11 +77,15 @@
 
 			//add initial servant
 			this.finishedHireServant();
-			this.graphics.addFlame(new THREE.Vector3(-9.3, 9.5, 5.2));
-			this.graphics.addFlame(new THREE.Vector3(-30, 9.5, 5.2));
-			this.graphics.addFlame(new THREE.Vector3(-48, 9.5, 5.2));
-			this.graphics.addFlame(new THREE.Vector3(12, 9.5, 5.2));
-			this.graphics.addFlame(new THREE.Vector3(34, 9.5, 5.2));
+
+			var flameLocations = [new THREE.Vector3(-9.3, 9.5, 5.2), new THREE.Vector3(-30, 9.5, 5.2), 
+				new THREE.Vector3(-48, 9.5, 5.2), new THREE.Vector3(12, 9.5, 5.2), new THREE.Vector3(34, 9.5, 5.2)];
+
+			for(var i = 0; i < flameLocations.length; i++) {
+				this.graphics.addFlame(flameLocations[i]);
+				this.audio.addSound(["torch1.mp3"], 50, 1, flameLocations[i], 
+					{ loop: true, autoplay: true })
+			}
 		},
 
 		// EVENTS
@@ -368,6 +375,12 @@
 			this.graphics.update(dt);
 
 			this.audio.update(dt, this.graphics.camera);
+
+			this.events.update(dt);
+		},
+
+		randomizeWind: function() {
+
 		},
 
 		updateRatings: function(dt) {
