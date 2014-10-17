@@ -368,7 +368,6 @@
 
 		focusCamera: function(x, y, z) {
 			var cameraZ = this.camera.position.z;
-			console.log(cameraZ);
 
 			var tween = new TWEEN.Tween(this.camera.position).to({
 			    x: x,

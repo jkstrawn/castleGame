@@ -320,10 +320,12 @@
 
 			this.noble = true;
 
-			var noble = new THREE.Mesh(new THREE.BoxGeometry(10, 10, 10), new THREE.MeshLambertMaterial({color: 0xcccccc}));
+			var nobleModel = new THREE.Mesh(new THREE.BoxGeometry(5, 10, 5), new THREE.MeshLambertMaterial({color: 0xcccccc}));
 			var position = this.getPosition();
-			noble.position.set(position.x + 10, position.y, position.z + 10);
-			this.sim.graphics.scene.add(noble);
+			nobleModel.position.set(position.x + 10, position.y+ 5, position.z + 10);
+
+			var noble = new SIM.Noble(this.sim, nobleModel, this);
+			this.sim.addShape(noble);
 		},
 	});
 

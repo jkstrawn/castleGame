@@ -22,7 +22,7 @@
 				"res/models/ground_block/ground_block16.dae",
 				"res/models/room/roomBed.dae",
 				"res/models/room_hall/roomHall.dae",
-				"res/models/servant/servant.dae"
+				"res/models/servant/manfred.dae"
 			];
 			this.draggingShape = null;
 			this.hoveredShape = null;
@@ -153,7 +153,7 @@
 
 			mesh = this.graphics.getModel(this.modelUrls[3]);
 			mesh.scale.x = mesh.scale.y = mesh.scale.z = .7;
-			mesh.position.set(gridSection.x + 20, gridSection.y + 5, 10);
+			mesh.position.set(gridSection.x + 20, gridSection.y + 10, 10);
 			
 
 			var servant = new SIM.Servant(this, mesh, this.initialHall);
