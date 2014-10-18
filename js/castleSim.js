@@ -19,12 +19,16 @@
 			this.audio = new SIM.AudioManager(this);
 			this.events = new SIM.EventManager(this);
 
-			this.modelUrls = [
-				"res/models/ground_block/ground_block16.dae",
-				"res/models/room/roomBed.dae",
-				"res/models/room_hall/roomHall.dae",
-				"res/models/servant/manfred.dae"
-			];
+			this.modelUrls = {
+				dead: [
+					"res/models/ground_block/ground_block16.dae",
+					"res/models/room/roomBed.dae",
+					"res/models/room_hall/roomHall.dae"
+				],
+				live: [
+					"res/models/servant/manfred.js"
+				]
+			};
 			this.draggingShape = null;
 			this.hoveredShape = null;
 			this.tweenForBox = null;
@@ -158,10 +162,9 @@
 				new THREE.MeshBasicMaterial( { color: 0xFFFFFF } )
 				);
 
-			mesh = this.graphics.getModel(this.modelUrls[3]);
-			mesh.scale.x = mesh.scale.y = mesh.scale.z = .7;
-			mesh.position.set(gridSection.x + 20, gridSection.y + 10, 10);
-			
+			mesh = this.graphics.getModel(this.modelUrls.live[0]);
+			mesh.position.set(gridSection.x + 20, gridSection.y + 1.2, 10);
+			console.log("hire servant");
 
 			var servant = new SIM.Servant(this, mesh, this.initialHall);
 			this.addShape(servant);

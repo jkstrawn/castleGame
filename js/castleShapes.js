@@ -115,8 +115,8 @@
 
 			this.fallingSpeed += .01 * dt;
 
-			if (this.model.position.y < (this.room.getY() + 6)) {
-				this.model.position.y = this.room.getY() + 6;
+			if (this.model.position.y < (this.room.getY() + 1.2)) {
+				this.model.position.y = this.room.getY() + 1.2;
 				this.state = this.states.IDLE;
 			}
 		},
@@ -127,7 +127,7 @@
 
 			var x = this.model.position.x + (Math.random() * 7 + 2) * (Math.random() > .5 ? 1 : -1);
 			var z = this.model.position.z + (Math.random() * 7 + 2) * (Math.random() > .5 ? 1 : -1);
-			var y = roomDimensions.start.y + 5;
+			var y = roomDimensions.start.y + 1.2;
 
 			x = this.makePointBetweenMinAndMax(x, roomDimensions.start.x + 5, roomDimensions.start.x + roomDimensions.size.x - 5);
 			z = this.makePointBetweenMinAndMax(z, roomDimensions.start.z + 5, roomDimensions.start.z + roomDimensions.size.z - 5);
@@ -155,6 +155,11 @@
 			    z: position.z
 			}, time).onComplete($.proxy(this.arrivedAtDestination, this)).start();
 
+			if (this.model.animations) {
+				this.model.stopAll();
+				this.model.play("walk", 1, speed / 7);
+			}
+
 			//need to adjust shorter distances to take longer in order to use sine easing
 			//.easing(TWEEN.Easing.Sinusoidal.InOut)
 
@@ -166,11 +171,16 @@
 
 			var dx = x - this.getX();
 			var dz = z - this.getZ();
-			var rotation = - Math.atan2(dz, dx);
+			var rotation = - Math.atan2(dz, dx) + .5 * Math.PI;
 			this.model.rotation.y = rotation;
 		},
 
 		arrivedAtDestination: function() {
+
+			if (this.model.animations) {
+				this.model.stopAll();
+				this.model.play("idle", 1);
+			}
 			this.state = this.states.IDLE;
 		},
 

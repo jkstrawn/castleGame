@@ -48,7 +48,7 @@
 
 		generateRoomModel: function(roomType, vector) {
 
-			var room = this.sim.graphics.getModel(this.sim.modelUrls[roomType.modelIndex]);
+			var room = this.sim.graphics.getModel(this.sim.modelUrls.dead[roomType.modelIndex]);
 
 			room.position.set(vector.x, vector.y, vector.z);
 			room.rotation.y = Math.PI * 1.5;

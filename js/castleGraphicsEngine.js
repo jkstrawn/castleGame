@@ -45,9 +45,12 @@
 			this.addRendered();
 			this.addSkyDome();
 
-			this.numModelsToLoad = urls.length;
-			for (var i = urls.length - 1; i >= 0; i--) {
-				this.loadModel(urls[i], callback);
+			this.numModelsToLoad = urls.dead.length + urls.live.length;
+			for (var i = urls.dead.length - 1; i >= 0; i--) {
+				this.loadModel(urls.dead[i], callback);
+			};
+			for (var i = urls.live.length - 1; i >= 0; i--) {
+				this.loadAnimated(urls.live[i], callback);
 			};
 
 			this.particles.init(this.scene);
@@ -122,11 +125,33 @@
 				//model = that.makeLambert(model);
 				that.models.push({
 					model: model,
-					url: url
+					url: url,
+					animated: false
 				});
 
 				that.numModelsToLoad--;
 				if (that.numModelsToLoad == 0) {
+					callback();
+				}
+			});
+		},
+
+		loadAnimated: function(url, callback) {
+
+			var self = this;
+
+			var model = new BlenderCharacterLoader();
+
+			model.load( url, function() {
+
+				console.log(model);
+				self.models.push({
+					model: model,
+					url: url,
+					animated: true
+				});
+				self.numModelsToLoad--;
+				if (self.numModelsToLoad == 0) {
 					callback();
 				}
 			});
@@ -155,15 +180,23 @@
 
 			for (var i = this.models.length - 1; i >= 0; i--) {
 				if (this.models[i].url == url) {
-					var model = this.models[i].model.clone();
 
-					model.traverse(function(thing) {
-						if (thing.material instanceof THREE.MeshLambertMaterial) {
-							//thing.material.map.magFilter = THREE.LinearFilter;
-							//thing.material.map.minFilter = THREE.NearestMipMapLinearFilter;
-							thing.material.map.anisotropy = 16;
-						}
-					});
+					var model;
+
+					if (this.models[i].animated) {
+						model = this.models[i].model.createModel();
+					} else {
+						model = this.models[i].model.clone();
+
+						model.traverse(function(thing) {
+							if (thing.material instanceof THREE.MeshLambertMaterial) {
+								//thing.material.map.magFilter = THREE.LinearFilter;
+								//thing.material.map.minFilter = THREE.NearestMipMapLinearFilter;
+								thing.material.map.anisotropy = 16;
+							}
+						});						
+					}
+
 
 					return model;
 				}
@@ -275,12 +308,15 @@
 		},
 
 		render: function() {
+
 			this.particles.render();
 			this.renderer.render( this.scene, this.camera );
 			TWEEN.update();
 		},
 
-		update: function() {
+		update: function(dt) {
+
+			THREE.AnimationHandler.update( dt / 1000 );
 		},
 
 		getHoveredShape: function(shapes) {
