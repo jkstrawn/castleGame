@@ -104,10 +104,32 @@
 			var flame5 = new THREE.PointLight( 0xffcc00, 1.5, 20 );
 			flame5.position.set( 34, 9.5, 5.2 );
 			this.scene.add( flame5 );
+
+			this.glowMaterial = new THREE.ShaderMaterial( 
+			{
+			    uniforms: 
+				{ 
+					"c":   { type: "f", value: 1.0 },
+					"p":   { type: "f", value: 3.0 },
+					glowColor: { type: "c", value: new THREE.Color(0x00ff00) },
+					viewVector: { type: "v3", value: this.camera.position }
+				},
+				vertexShader:   document.getElementById( 'vertexShaderGlow'   ).textContent,
+				fragmentShader: document.getElementById( 'fragmentShaderGlow' ).textContent,
+				side: THREE.FrontSide,
+				blending: THREE.AdditiveBlending,
+				transparent: true
+			});
+
 		},
 
-		addRoomSpotParticles: function(position, width, length) {
-			this.particles.addBoundingEmitter(position, width, length);
+		addRoomSpotParticles: function(startX, startY, segments, gridWidth, gridLength) {
+
+			var position = new THREE.Vector3(startX + 4, startY, 4);
+			var width = gridWidth * segments - 8;
+			var length = gridLength - 8;
+
+			this.particles.addBoundingEmitter(position, width, length, segments);
 		},
 
 		addFlame: function(position) {
@@ -120,6 +142,7 @@
 			loader = new THREE.ColladaLoader();
 			loader.options.convertUpAxis = true;
 			loader.load( url, function(collada) {
+				
 				var model = collada.scene;
 
 				//model = that.makeLambert(model);
@@ -167,13 +190,16 @@
 		},
 
 		addDraggingRoom: function(room) {
+
 			this.tempObjects.push(room);
 			this.scene.add(room);
 		},
 
-		addBoundingBox: function(box) {
-			this.tempObjects.push(box);
-			this.scene.add(box);
+		addBoundingBox: function(gridSection) {
+
+			gridSection.updateMaterialVector(this.camera.position);
+			this.tempObjects.push(gridSection.model);
+			this.scene.add(gridSection.model);
 		},
 
 		getModel: function(url) {
@@ -361,6 +387,10 @@
 					distanceY * 40, 
 					0)
 				);
+
+				for (var i = this.tempObjects.length - 1; i >= 0; i--) {
+					this.tempObjects[i].updateMaterialVector(this.camera.position);
+				};
 			}
 
 			var vector = new THREE.Vector3(
@@ -403,6 +433,7 @@
 		},
 
 		focusCamera: function(x, y, z) {
+			/*
 			var cameraZ = this.camera.position.z;
 
 			var tween = new TWEEN.Tween(this.camera.position).to({
@@ -415,6 +446,7 @@
 			}).onComplete(function () {
 			    //that.camera.lookAt(new THREE.Vector3(x,y,cameraZ));
 			}).start();
+			*/
 		},
 
 		zoom: function(increase) {

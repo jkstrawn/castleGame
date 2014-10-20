@@ -210,7 +210,6 @@ SPARKS.Emitter.prototype = {
         this._particles = [];
         this._initializers = [];
         this._actions = [];
-        this.callbacks = {};
 
         return particles;
     }

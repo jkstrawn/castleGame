@@ -50,8 +50,8 @@
 				uniforms: uniforms,
 				attributes: this.particleVectors,
 
-				vertexShader: document.getElementById( 'vertexshader' ).textContent,
-				fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
+				vertexShader: document.getElementById( 'vertexShaderParticle' ).textContent,
+				fragmentShader: document.getElementById( 'fragmentShaderParticle' ).textContent,
 
 				blending: THREE.AdditiveBlending,
 				depthWrite: false,
@@ -83,12 +83,15 @@
 				}
 			};
 
-			return new SPARKS.Emitter(new SPARKS.SteadyCounter(30));
+			var emitter = new SPARKS.Emitter(new SPARKS.SteadyCounter(0));
+			emitter.addCallback( "created", $.proxy(this.onParticleCreated, this) );
+			emitter.addCallback( "dead", $.proxy(this.onParticleDead, this) );
+			return emitter;
 		},
 
-		addBoundingEmitter: function(startPoint, width, length) {
+		addBoundingEmitter: function(startPoint, width, length, segments) {
 
-			var properties = new SIM.ParticleType.Bounding(startPoint, width, length);
+			var properties = new SIM.ParticleType.Bounding(startPoint, width, length, segments);
 			this.addEmitter(properties);
 		},
 
@@ -105,6 +108,7 @@
 			var zone = new SPARKS.ParallelogramZone( properties.startPoint, new THREE.Vector3(properties.width, 0, 0),
 			 new THREE.Vector3(0, 0, properties.length)	);
 
+			emitter._counter.rate = properties.rate;
 			emitter.using = true;
 			emitter.type = properties.name;
 			emitter.addInitializer(new SPARKS.Position( zone ) );
@@ -120,8 +124,6 @@
 			emitter.addAction(new SPARKS.Accelerate(0, properties.acceleration, 0));
 
 
-			emitter.addCallback( "created", $.proxy(this.onParticleCreated, this) );
-			emitter.addCallback( "dead", $.proxy(this.onParticleDead, this) );
 			emitter.start();
 			this.emitters.push(emitter);
 		},
@@ -175,7 +177,7 @@
 				console.log("ERROR: ColorValue at index of " + index + " was undefined!");
 			}
 
-			this.particleVectors.size.value[ index ] = Math.random() * properties.sizeBase + properties.sizeVariance;
+			this.particleVectors.size.value[ index ] = Math.random() * properties.sizeVariance + properties.sizeBase;
 			this.particleVectors.pcolor.value[ index ].setHSL( 
 				properties.color.hue + Math.random() * .1 - .05, 
 				properties.color.saturation, 
@@ -248,8 +250,9 @@
 
 		constructor: function(startPoint) {
 
-			this.sizeBase = 10;
-			this.sizeVariance = 3;
+			this.rate = 25;
+			this.sizeBase = 5;
+			this.sizeVariance = 5;
 			this.color = {
 				hue: .10,
 				saturation: .6,
@@ -267,9 +270,10 @@
 
 	SIM.ParticleType.Bounding = my.Class({
 
-		constructor: function(startPoint, width, length) {
+		constructor: function(startPoint, width, length, segments) {
 
-			this.sizeBase = 15;
+			this.rate = segments * 7;
+			this.sizeBase = 8;
 			this.sizeVariance = 5;
 			this.color = {
 				hue: .3,

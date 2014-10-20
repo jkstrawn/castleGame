@@ -22,8 +22,12 @@
 			this.modelUrls = {
 				dead: [
 					"res/models/ground_block/ground_block16.dae",
-					"res/models/room/roomBed.dae",
-					"res/models/room_hall/roomHall.dae"
+					"res/models/rooms/roomBed.dae",
+					//"res/models/room/roomBed.dae",
+					"res/models/rooms/roomHall.dae",
+					"res/models/rooms/roomStairsBottom.dae",
+					"res/models/rooms/roomStairsMiddle.dae",
+					"res/models/rooms/roomStairsTop.dae",
 				],
 				live: [
 					"res/models/servant/manfred.js"
@@ -95,10 +99,22 @@
 		// EVENTS
 		clickRoomButton: function(data) {
 
-			if (this.resources.stone >= 2) {
-				this.grid.show();
+			if (data.detail.room != "Bedroom") {
+				var roomType = this.rooms.getTypeByName(data.detail.room);
+				this.grid.show(roomType.width);
 
-				var room = this.rooms.generateDraggingRoom("Bedroom");
+				var room = this.rooms.generateDraggingRoom(data.detail.room);
+
+				this.draggingShape = room;
+				this.graphics.addDraggingRoom(room.model);
+
+			} else
+
+			if (this.resources.stone >= 2) {
+				var roomType = this.rooms.getTypeByName(data.detail.room);
+				this.grid.show(roomType.width);
+
+				var room = this.rooms.generateDraggingRoom(data.detail.room);
 
 				this.draggingShape = room;
 				this.graphics.addDraggingRoom(room.model);
@@ -210,7 +226,7 @@
 
 			this.changeResourceValue("Stone", -2);
 			var gridSection = this.grid.get(this.hoveredShape.gridX, this.hoveredShape.gridY);
-			var room = this.rooms.generateRoom("Bedroom", gridSection);
+			var room = this.rooms.generateRoom(this.draggingShape.type.name, gridSection);
 			this.grid.setRoom(this.hoveredShape.gridX, this.hoveredShape.gridY, room);
 			this.addShape(room);
 			this.clearDragging();

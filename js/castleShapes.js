@@ -16,6 +16,8 @@
 
 		update: function() {},
 
+		updateMaterialVector: function() {},
+
 		setHover: function(_hover) {
 
 			this.hover = _hover;
@@ -64,18 +66,29 @@
 			this.state = 0;
 			this.states = {
 				IDLE: 0,
-				MOVING: 1,
-				CLEANING: 2,
-				FALLING: 3,
-				DRAGGING: 4,
+				IDLEWALK: 1,
+				MOVING: 2,
+				CLEANING: 3,
+				FALLING: 4,
+				DRAGGING: 5,
 			};
 
 			this.stateSounds = {
 				IDLE: [],
+				IDLEWALK: [],
 				MOVING: [],
 				CLEANING: ["trashPickup2.mp3", "trashPickup3.mp3"], //"res/sounds/trashPickup1.mp3", 1 sucks
 				FALLING: [],
 				DRAGGING: []
+			};
+
+			this.stateAnimations = {
+				IDLE: ["idle"],
+				IDLEWALK: ["walk"],
+				MOVING: ["walk"],
+				CLEANING: ["idle"], //"res/sounds/trashPickup1.mp3", 1 sucks
+				FALLING: ["idle"],
+				DRAGGING: ["idle"]
 			};
 
 			if (!this.room instanceof SIM.Room) {
@@ -85,7 +98,7 @@
 
 		update: function(dt) {
 
-			if (this.state == this.states.IDLE) {
+			if (this.state == this.states.IDLE || this.state == this.states.IDLEWALK) {
 
 				this.idleTime += dt;
 				this.timeTilWander -= dt;
@@ -122,6 +135,8 @@
 		},
 
 		wanderToRandomLocation: function() {
+
+			this.state = this.states.IDLEWALK;
 
 			var roomDimensions = this.room.getDimensions();
 
@@ -243,7 +258,7 @@
 				return;
 			}
 
-			if (this.state == this.states.IDLE) {
+			if (this.state == this.states.IDLE || this.state == this.states.IDLEWALK) {
 
 				this.idleTime += dt;
 				this.timeTilWander -= dt;
@@ -313,6 +328,10 @@
 
 			Servant.Super.prototype.stop.call(this);
 		},
+
+		setState: function(state) {
+
+		}
 
 	});
 

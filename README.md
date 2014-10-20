@@ -318,9 +318,9 @@ To view the current version, go to: http://castlesim.azurewebsites.net/
 
 ###### Gameplay
 
+- Better noble AI (wait longer to move in, move out if too dirty)
 - Servants move to other rooms to clean
 - stairs
-- nobles move in
 - hire militia
 - Each servant chooses his morale?
 - Starvation affects morale
@@ -332,20 +332,17 @@ To view the current version, go to: http://castlesim.azurewebsites.net/
 
 ###### ThreeJS
 
-- Add terrain
 - Shadows
-- Redo ground
 - Add grass sprites
 - BUG: Transparency on room looks weird
 - BUG: Light casting to room above the selected room
 
 ###### Models
 
-- Animate servant model
 - Trash model
 - More rooms...
 - Room furniture
-- Update models to use JPGs intead of PNGs
+- Update models to use JPGs intead of PNGs (and use better textures)
 
 ###### Other
 

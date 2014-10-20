@@ -4,14 +4,21 @@
 		constructor: function(_sim) {
 			this.sim = _sim;
 			this.grid = [];
-			this.gridWidth = 30;
+			this.gridWidth = 15;
 			this.gridLength = 30;
+			this.gridHeight = 30;
+
+			this.gridStates = {
+				INVALID: 0,
+				ROOMTOOBIG: 1,
+				OPEN: 2
+			}
 		},
 
 		init: function() {
 
 			var startPoint = -110;
-			var numOfSectionsX = 7;
+			var numOfSectionsX = 15;
 			var numOfSectionsY = 4;
 
 			for (var x = 0; x < numOfSectionsX; x++) {
@@ -19,8 +26,8 @@
 
 				for (var y = 0; y < numOfSectionsY; y++) {
 					this.grid[x][y] = {
-						x: x * this.gridLength + startPoint, 
-						y: y * this.gridWidth, 
+						x: x * this.gridWidth + startPoint, 
+						y: y * this.gridHeight, 
 						z: 0,
 						used: false
 					};
@@ -33,33 +40,120 @@
 			return this.grid[x][y];
 		},
 
-		show: function() {
-			var gridSpots = [];
+		show: function(roomWidth) {
+			var openSpots = [];
+			var lastGoodYRoom = [];
+			for (var i = 0; i < this.grid[0].length; i++) {
+				lastGoodYRoom[i] = -1;
+			}
+			var lastRoomBlob = [];
+			var roomBlobs = [];
 
-			for (var x = this.grid.length - 1; x >= 0; x--) {
+			for (var x = 0; x < this.grid.length; x ++) {
 				for (var y = 0; y < this.grid[x].length; y++) {
 					var box = this.grid[x][y];
+					var gridState = this.isGridLocationValid(x, y, roomWidth);
 
-					if (!box.used) {
-						this.generateSpot(box, x, y);
-						this.sim.graphics.addRoomSpotParticles(new THREE.Vector3(box.x, box.y, 0), this.gridLength, this.gridWidth);
-						break;
+					if (gridState == this.gridStates.OPEN) {
+						openSpots.push({start: box, segments: 1, gridX: x, gridY: y});
+
+						if (lastGoodYRoom[y] == -1) {
+							lastRoomBlob[y] = {start: box, segments: 1};
+						} else {
+							lastRoomBlob[y].segments++;
+						}
+
+						lastGoodYRoom[y] = openSpots.length - 1;
+					}
+
+					if (gridState == this.gridStates.ROOMTOOBIG && lastGoodYRoom[y] > -1) {
+						lastRoomBlob[y].segments++;
+						openSpots[lastGoodYRoom[y]].segments++;
+					}
+
+					if (gridState == this.gridStates.INVALID) {
+						if (lastGoodYRoom[y] > -1) {
+							roomBlobs.push(lastRoomBlob[y]);
+							lastRoomBlob[y] = null;
+						}
+						lastGoodYRoom[y] = -1;
 					}
 				}
 			};
+
+			for (var i = lastGoodYRoom.length - 1; i >= 0; i--) {
+				if (lastGoodYRoom[i] > -1) {
+					roomBlobs.push(lastRoomBlob[i]);
+				}
+			};
+
+			for (var i = roomBlobs.length - 1; i >= 0; i--) {
+				this.generateRoomBlob(roomBlobs[i]);
+			};
+
+			for (var i = openSpots.length - 1; i >= 0; i--) {
+				var box = openSpots[i];
+				this.generateSpot(box.start, box.gridX, box.gridY, box.segments);
+			};
 		},
 
-		generateSpot: function(box, x, y) {
+		isGridLocationValid: function(x, y, roomWidth) {
 
-			var boundingBox = new THREE.Mesh(
-				new THREE.BoxGeometry(this.gridLength, this.gridWidth, this.gridWidth), 
-				new THREE.MeshBasicMaterial( { color: 0x44cc00, wireframe: true, transparent: true, opacity: 0.3 } )
-			);
-			boundingBox.position.set(box.x + 15, box.y + 15, box.z + 15);
-			
-			var gridSection = new GridSection(this, boundingBox, x, y);
-			this.sim.shapes.push(gridSection);
+			if (this.grid[x][y - 1] && !this.grid[x][y - 1].used) {
+				// the grid below is empty
+				return this.gridStates.INVALID;
+			}
+
+			if (this.grid[x][y].used) {
+				// the grid is occupied by a room already
+				return this.gridStates.INVALID;
+			}
+
+			for (var i = 1; i < roomWidth; i++) {
+				if (this.grid[x + i]) {
+					if (this.grid[x + i][y].used && !this.grid[x][y].used) {
+						// the right side of the room is overlapping another room
+						return this.gridStates.ROOMTOOBIG;
+					} else if (this.grid[x + 1][y - 1] && !this.grid[x + 1][y - 1].used) {
+						// the right side of the room is hanging in mid air
+						return this.gridStates.ROOMTOOBIG;
+					}
+				} else {
+					// the room is going off the right side of the grid
+					return this.gridStates.ROOMTOOBIG;
+				}
+			}
+
+			return this.gridStates.OPEN;
+		},
+
+		generateRoomBlob: function(blob) {
+
+			var smoothCubeGeom = new THREE.BoxGeometry(this.gridWidth * blob.segments, this.gridHeight, this.gridLength, 2, 2, 2);
+			var modifier = new THREE.SubdivisionModifier( 2 );
+			modifier.modify( smoothCubeGeom ); 
+
+			var glow = new THREE.Mesh( smoothCubeGeom, this.sim.graphics.glowMaterial.clone());
+			glow.position.set(blob.start.x + this.gridWidth * blob.segments / 2, blob.start.y + this.gridHeight / 2, blob.start.z + this.gridLength / 2);
+
+			var boundingBox = new BoundingBox(glow);
+			console.log(boundingBox);
 			this.sim.graphics.addBoundingBox(boundingBox);
+
+				this.sim.graphics.addRoomSpotParticles(blob.start.x, blob.start.y, blob.segments, this.gridWidth, this.gridLength);
+		},
+
+		generateSpot: function(box, gridX, gridY, segments) {
+
+			var gridSectionBox = new THREE.BoxGeometry(this.gridWidth * segments, this.gridHeight, this.gridLength, 2, 2, 2);
+
+			var glow = new THREE.Mesh( gridSectionBox, new THREE.MeshBasicMaterial());
+			glow.position.set(box.x + this.gridWidth * segments / 2, box.y + this.gridHeight / 2, box.z + this.gridLength / 2);
+			glow.visible = false;
+
+			var gridSection = new GridSection(this.sim, glow, gridX, gridY);
+			this.sim.shapes.push(gridSection);
+			this.sim.graphics.scene.add(glow);
 		},
 
 		setRoom: function(x, y, room) {
@@ -85,9 +179,28 @@
 			this.gridX = _x;
 			this.gridY = _y;
 			this.room = null;
+		},
+
+		updateMaterialVector: function(camera) {
+
+			this.model.material.uniforms.viewVector.value = new THREE.Vector3().subVectors( camera, this.model.position );
 		}
 	});
 
 	SIM.GridSection = GridSection;
+
+	var BoundingBox = my.Class({
+
+		constructor: function(model) {	
+			this.model = model;
+		},
+
+		updateMaterialVector: function(camera) {
+
+			this.model.material.uniforms.viewVector.value = new THREE.Vector3().subVectors( camera, this.model.position );
+		}
+	});
+
+	SIM.BoundingBox = BoundingBox;
 
 })()

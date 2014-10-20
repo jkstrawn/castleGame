@@ -67,7 +67,7 @@
 			}
 		</script>
 
-		<script type="x-shader/x-vertex" id="vertexshader">
+		<script type="x-shader/x-vertex" id="vertexShaderParticle">
 
 			attribute float size;
 			attribute vec3 pcolor;
@@ -82,16 +82,42 @@
 
 		</script>
 
-		<script type="x-shader/x-fragment" id="fragmentshader">
+		<script type="x-shader/x-fragment" id="fragmentShaderParticle">
 
 			uniform sampler2D texture;
 			varying vec3 vColor;
 
 			void main() {
 				vec4 outColor = texture2D( texture, gl_PointCoord );
-				gl_FragColor = outColor * vec4( vColor, 1.0 );
+				gl_FragColor = outColor * vec4( vColor * vec3(1.5, 1.5, 1.5), 1.0 );
 			}
 
+		</script>
+		
+		<script id="vertexShaderGlow" type="x-shader/x-vertex">
+		uniform vec3 viewVector;
+		uniform float c;
+		uniform float p;
+		varying float intensity;
+		void main() 
+		{
+			vec3 vNormal = normalize( normalMatrix * normal );
+			vec3 vNormel = normalize( normalMatrix * viewVector );
+			intensity = min( 0.2, pow( c - dot(vNormal, vNormel), p ));
+			
+			gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+		}
+		</script>
+
+		<!-- fragment shader a.k.a. pixel shader -->
+		<script id="fragmentShaderGlow" type="x-shader/x-vertex"> 
+		uniform vec3 glowColor;
+		varying float intensity;
+		void main() 
+		{
+			vec3 glow = glowColor * intensity;
+			gl_FragColor = vec4( glow, 1.0 );
+		}
 		</script>
 
 		<script type="text/javascript">
@@ -100,6 +126,7 @@
 
 		<script src="js/jquery.js"></script> 
 		<script src="js/three.js"></script>
+		<script src="js/SubdivisionModifier.js"></script>
 		<script src="js/tween.js"></script>
 		<script src="js/sparks.js"></script>
 		<script src="js/OBJLoader.js"></script>

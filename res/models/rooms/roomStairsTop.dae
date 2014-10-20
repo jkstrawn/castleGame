@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <author>Blender User</author>
+      <authoring_tool>Blender 2.71.0 commit date:2014-06-25, commit time:18:36, hash:9337574</authoring_tool>
+    </contributor>
+    <created>2014-10-18T23:48:22</created>
+    <modified>2014-10-18T23:48:22</modified>
+    <unit name="meter" meter="1"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_images>
+    <image id="StoneWall_png" name="StoneWall_png">
+      <init_from>StoneWall.png</init_from>
+    </image>
+    <image id="StoneFloor_png" name="StoneFloor_png">
+      <init_from>StoneFloor.png</init_from>
+    </image>
+  </library_images>
+  <library_effects>
+    <effect id="StoneWall-effect">
+      <profile_COMMON>
+        <newparam sid="StoneWall_png-surface">
+          <surface type="2D">
+            <init_from>StoneWall_png</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="StoneWall_png-sampler">
+          <sampler2D>
+            <source>StoneWall_png-surface</source>
+          </sampler2D>
+        </newparam>
+        <technique sid="common">
+          <lambert>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color sid="ambient">0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <texture texture="StoneWall_png-sampler" texcoord="UVMap"/>
+            </diffuse>
+            <index_of_refraction>
+              <float sid="index_of_refraction">1</float>
+            </index_of_refraction>
+          </lambert>
+        </technique>
+        <extra>
+          <technique profile="GOOGLEEARTH">
+            <double_sided>1</double_sided>
+          </technique>
+        </extra>
+      </profile_COMMON>
+      <extra><technique profile="MAX3D"><double_sided>1</double_sided></technique></extra>
+    </effect>
+    <effect id="StoneFloor-effect">
+      <profile_COMMON>
+        <newparam sid="StoneFloor_png-surface">
+          <surface type="2D">
+            <init_from>StoneFloor_png</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="StoneFloor_png-sampler">
+          <sampler2D>
+            <source>StoneFloor_png-surface</source>
+          </sampler2D>
+        </newparam>
+        <technique sid="common">
+          <lambert>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color sid="ambient">0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <texture texture="StoneFloor_png-sampler" texcoord="UVMap"/>
+            </diffuse>
+            <index_of_refraction>
+              <float sid="index_of_refraction">1</float>
+            </index_of_refraction>
+          </lambert>
+        </technique>
+      </profile_COMMON>
+    </effect>
+  </library_effects>
+  <library_materials>
+    <material id="StoneWall-material" name="StoneWall">
+      <instance_effect url="#StoneWall-effect"/>
+    </material>
+    <material id="StoneFloor-material" name="StoneFloor">
+      <instance_effect url="#StoneFloor-effect"/>
+    </material>
+  </library_materials>
+  <library_geometries>
+    <geometry id="Cube_012-mesh" name="Cube.012">
+      <mesh>
+        <source id="Cube_012-mesh-positions">
+          <float_array id="Cube_012-mesh-positions-array" count="48">14.99999 -0.02826976 -14.9636 14.99999 -7.499996 -14.9636 -14.99999 -7.499995 -14.9636 -14.99999 -0.02826642 -14.9636 15 -0.0282731 14.9636 14.99998 -7.500001 14.9636 -15 -7.499993 14.9636 -14.99999 -0.02826929 14.9636 14.99999 -0.4260035 -14.97382 14.99999 -7.102262 -14.99458 -14.35048 -7.175237 -15.0364 -14.35047 -0.353025 -15.0364 15 -0.4260068 14.17006 14.99998 -7.102266 14.17006 -14.35048 -7.175235 14.31566 -14.35048 -0.3530274 14.31566</float_array>
+          <technique_common>
+            <accessor source="#Cube_012-mesh-positions-array" count="16" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Cube_012-mesh-normals">
+          <float_array id="Cube_012-mesh-normals-array" count="84">0 0 1 0 0 1 -2.54313e-7 -1 0 -1 8.93464e-7 -1.27466e-7 0 1 0 -0.004960536 0 -0.9999877 -0.002486109 0.999997 0 1 -8.38738e-7 1.62454e-7 -0.002486407 -0.9999969 0 1 5.08627e-7 -2.54932e-7 1 0 3.26997e-7 1 -2.29748e-6 -1.15154e-6 0.002195298 0.02568835 -0.9996676 0.001613736 -0.07764428 -0.9969798 -0.1113854 0 -0.9937773 0 -0.2187371 -0.9757838 -0.1113854 0 -0.9937773 0 0.2187372 -0.9757839 0 -1 -1.59332e-7 -1 1.0211e-6 -1.59332e-7 1.27157e-7 1 0 -0.004960536 0 -0.9999877 -0.002486288 0.9999969 1.46227e-7 1 -9.78527e-7 1.29964e-7 -0.002486467 -0.999997 0 1 0 -2.61784e-7 1 6.35781e-7 3.18665e-7 1 -2.57122e-6 1.28874e-6</float_array>
+          <technique_common>
+            <accessor source="#Cube_012-mesh-normals-array" count="28" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Cube_012-mesh-map-0">
+          <float_array id="Cube_012-mesh-map-0-array" count="168">-0.4697438 1.906728 -2.178228 1.906728 -0.4697448 1.052486 -2.178228 1.906728 -2.178228 1.052486 -0.4697448 1.052486 -0.4697448 3.700637 -2.178228 3.700637 -2.178228 1.992153 -0.3843193 1.992153 -0.3843192 3.700637 0.4699226 3.700637 -0.4697438 1.992153 -0.4697441 0.2836682 -2.178228 0.2836682 -0.4697448 2.100228 -2.141239 2.096072 -2.141238 2.913324 -0.4327539 1.987997 -0.432754 3.663647 1.23874 3.655336 -0.573663 1.987997 -0.573663 3.663647 -1.390915 3.663647 -0.4327535 0.2795119 1.238741 0.2878238 1.238741 1.946851 0.4989649 1.235657 0.4989648 2.944142 0.476314 2.89884 0.6698139 -0.4728276 0.6924647 -0.468672 0.6924645 1.190356 0.4989648 1.235657 -0.3552772 1.235657 -0.3326262 1.190356 -0.4697441 1.884077 -2.141238 1.888233 -0.4697441 1.906728 -2.141239 1.070981 -0.4697441 1.075137 -0.4697441 1.052486 -2.141239 1.070981 -2.178228 1.052486 -2.178228 1.906728 -2.141239 1.070981 -0.4697441 1.052486 -2.178228 1.052486 -2.141238 1.888233 -2.141239 1.070981 -2.178228 1.906728 -2.141238 1.888233 -2.178228 1.906728 -0.4697441 1.906728 -0.4697441 1.992153 -0.4697448 3.700637 -2.178228 1.992153 0.4699228 1.992153 -0.3843193 1.992153 0.4699226 3.700637 -2.178228 1.992153 -0.4697438 1.992153 -2.178228 0.2836682 -0.4697438 2.909168 -0.4697448 2.100228 -2.141238 2.913324 1.238741 1.996309 -0.4327539 1.987997 1.23874 3.655336 -1.390915 1.987997 -0.573663 1.987997 -1.390915 3.663647 -0.4327537 1.955163 -0.4327535 0.2795119 1.238741 1.946851 0.4763142 1.239813 0.4989649 1.235657 0.476314 2.89884 0.6698136 1.235657 0.6698139 -0.4728276 0.6924645 1.190356 0.476314 1.190356 0.4989648 1.235657 -0.3326262 1.190356</float_array>
+          <technique_common>
+            <accessor source="#Cube_012-mesh-map-0-array" count="84" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Cube_012-mesh-vertices">
+          <input semantic="POSITION" source="#Cube_012-mesh-positions"/>
+        </vertices>
+        <polylist material="StoneWall-material" count="28">
+          <input semantic="VERTEX" source="#Cube_012-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Cube_012-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#Cube_012-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 </vcount>
+          <p>4 0 0 7 0 1 5 0 2 7 1 3 6 1 4 5 1 5 5 2 6 6 2 7 2 2 8 2 3 9 6 3 10 7 3 11 4 4 12 0 4 13 3 4 14 13 5 15 14 5 16 15 5 17 10 6 18 14 6 19 13 6 20 11 7 21 15 7 22 14 7 23 11 8 24 8 8 25 12 8 26 0 9 27 4 9 28 12 9 29 1 10 30 9 10 31 13 10 32 4 11 33 5 11 34 13 11 35 8 12 36 11 12 37 0 12 38 10 13 39 9 13 40 1 13 41 10 14 42 2 14 43 3 14 44 10 15 45 1 15 46 2 15 47 11 16 48 10 16 49 3 16 50 11 17 51 3 17 52 0 17 53 1 18 54 5 18 55 2 18 56 3 19 57 2 19 58 7 19 59 7 20 60 4 20 61 3 20 62 12 21 63 13 21 64 15 21 65 9 22 66 10 22 67 13 22 68 10 23 69 11 23 70 14 23 71 15 24 72 11 24 73 12 24 74 8 25 75 0 25 76 12 25 77 5 26 78 1 26 79 13 26 80 12 27 81 4 27 82 13 27 83</p>
+        </polylist>
+      </mesh>
+    </geometry>
+    <geometry id="Cube_010-mesh" name="Cube.010">
+      <mesh>
+        <source id="Cube_010-mesh-positions">
+          <float_array id="Cube_010-mesh-positions-array" count="48">-14.9 -7.200006 -0.375 14.9 7.200006 -0.375 14.9 -7.200006 -0.375 -14.9 -7.200006 0.375 14.9 7.200006 0.375 14.9 -7.200006 0.375 -14.9 0 0.375 -14.9 0 -0.375 6.114257 7.200006 0.375 6.114257 7.200006 -0.375 14.9 0 0.375 14.9 0 -0.375 6.114257 -7.200006 0.375 6.114257 -7.200006 -0.375 6.114257 0 -0.375 6.114257 0 0.375</float_array>
+          <technique_common>
+            <accessor source="#Cube_010-mesh-positions-array" count="16" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Cube_010-mesh-normals">
+          <float_array id="Cube_010-mesh-normals-array" count="84">1 0 0 0 -1 0 -1 0 0 0 0 -1 0 1 0 -1 0 0 1 0 0 0 -1 0 0 1 0 0 0 -1 0 0 -1 0 0 1 0 0 1 0 0 1 1 0 0 0 -1 0 -1 0 0 0 0 -1 0 1 0 -1 0 0 1 0 0 0 -1 0 0 1 0 0 0 -1 0 0 -1 0 0 1 0 0 1 0 0 1</float_array>
+          <technique_common>
+            <accessor source="#Cube_010-mesh-normals-array" count="28" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Cube_010-mesh-map-0">
+          <float_array id="Cube_010-mesh-map-0-array" count="168">1.323617 0.4709597 1.323617 0.05276733 1.365425 0.05276733 1.240001 1.365425 1.240001 0.8551296 1.281809 0.8551296 1.323617 0.8891519 1.365425 0.8891519 1.365425 1.307344 0.03593146 0.1448704 -0.3654249 0.1448705 -0.3654249 -0.3654248 1.281809 1.365425 1.281809 0.8551296 1.323617 0.8551296 1.323617 0.889152 1.323617 0.4709597 1.365425 0.4709597 1.323617 0.05276733 1.323617 -0.3654249 1.365425 -0.3654249 1.240001 0.8551296 1.240001 -0.3654249 1.281809 -0.3654249 1.281809 0.8551296 1.281809 -0.3654249 1.323617 -0.3654249 0.4372878 0.1448703 0.03593146 0.1448704 0.03593134 -0.3654249 0.4372879 1.365425 0.03593164 1.365425 0.03593146 0.1448704 1.240001 0.8551294 0.8386443 0.8551296 0.8386439 -0.3654248 1.240001 1.365425 0.8386444 1.365425 0.8386443 0.8551296 0.8386444 1.365425 0.4372881 1.365425 0.4372879 0.8551297 1.365425 0.4709597 1.323617 0.4709597 1.365425 0.05276733 1.281809 1.365425 1.240001 1.365425 1.281809 0.8551296 1.323617 1.307344 1.323617 0.8891519 1.365425 1.307344 0.03593134 -0.3654249 0.03593146 0.1448704 -0.3654249 -0.3654248 1.323617 1.365425 1.281809 1.365425 1.323617 0.8551296 1.365425 0.889152 1.323617 0.889152 1.365425 0.4709597 1.365425 0.05276733 1.323617 0.05276733 1.365425 -0.3654249 1.281809 0.8551296 1.240001 0.8551296 1.281809 -0.3654249 1.323617 0.8551296 1.281809 0.8551296 1.323617 -0.3654249 0.4372878 -0.3654249 0.4372878 0.1448703 0.03593134 -0.3654249 0.4372878 0.1448703 0.4372879 1.365425 0.03593146 0.1448704 1.24 -0.3654249 1.240001 0.8551294 0.8386439 -0.3654248 1.240001 0.8551294 1.240001 1.365425 0.8386443 0.8551296 0.8386443 0.8551296 0.8386444 1.365425 0.4372879 0.8551297</float_array>
+          <technique_common>
+            <accessor source="#Cube_010-mesh-map-0-array" count="84" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Cube_010-mesh-vertices">
+          <input semantic="POSITION" source="#Cube_010-mesh-positions"/>
+        </vertices>
+        <polylist material="StoneFloor-material" count="28">
+          <input semantic="VERTEX" source="#Cube_010-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Cube_010-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#Cube_010-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 </vcount>
+          <p>4 0 0 10 0 1 11 0 2 5 1 3 12 1 4 13 1 5 8 2 6 9 2 7 14 2 8 14 3 9 9 3 10 1 3 11 8 4 12 4 4 13 1 4 14 3 5 15 6 5 16 7 5 17 10 6 18 5 6 19 2 6 20 12 7 21 3 7 22 0 7 23 6 8 24 15 8 25 14 8 26 13 9 27 14 9 28 11 9 29 0 10 30 7 10 31 14 10 32 12 11 33 15 11 34 6 11 35 5 12 36 10 12 37 15 12 38 10 13 39 4 13 40 8 13 41 1 14 42 4 14 43 11 14 44 2 15 45 5 15 46 13 15 47 15 16 48 8 16 49 14 16 50 11 17 51 14 17 52 1 17 53 9 18 54 8 18 55 1 18 56 0 19 57 3 19 58 7 19 59 11 20 60 10 20 61 2 20 62 13 21 63 12 21 64 0 21 65 7 22 66 6 22 67 14 22 68 2 23 69 13 23 70 11 23 71 13 24 72 0 24 73 14 24 74 3 25 75 12 25 76 6 25 77 12 26 78 5 26 79 15 26 80 15 27 81 10 27 82 8 27 83</p>
+        </polylist>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_controllers/>
+  <library_visual_scenes>
+    <visual_scene id="Scene" name="Scene">
+      <node id="WallsTop" name="WallsTop" type="NODE">
+        <matrix sid="transform">1 0 0 15.04169 0 2.007566 0 15.0575 0 0 1 14.99188 0 0 0 1</matrix>
+        <instance_geometry url="#Cube_012-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="StoneWall-material" target="#StoneWall-material">
+                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="FloorTop" name="FloorTop" type="NODE">
+        <matrix sid="transform">1 0 0 15.1435 0 1 0 7.527926 0 0 1 0.4283915 0 0 0 1</matrix>
+        <instance_geometry url="#Cube_010-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="StoneFloor-material" target="#StoneFloor-material">
+                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#Scene"/>
+  </scene>
+</COLLADA>

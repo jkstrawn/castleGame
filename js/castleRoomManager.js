@@ -7,13 +7,16 @@
 			this.rooms = [];
 			this.roomTypes = [];
 
-			this.roomTypes.push({name: "Bedroom", width: 1, modelIndex: 1});
-			this.roomTypes.push({name: "Hall", width: 3, modelIndex: 2});
+			this.roomTypes.push({name: "Bedroom", width: 2, modelIndex: 1});
+			this.roomTypes.push({name: "Hall", width: 6, modelIndex: 2});
+			this.roomTypes.push({name: "stairBottom", width: 1, modelIndex: 3});
+			this.roomTypes.push({name: "stairMiddle", width: 1, modelIndex: 4});
+			this.roomTypes.push({name: "stairTop", width: 1, modelIndex: 5});
 		},
 
 		generateDraggingRoom: function(typeName) {
 
-			var roomType = this.getRoomFromType(typeName);
+			var roomType = this.getTypeByName(typeName);
 			var roomModel = this.generateRoomModel(roomType, new THREE.Vector3(500, 500, 0));
 			
 			roomModel.traverse(function(thing) {
@@ -21,7 +24,7 @@
 					var clonedMat = thing.material.clone();
 
 					thing.material = clonedMat;
-					thing.material.opacity = .4;
+					thing.material.opacity = .6;
 					thing.material.transparent = true;
 				}
 			});
@@ -33,7 +36,7 @@
 
 		generateRoom: function(typeName, gridSection) {
 
-			var roomType = this.getRoomFromType(typeName);
+			var roomType = this.getTypeByName(typeName);
 			var roomModel = this.generateRoomModel(roomType, new THREE.Vector3(gridSection.x, gridSection.y, 0));
 			var room = null;
 			if (typeName == "Bedroom") {
@@ -52,12 +55,11 @@
 
 			room.position.set(vector.x, vector.y, vector.z);
 			room.rotation.y = Math.PI * 1.5;
-			room.scale.x = room.scale.y = room.scale.z = 3;
 
 			return room;
 		},
 
-		getRoomFromType: function(typeName) {
+		getTypeByName: function(typeName) {
 			for (var i = this.roomTypes.length - 1; i >= 0; i--) {
 				if (this.roomTypes[i].name == typeName) {
 					return this.roomTypes[i];
@@ -94,10 +96,10 @@
 
 		addInitialHall: function() {
 			console.log("add initial hall");
-			var gridSection = this.sim.grid.get(2, 0);
+			var gridSection = this.sim.grid.get(4, 0);
 			var room = this.generateRoom("Hall", gridSection);
 
-			this.sim.grid.setRoom(2, 0, room);
+			this.sim.grid.setRoom(4, 0, room);
 			this.sim.addShape(room);
 
 			return room;
@@ -111,7 +113,7 @@
 
 			room.gridSectionToSnapTo = hoveredGrid;
 			var gridSection = this.sim.grid.get(hoveredGrid.gridX, hoveredGrid.gridY);
-		
+
 			room.tween = new TWEEN.Tween(room.model.position).to({
 			    x: gridSection.x,
 			    y: gridSection.y,
