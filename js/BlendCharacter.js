@@ -24,7 +24,6 @@ BlenderCharacterLoader = function() {
 
 	this.createModel = function() {
 
-console.log(this.geometry);
 		blendMesh = new THREE.BlendCharacter();
 		blendMesh.load( this.geometry, this.material.clone() );
 
@@ -46,7 +45,6 @@ THREE.BlendCharacter = function () {
 
 		// Create the animations
 
-	console.log(geometry.animations);
 		for ( var i = 0; i < geometry.animations.length; ++i ) {
 
 			var animName = geometry.animations[ i ].name;
@@ -54,9 +52,6 @@ THREE.BlendCharacter = function () {
 			this.animations[ animName ] = new THREE.Animation( this, clonedAnim );
 
 		}
-
-
-		console.log(this.animations);
 
 		// Create the debug visualization
 

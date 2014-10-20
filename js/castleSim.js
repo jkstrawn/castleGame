@@ -99,25 +99,15 @@
 		// EVENTS
 		clickRoomButton: function(data) {
 
-			if (data.detail.room != "Bedroom") {
+			if (data.detail.room != "Bedroom" || this.resources.stone >= 2) {
 				var roomType = this.rooms.getTypeByName(data.detail.room);
 				this.grid.show(roomType.width);
 
 				var room = this.rooms.generateDraggingRoom(data.detail.room);
 
 				this.draggingShape = room;
-				this.graphics.addDraggingRoom(room.model);
+				this.graphics.addTempObject(room.model);
 
-			} else
-
-			if (this.resources.stone >= 2) {
-				var roomType = this.rooms.getTypeByName(data.detail.room);
-				this.grid.show(roomType.width);
-
-				var room = this.rooms.generateDraggingRoom(data.detail.room);
-
-				this.draggingShape = room;
-				this.graphics.addDraggingRoom(room.model);
 			}
 		},
 
@@ -180,7 +170,6 @@
 
 			mesh = this.graphics.getModel(this.modelUrls.live[0]);
 			mesh.position.set(gridSection.x + 20, gridSection.y + 1.2, 10);
-			console.log("hire servant");
 
 			var servant = new SIM.Servant(this, mesh, this.initialHall);
 			this.addShape(servant);
@@ -194,7 +183,7 @@
 
 		clearDragging: function() {
 			for (var i = this.shapes.length - 1; i >= 0; i--) {
-				if (this.shapes[i] instanceof SIM.GridSection) {
+				if (this.shapes[i] instanceof SIM.GridSnapper) {
 					this.shapes.splice(i, 1);
 				}
 			};
@@ -224,15 +213,31 @@
 
 		placeRoomOnHoverLocation: function() {
 
-			this.changeResourceValue("Stone", -2);
-			var gridSection = this.grid.get(this.hoveredShape.gridX, this.hoveredShape.gridY);
-			var room = this.rooms.generateRoom(this.draggingShape.type.name, gridSection);
-			this.grid.setRoom(this.hoveredShape.gridX, this.hoveredShape.gridY, room);
-			this.addShape(room);
+			var cost = 0;
+			var rooms = this.rooms.getRoomsToPlace(this.hoveredShape, this.draggingShape.type.name);
+			var roomChanges = this.rooms.getRoomsToChange(this.hoveredShape, this.draggingShape.type.name);
+
+			for (var i = rooms.length - 1; i >= 0; i--) {
+				this.grid.setRoom(rooms[i].grid, rooms[i].room);
+				this.addShape(rooms[i].room);
+				cost += rooms[i].room.type.cost;
+			};
+			for (var i = roomChanges.length - 1; i >= 0; i--) {
+				roomChanges[i].room.model = roomChanges[i].model;
+				this.graphics.removeModel(roomChanges[i].model);
+				this.graphics.addModel(roomChanges[i].model);
+			};
+
+			this.changeResourceValue("Stone", cost * -1);
 			this.clearDragging();
+			this.rooms.clearTempRoom();
 		},
 
 		// OTHER
+
+		changeRoomModel: function(room, model) {
+
+		},
 
 		getShapes: function() {
 
@@ -283,7 +288,7 @@
 			this.updateShapeHoverStates();
 
 			if (this.draggingShape instanceof SIM.Room) {
-				if (this.hoveredShape instanceof SIM.GridSection) {
+				if (this.hoveredShape instanceof SIM.GridSnapper) {
 					this.rooms.snapHoveredRoomToGrid(this.draggingShape, this.hoveredShape);	
 				} else {
 					this.rooms.moveAndUnsnapRoom(this.draggingShape, mousePosition);
@@ -329,13 +334,14 @@
 					}
 				};
 
-				if (this.hoveredShape instanceof SIM.GridSection) {
+				if (this.hoveredShape instanceof SIM.GridSnapper) {
 					this.placeRoomOnHoverLocation(this.hoveredShape);
 				}
 			}
 
 			if (event.button == 2) {
 			//right click
+				this.rooms.clearTempRoom();
 				this.graphics.setRightMouseButtonDown(false);
 				if (this.draggingShape instanceof SIM.Room) {
 					this.clearDragging();

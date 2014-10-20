@@ -57,6 +57,28 @@
 
 			//add hall flames
 
+			this.addGround();
+
+			this.glowMaterial = new THREE.ShaderMaterial( 
+			{
+			    uniforms: 
+				{ 
+					"c":   { type: "f", value: 1.0 },
+					"p":   { type: "f", value: 3.0 },
+					glowColor: { type: "c", value: new THREE.Color(0x00ff00) },
+					viewVector: { type: "v3", value: this.camera.position }
+				},
+				vertexShader:   document.getElementById( 'vertexShaderGlow'   ).textContent,
+				fragmentShader: document.getElementById( 'fragmentShaderGlow' ).textContent,
+				side: THREE.FrontSide,
+				blending: THREE.AdditiveBlending,
+				transparent: true
+			});
+
+		},
+
+		addGround: function() {
+
 			var width = 500;
 			var length = 1000;
 			var geometry = new THREE.PlaneGeometry(length, width, 9, 9);
@@ -84,43 +106,6 @@
 			plane.rotation.x = -1/2 * Math.PI;
 			plane.position.set(0, 0, -100);
 			this.scene.add(plane);
-
-			var flame1 = new THREE.PointLight( 0xffcc00, 1.5, 20 );
-			flame1.position.set( -9.3, 9.5, 5.2 );
-			this.scene.add( flame1 );
-
-			var flame2 = new THREE.PointLight( 0xffcc00, 1.5, 20 );
-			flame2.position.set( -30, 9.5, 5.2 );
-			this.scene.add( flame2 );
-
-			var flame3 = new THREE.PointLight( 0xffcc00, 1.5, 20 );
-			flame3.position.set( -48, 9.5, 5.2 );
-			this.scene.add( flame3 );
-
-			var flame4 = new THREE.PointLight( 0xffcc00, 1.5, 20 );
-			flame4.position.set( 12, 9.5, 5.2 );
-			this.scene.add( flame4 );
-
-			var flame5 = new THREE.PointLight( 0xffcc00, 1.5, 20 );
-			flame5.position.set( 34, 9.5, 5.2 );
-			this.scene.add( flame5 );
-
-			this.glowMaterial = new THREE.ShaderMaterial( 
-			{
-			    uniforms: 
-				{ 
-					"c":   { type: "f", value: 1.0 },
-					"p":   { type: "f", value: 3.0 },
-					glowColor: { type: "c", value: new THREE.Color(0x00ff00) },
-					viewVector: { type: "v3", value: this.camera.position }
-				},
-				vertexShader:   document.getElementById( 'vertexShaderGlow'   ).textContent,
-				fragmentShader: document.getElementById( 'fragmentShaderGlow' ).textContent,
-				side: THREE.FrontSide,
-				blending: THREE.AdditiveBlending,
-				transparent: true
-			});
-
 		},
 
 		addRoomSpotParticles: function(startX, startY, segments, gridWidth, gridLength) {
@@ -133,6 +118,10 @@
 		},
 
 		addFlame: function(position) {
+
+			var flameLight = new THREE.PointLight( 0xffcc00, 1.5, 20 );
+			flameLight.position.set(position.x, position.y, position.z);
+			this.scene.add( flameLight );
 			this.particles.addFlameEmitter(position);
 		},
 
@@ -189,7 +178,7 @@
 			this.particles.stopParticles("Bounding");
 		},
 
-		addDraggingRoom: function(room) {
+		addTempObject: function(room) {
 
 			this.tempObjects.push(room);
 			this.scene.add(room);
@@ -433,7 +422,7 @@
 		},
 
 		focusCamera: function(x, y, z) {
-			/*
+
 			var cameraZ = this.camera.position.z;
 
 			var tween = new TWEEN.Tween(this.camera.position).to({
@@ -446,7 +435,6 @@
 			}).onComplete(function () {
 			    //that.camera.lookAt(new THREE.Vector3(x,y,cameraZ));
 			}).start();
-			*/
 		},
 
 		zoom: function(increase) {

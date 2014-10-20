@@ -6,15 +6,21 @@
 			this.sim = sim;
 			this.rooms = [];
 			this.roomTypes = [];
+			this.tempRoom = null;
 
-			this.roomTypes.push({name: "Bedroom", width: 2, modelIndex: 1});
-			this.roomTypes.push({name: "Hall", width: 6, modelIndex: 2});
-			this.roomTypes.push({name: "stairBottom", width: 1, modelIndex: 3});
-			this.roomTypes.push({name: "stairMiddle", width: 1, modelIndex: 4});
-			this.roomTypes.push({name: "stairTop", width: 1, modelIndex: 5});
+			this.roomTypes.push({name: "Bedroom", width: 2, modelIndex: 1, cost: 2});
+			this.roomTypes.push({name: "Hall", width: 6, modelIndex: 2, cost: 0});
+			this.roomTypes.push({name: "stairBottom", width: 1, modelIndex: 3, cost: 1});
+			this.roomTypes.push({name: "stairMiddle", width: 1, modelIndex: 4, cost: 1});
+			this.roomTypes.push({name: "stairTop", width: 1, modelIndex: 5, cost: 1});
 		},
 
 		generateDraggingRoom: function(typeName) {
+
+			if (typeName == "stairBottom") {
+				this.tempRoom = this.generateDraggingRoom("stairTop");
+				this.tempRoom.model.visible = false;
+			}
 
 			var roomType = this.getTypeByName(typeName);
 			var roomModel = this.generateRoomModel(roomType, new THREE.Vector3(500, 500, 0));
@@ -51,12 +57,12 @@
 
 		generateRoomModel: function(roomType, vector) {
 
-			var room = this.sim.graphics.getModel(this.sim.modelUrls.dead[roomType.modelIndex]);
+			var roomModel = this.sim.graphics.getModel(this.sim.modelUrls.dead[roomType.modelIndex]);
 
-			room.position.set(vector.x, vector.y, vector.z);
-			room.rotation.y = Math.PI * 1.5;
+			roomModel.position.set(vector.x, vector.y, vector.z);
+			roomModel.rotation.y = Math.PI * 1.5;
 
-			return room;
+			return roomModel;
 		},
 
 		getTypeByName: function(typeName) {
@@ -99,34 +105,67 @@
 			var gridSection = this.sim.grid.get(4, 0);
 			var room = this.generateRoom("Hall", gridSection);
 
-			this.sim.grid.setRoom(4, 0, room);
+			this.sim.grid.setRoom({gridX: 4, gridY: 0}, room);
 			this.sim.addShape(room);
 
 			return room;
 		},
 
-		snapHoveredRoomToGrid: function(room, hoveredGrid) {
+		snapHoveredRoomToGrid: function(room, hoveredSnapLocation) {
 
-			if (room.gridSectionToSnapTo == hoveredGrid) {
+			if (room.gridSectionToSnapTo == hoveredSnapLocation) {
 				return;
 			}
 
-			room.gridSectionToSnapTo = hoveredGrid;
-			var gridSection = this.sim.grid.get(hoveredGrid.gridX, hoveredGrid.gridY);
+			room.gridSectionToSnapTo = hoveredSnapLocation;
+			var gridSection = this.sim.grid.get(hoveredSnapLocation.gridX, hoveredSnapLocation.gridY);
 
+			this.moveUpperRoomIfNecessary(room, gridSection, hoveredSnapLocation);
 			room.tween = new TWEEN.Tween(room.model.position).to({
 			    x: gridSection.x,
 			    y: gridSection.y,
 			    z: 0
-			}, 100).easing(TWEEN.Easing.Sinusoidal.In).start();
+			}, 100).easing(TWEEN.Easing.Back.Out).start();
 
-			this.sim.graphics.focusCamera(gridSection.x, gridSection.y, 0);	
+			//this.sim.graphics.focusCamera(gridSection.x, gridSection.y, 0);	
+		},
+
+		moveUpperRoomIfNecessary: function(room, gridSection, hoveredSnapLocation) {
+
+			var roomBelowLocation = this.sim.grid.getRoom(hoveredSnapLocation.gridX, hoveredSnapLocation.gridY - 1);
+
+			if (this.tempRoom && this.shouldShowTempRoom(roomBelowLocation)) {
+				var height = this.sim.grid.gridHeight;
+				this.tempRoom.model.visible = true;
+				this.tempRoom.model.position.set(room.model.position.x, room.model.position.y + height, room.model.position.z);
+
+				this.tempRoom.tween = new TWEEN.Tween(this.tempRoom.model.position).to({
+				    x: gridSection.x,
+				    y: gridSection.y + height,
+				    z: 0
+				}, 100).easing(TWEEN.Easing.Back.Out).start();				
+				this.sim.graphics.addTempObject(this.tempRoom.model);
+			} else if (this.tempRoom) {
+				this.tempRoom.model.visible = false;
+			}
+		},
+
+		shouldShowTempRoom: function(roomBelowLocation) {
+
+			// this won't work for othe room types if they span more than 1 grid location... maybe
+			if (roomBelowLocation) {
+				return roomBelowLocation.type.name.substring(0, 5) != "stair";
+			}
+			return true;
 		},
 
 		moveAndUnsnapRoom: function(room, mousePosition) {
 
 			if (room.tween) {
 				TWEEN.remove(room.tween);
+			}
+			if (this.tempRoom) {
+				this.tempRoom.model.visible = false;
 			}
 			room.model.position.set(mousePosition.x - room.width / 2, mousePosition.y - 15, 0);
 			room.gridSectionToSnapTo = null;
@@ -152,7 +191,53 @@
 			};
 
 			return number;
-		}
+		},
+
+		clearTempRoom: function() {
+			this.tempRoom = null;
+		},
+
+		getRoomsToPlace: function(hoveredGridSnapper, roomName) {
+
+			var rooms = [];
+
+			if (roomName == "stairBottom") {
+				var roomBelowLocation = this.sim.grid.getRoom(hoveredGridSnapper.gridX, hoveredGridSnapper.gridY - 1);
+				if (this.shouldShowTempRoom(roomBelowLocation)) {
+					var upperGridSection = this.sim.grid.get(hoveredGridSnapper.gridX, hoveredGridSnapper.gridY + 1);
+					var extraRoom = this.generateRoom("stairTop", upperGridSection);
+					rooms.push({room: extraRoom, grid: upperGridSection});
+				}
+
+				if (roomBelowLocation && roomBelowLocation.type.name == "stairTop") {
+					roomName = "stairTop";
+				}
+			}
+
+			var gridSection = this.sim.grid.get(hoveredGridSnapper.gridX, hoveredGridSnapper.gridY);
+			var room = this.generateRoom(roomName, gridSection);
+			rooms.push({room: room, grid: gridSection});
+
+			return rooms;
+		},
+
+		getRoomsToChange: function(hoveredGridSnapper, roomName) {
+
+			//if below is top: make below into middle
+
+			var rooms = [];
+
+			if (roomName == "stairBottom") {
+				var roomBelowLocation = this.sim.grid.getRoom(hoveredGridSnapper.gridX, hoveredGridSnapper.gridY - 1);
+				if (roomBelowLocation && roomBelowLocation.type.name == "stairTop") {
+					var newRoomType = this.getTypeByName("stairMiddle");
+					var newModel = this.generateRoomModel(newRoomType, roomBelowLocation.model.position);
+					rooms.push({room: roomBelowLocation, model: newModel});
+				}
+			}
+
+			return rooms;
+		},
 
 	});
 
@@ -214,6 +299,9 @@
 		update: function(dt) {
 
 			this.age += dt;
+
+			if (this.type.name.substring(0, 5) == "stair") return;
+
 			this.trashTimer -= dt;
 
 			if (this.trashTimer < 0) {

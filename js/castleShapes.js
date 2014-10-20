@@ -316,7 +316,7 @@
 		turnRed: function() {
 
 			var redMaterial = new THREE.MeshBasicMaterial({color: 0xFF0000});
-			this.model.children[0].children[0].material = redMaterial;
+			//this.model.children[0].children[0].material = redMaterial;
 		},
 
 		stop: function() {

@@ -24,14 +24,8 @@ function BlendCharacterGui(animations) {
 		"Build Bedroom (cost: 2 stone)": function() {
 			window.dispatchEvent( new CustomEvent( 'create-room', {detail: {room: "Bedroom"}} ) );
 		},
-		"Build StairBottom": function() {
+		"Build Stairs (cast: 2 stone)": function() {
 			window.dispatchEvent( new CustomEvent( 'create-room', {detail: {room: "stairBottom"}} ) );
-		},
-		"Build StairMiddle": function() {
-			window.dispatchEvent( new CustomEvent( 'create-room', {detail: {room: "stairMiddle"}} ) );
-		},
-		"Build StairTop": function() {
-			window.dispatchEvent( new CustomEvent( 'create-room', {detail: {room: "stairTop"}} ) );
 		},
 		"Hire Servant (cost: 2 food)": function() {
 			window.dispatchEvent( new CustomEvent( 'hire-servant'));
@@ -57,9 +51,7 @@ function BlendCharacterGui(animations) {
 
 		this.controls.folderRooms = this.gui.addFolder( "Rooms" );
 		this.controls.folderRooms.add( this.controls, "Build Bedroom (cost: 2 stone)" );
-		this.controls.folderRooms.add( this.controls, "Build StairBottom" );
-		this.controls.folderRooms.add( this.controls, "Build StairMiddle" );
-		this.controls.folderRooms.add( this.controls, "Build StairTop" );
+		this.controls.folderRooms.add( this.controls, "Build Stairs (cast: 2 stone)" );
 		this.controls.folderRooms.open();
 
 		this.controls.folderResources = this.gui.addFolder( "Resources" );
