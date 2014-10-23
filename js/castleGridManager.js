@@ -7,31 +7,37 @@
 			this.gridWidth = 15;
 			this.gridLength = 30;
 			this.gridHeight = 30;
+			this.numOfSectionsX = 15;
+			this.numOfSectionsY = 4;
+			this.graph = null;
+			this.points = [];
 
 			this.gridStates = {
 				INVALID: 0,
 				ROOMTOOBIG: 1,
 				OPEN: 2
 			}
+
+			this.directions = ["north", "east", "south", "west"];
 		},
 
 		init: function() {
 
 			var startPoint = -110;
-			var numOfSectionsX = 15;
-			var numOfSectionsY = 4;
 
-			for (var x = 0; x < numOfSectionsX; x++) {
+			for (var x = 0; x < this.numOfSectionsX; x++) {
 				this.grid[x] = [];
 
-				for (var y = 0; y < numOfSectionsY; y++) {
+				for (var y = 0; y < this.numOfSectionsY; y++) {
 					this.grid[x][y] = {
 						x: x * this.gridWidth + startPoint, 
 						y: y * this.gridHeight, 
 						z: 0,
 						gridX: x,
 						gridY: y,
-						used: false
+						used: false,
+						room: null,
+						name: "a"
 					};
 				}
 			};
@@ -186,6 +192,140 @@
 				section.used = true;
 				section.room = room;
 			}
+		},
+
+		generateRoomPoints: function() {
+
+		},
+
+		updateRoomPoints: function() {
+
+			this.points = [];
+			this.assignNamesAndPoints();
+
+			for (var x = 0; x < this.grid.length; x ++) {
+				for (var y = 0; y < this.grid[x].length; y++) {
+					var gridSection = this.grid[x][y];
+
+					if (gridSection.room && !gridSection.room.gridConnected) {
+						this.connectTwoPoints(gridSection, "north", "south");
+						this.connectTwoPoints(gridSection, "east", "west");
+						this.connectTwoPoints(gridSection, "south", "north");
+						this.connectTwoPoints(gridSection, "west", "east");
+						gridSection.room.gridConnected = true;
+					}
+				}
+			};
+
+
+			console.log(this.points);
+			for (var i = this.points.length - 1; i >= 0; i--) {
+				var mesh = new THREE.BoxGeometry(2, 2, 2);
+				var pointBox = new THREE.Mesh(mesh, new THREE.MeshBasicMaterial());
+				pointBox.position.set(this.points[i].x, this.points[i].y, this.points[i].z);
+				sim.graphics.scene.add(pointBox);
+			};
+
+			this.constructGraph();
+
+		},
+
+		constructGraph: function() {
+
+			var map = {
+				"a1":{"b":3,"c":1},
+				"b":{"a1":2,"c":1},
+				"c":{"a1":4,"b":1}
+			};
+
+			var map = {};
+
+			for (var i = this.points.length - 1; i >= 0; i--) {
+				var point = this.points[i];
+				var siblings = {};
+				for (var s = 0; s < point.siblings.length; s++) {
+					siblings[point.siblings[s]] = 1;
+				}
+				map[this.points[i].name] = siblings;
+			};
+			console.log(map);
+			var graph = new Graph(map);
+
+			console.log(graph.findShortestPath(this.points[0].name, this.points[this.points.length - 1].name));
+		},
+
+		assignNamesAndPoints: function() {
+
+			var nameIndex = 360;
+
+			for (var x = 0; x < this.grid.length; x ++) {
+				for (var y = 0; y < this.grid[x].length; y++) {
+					var gridSection = this.grid[x][y];
+					if (gridSection.room) {
+						var roomNumber = parseInt(gridSection.room.gridName, 36);
+						if (roomNumber < 360) {
+							gridSection.name = nameIndex.toString(36);
+							var points = gridSection.room.generatePoints(gridSection.name);
+							this.points = this.points.concat(points);
+							nameIndex++;
+						}
+					}
+				}
+			};
+		},
+
+		connectTwoPoints: function(grid, ourDirection, otherDirection, gridX, gridY) {
+
+			var pointName = grid.room.getPointForDirection(ourDirection);
+			if (!pointName) return;
+			var point = this.getPointByName(pointName);
+
+			var otherRoom = this.getRoomInDirection(grid, otherDirection);
+			if (otherRoom) {
+				var otherPointName = otherRoom.getPointForDirection(otherDirection);
+				if (otherPointName) {
+					point.siblings.push(otherPointName);
+				}
+			}
+		},
+
+		getRoomInDirection: function(grid, direction) {
+
+			var sign = (direction == "north" || direction == "west") ? -1 : 1;
+
+			if (direction == "north" || direction == "south") {
+				otherGrid = this.get(grid.gridX, grid.gridY + sign);
+				if (otherGrid && otherGrid.room) {
+					console.log("return room to attach");
+					return otherGrid.room;
+				}
+				return null;
+			}
+
+			for (var i = grid.gridX; i < 100; i += sign) {
+				var otherGrid = this.get(i, grid.gridY);
+				if (otherGrid && otherGrid.room) {
+					if (otherGrid.room != grid.room) {
+						return otherGrid.room;
+					}
+				} else {
+					return null;
+				}
+			}
+
+			return null;
+		},
+
+		getPointByName: function(name) {
+
+			for (var i = this.points.length - 1; i >= 0; i--) {
+				if (this.points[i].name == name) {
+					return this.points[i];
+				}
+			};
+
+			console.log("ERROR: Tried to find point named '" + name + "'' but no such point exists in " + this.points);
+			return null;
 		},
 
 	});

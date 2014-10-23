@@ -125,6 +125,7 @@
 		</script>
 
 		<script src="js/jquery.js"></script> 
+		<script src="js/graph.js"></script> 
 		<script src="js/three.js"></script>
 		<script src="js/SubdivisionModifier.js"></script>
 		<script src="js/tween.js"></script>
@@ -148,9 +149,9 @@
 
 			var oldTime = 0;
 			var stats;
-			var _sim = new SIM.CastleSim();
+			var sim = new SIM.CastleSim();
 
-			_sim.init();
+			sim.init();
 			animate();
 
 			document.addEventListener( 'mouseup', onDocumentMouseUp, false );
@@ -166,19 +167,19 @@
 			}, false);
 
 			function onDocumentMouseUp(event) {
-				_sim.click(event);
+				sim.click(event);
 			}
 
 			function onDocumentMouseDown(event) {
-				_sim.mouseDown(event);
+				sim.mouseDown(event);
 			}
 
 			function onDocumentMouseMove(event) {
-				_sim.mouseMove(event);
+				sim.mouseMove(event);
 			}
 
 			function onWindowResize() {
-				_sim.onWindowResize();
+				sim.onWindowResize();
 			}
 
 			function animate(time) {		
@@ -187,8 +188,8 @@
 				var dt = time - oldTime;
 				oldTime = time;
 
-				_sim.update(dt);
-				_sim.render();
+				sim.update(dt);
+				sim.render();
 				stats.update();
 			}
 
@@ -196,11 +197,11 @@
 				var event = window.event || event; // old IE support
 				var delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
 				//console.log(delta)
-				_sim.zoom(delta);
+				sim.zoom(delta);
 			}
 
 			function onWindowKeyPress(event) {
-				_sim.keypress(event)
+				sim.keypress(event)
 			}
 		</script>
 	</body>

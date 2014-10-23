@@ -320,7 +320,7 @@ To view the current version, go to: http://castlesim.azurewebsites.net/
 
 - Better noble AI (wait longer to move in, move out if too dirty)
 - Servants move to other rooms to clean
-- stairs
+- servants use stairs
 - hire militia
 - Each servant chooses his morale?
 - Starvation affects morale
@@ -332,7 +332,11 @@ To view the current version, go to: http://castlesim.azurewebsites.net/
 
 ###### ThreeJS
 
+- Make it so that rooms dont blend together
+	+ Make side walls different from back walls?
+	+ Construct room shells out of three-js generated boxes?
 - Shadows
+- Cut out section of room blob when hovering room over it
 - Add grass sprites
 - BUG: Transparency on room looks weird
 - BUG: Light casting to room above the selected room

@@ -231,13 +231,11 @@
 			this.changeResourceValue("Stone", cost * -1);
 			this.clearDragging();
 			this.rooms.clearTempRoom();
+			this.rooms.clearRoomGridNames();
+			this.grid.updateRoomPoints();
 		},
 
 		// OTHER
-
-		changeRoomModel: function(room, model) {
-
-		},
 
 		getShapes: function() {
 

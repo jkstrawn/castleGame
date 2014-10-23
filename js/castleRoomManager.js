@@ -239,6 +239,14 @@
 			return rooms;
 		},
 
+		clearRoomGridNames: function() {
+
+			for (var i = this.rooms.length - 1; i >= 0; i--) {
+				this.rooms[i].gridName = "a";
+				this.rooms[i].gridConnected = false;
+			};
+		},
+
 	});
 
 	SIM.RoomManager = RoomManager;
@@ -258,6 +266,8 @@
 			this.length = _sim.grid.gridLength;
 			this.trash = [];
 			this.age = 0;
+			this.gridName = "a";
+			this.gridConnected = false;
 		},
 
 		createLight: function() {
@@ -374,6 +384,65 @@
 		getNumberOfTrash: function() {
 			return this.trash.length;
 		},
+
+		getPointForDirection: function(direction) {
+
+			if (direction == "east") {
+				return this.gridName + "4";
+			}
+			if (direction == "west") {
+				return this.gridName + "2";
+			}
+			if (direction == "north") {
+				if (this.type.name == "stairMiddle" || this.type.name == "stairBottom") {
+					return this.gridName + "1";
+				}
+				return null;
+			}
+			if (direction == "south") {
+				if (this.type.name == "stairTop" || this.type.name == "stairMiddle") {
+					return this.gridName + "2";
+				}
+				return null;
+			}
+
+			console.log("ERROR: tried to get non-existant point for type " + roomType + " with direction " + direction);
+			return null;
+		},
+
+		generatePoints: function(gridName) {
+
+			this.gridName = gridName;
+
+			var points = [];
+
+			this.addNewPoint(points, this.gridName + 2, this.width - 4, 1, 25, [this.gridName + 4]);
+
+			if (this.type.name == "stairMiddle" || this.type.name == "stairBottom") {
+				this.addNewPoint(points, this.gridName + 1, this.width - 4, 30, 21, [this.gridName + 6]);
+				this.addNewPoint(points, this.gridName + 4, 4, 1, 25, [this.gridName + 2, this.gridName + 5]);
+				this.addNewPoint(points, this.gridName + 5, 4, 15, 5, [this.gridName + 2, this.gridName + 4, this.gridName + 6]);
+				this.addNewPoint(points, this.gridName + 6, this.width - 4, 15, 5, [this.gridName + 1, this.gridName + 5]);
+			} else {
+				this.addNewPoint(points, this.gridName + 4, 4, 1, 25, [this.gridName + 2]);
+			}
+
+			return points;
+		},
+
+		addNewPoint: function(points, name, x, y, z, siblings) {
+
+			var point = {
+				name: name,
+				x: x + this.getX(),
+				y: y + this.getY(),
+				z: z + this.getZ(),
+				siblings: siblings,
+				room: this,
+			};
+
+			points.push(point);
+		}
 
 	});
 
