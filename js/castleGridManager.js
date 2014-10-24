@@ -1,15 +1,14 @@
 (function() {
 
 	var GridManager = my.Class({
-		constructor: function(_sim) {
-			this.sim = _sim;
+		constructor: function() {
 			this.grid = [];
 			this.gridWidth = 15;
 			this.gridLength = 30;
 			this.gridHeight = 30;
 			this.numOfSectionsX = 15;
 			this.numOfSectionsY = 4;
-			this.graph = null;
+			this.map = null;
 			this.points = [];
 
 			this.gridStates = {
@@ -161,13 +160,13 @@
 			var modifier = new THREE.SubdivisionModifier( 2 );
 			modifier.modify( smoothCubeGeom ); 
 
-			var glow = new THREE.Mesh( smoothCubeGeom, this.sim.graphics.glowMaterial.clone());
+			var glow = new THREE.Mesh( smoothCubeGeom, sim.graphics.glowMaterial.clone());
 			glow.position.set(blob.start.x + this.gridWidth * blob.segments / 2, blob.start.y + this.gridHeight / 2, blob.start.z + this.gridLength / 2);
 
 			var boundingBox = new BoundingBox(glow);
-			this.sim.graphics.addBoundingBox(boundingBox);
+			sim.graphics.addBoundingBox(boundingBox);
 
-			this.sim.graphics.addRoomSpotParticles(blob.start.x, blob.start.y, blob.segments, this.gridWidth, this.gridLength);
+			sim.graphics.addRoomSpotParticles(blob.start.x, blob.start.y, blob.segments, this.gridWidth, this.gridLength);
 		},
 
 		generateSnappableGridLocation: function(box, gridX, gridY, segments) {
@@ -178,9 +177,9 @@
 			glow.position.set(box.x + this.gridWidth * segments / 2, box.y + this.gridHeight / 2, box.z + this.gridLength / 2);
 			glow.visible = false;
 
-			var gridSnapper = new GridSnapper(this.sim, glow, gridX, gridY);
-			this.sim.shapes.push(gridSnapper);
-			this.sim.graphics.scene.add(glow);
+			var gridSnapper = new GridSnapper(glow, gridX, gridY);
+			sim.shapes.push(gridSnapper);
+			sim.graphics.scene.add(glow);
 		},
 
 		setRoom: function(startSection, room) {
@@ -208,16 +207,22 @@
 					var gridSection = this.grid[x][y];
 
 					if (gridSection.room && !gridSection.room.gridConnected) {
-						this.connectTwoPoints(gridSection, "north", "south");
-						this.connectTwoPoints(gridSection, "east", "west");
-						this.connectTwoPoints(gridSection, "south", "north");
-						this.connectTwoPoints(gridSection, "west", "east");
+						var reachableNorth = this.connectTwoPoints(gridSection, "north", "south");
+						var reachableEast = this.connectTwoPoints(gridSection, "east", "west");
+						var reachableSouth = this.connectTwoPoints(gridSection, "south", "north");
+						var reachableWest = this.connectTwoPoints(gridSection, "west", "east");
+						var roomReachable = reachableNorth || reachableEast || reachableSouth || reachableWest;
 						gridSection.room.gridConnected = true;
+						if (!roomReachable)
+							console.log("Room is unreachable: " + gridSection.room);
+						gridSection.room.reachable = roomReachable;
 					}
 				}
 			};
 
+			this.map = this.constructGraph();
 
+			/*
 			console.log(this.points);
 			for (var i = this.points.length - 1; i >= 0; i--) {
 				var mesh = new THREE.BoxGeometry(2, 2, 2);
@@ -225,18 +230,10 @@
 				pointBox.position.set(this.points[i].x, this.points[i].y, this.points[i].z);
 				sim.graphics.scene.add(pointBox);
 			};
-
-			this.constructGraph();
-
+			*/
 		},
 
 		constructGraph: function() {
-
-			var map = {
-				"a1":{"b":3,"c":1},
-				"b":{"a1":2,"c":1},
-				"c":{"a1":4,"b":1}
-			};
 
 			var map = {};
 
@@ -248,10 +245,52 @@
 				}
 				map[this.points[i].name] = siblings;
 			};
-			console.log(map);
-			var graph = new Graph(map);
 
-			console.log(graph.findShortestPath(this.points[0].name, this.points[this.points.length - 1].name));
+			return map;
+		},
+
+		getPath: function(startObject, endObject) {
+
+			if(endObject.gridName == "a") return;
+
+			var map = this.constructGraph();
+
+			var startPoint = {};
+			startPoint[startObject.room.gridName + "2"] = 1;
+			startPoint[startObject.room.gridName + "4"] = 1;
+			map["start"] = startPoint;
+
+			var endRoomPoint1 = map[endObject.gridName + "2"];
+			endRoomPoint1["end"] = 1;
+			var endRoomPoint2 = map[endObject.gridName + "4"];
+			endRoomPoint2["end"] = 1;
+			map["end"] = {};
+			
+			var graph = new Graph(map);
+			var path = graph.findShortestPath("start", "end");
+			if (path) {
+				return this.constructPathPoints(path, endObject);
+			}
+
+			return null;
+		},
+
+		constructPathPoints: function(path, endObject) {
+
+			var pathPoints = [];
+
+			for (var i = 1; i < path.length - 1; i++) {
+				pathPoints.push(this.getPointByName(path[i]));
+			}
+
+			var endPoint = {
+				x: endObject.getX(),
+				y: endObject.getY(),
+				z: endObject.getZ(),
+			}
+			pathPoints.push(endPoint);
+
+			return pathPoints;
 		},
 
 		assignNamesAndPoints: function() {
@@ -277,7 +316,7 @@
 		connectTwoPoints: function(grid, ourDirection, otherDirection, gridX, gridY) {
 
 			var pointName = grid.room.getPointForDirection(ourDirection);
-			if (!pointName) return;
+			if (!pointName) return false;
 			var point = this.getPointByName(pointName);
 
 			var otherRoom = this.getRoomInDirection(grid, otherDirection);
@@ -285,8 +324,11 @@
 				var otherPointName = otherRoom.getPointForDirection(otherDirection);
 				if (otherPointName) {
 					point.siblings.push(otherPointName);
+					return true;
 				}
 			}
+
+			return false;
 		},
 
 		getRoomInDirection: function(grid, direction) {
@@ -296,7 +338,6 @@
 			if (direction == "north" || direction == "south") {
 				otherGrid = this.get(grid.gridX, grid.gridY + sign);
 				if (otherGrid && otherGrid.room) {
-					console.log("return room to attach");
 					return otherGrid.room;
 				}
 				return null;
@@ -334,8 +375,8 @@
 
 	var GridSnapper = my.Class(SIM.Shape, {
 
-		constructor: function(sim, model, _x, _y) {	
-			GridSnapper.Super.call(this, sim, model);
+		constructor: function(model, _x, _y) {	
+			GridSnapper.Super.call(this, model);
 
 			this.gridX = _x;
 			this.gridY = _y;

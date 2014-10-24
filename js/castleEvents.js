@@ -2,8 +2,7 @@
 
 	var EventManager = my.Class({
 
-		constructor: function(_sim) {
-			this.sim = _sim;
+		constructor: function() {
 			this.events = [];
 			this.randomEventsOn = true;
 			this.timeSinceLastEvent = null;
@@ -21,7 +20,7 @@
 					//for now just fire wind.  Each event will have different chance
 					//of happening, but need to work on this
 
-					var newEvent = new Wind(this.sim);
+					var newEvent = new Wind(sim);
 					newEvent.start();
 					this.events.push(newEvent);
 					this.timeSinceLastEvent = 0;
@@ -38,9 +37,8 @@
 	SIM.EventManager = EventManager;
 
 	var Event = my.Class({
-		constructor: function (sim) {
+		constructor: function () {
 			this.running = false;
-			this.sim = sim;
 			this.duration = 1000;
 		},
 
@@ -68,8 +66,8 @@
 	SIM.Event = Event;
 
 	var Wind = my.Class(SIM.Event, {
-		constructor: function(sim) {
-			Wind.Super.call(this, sim);
+		constructor: function() {
+			Wind.Super.call(this);
 
 			this.duration = 20000;
 		},
@@ -78,7 +76,7 @@
 			Wind.Super.prototype.start.call(this);
 
 			console.log("wind started");
-			this.sound = this.sim.audio.addSound(["wind.mp3"], 0, 1, null, { loop: true })
+			this.sound = sim.audio.addSound(["wind.mp3"], 0, 1, null, { loop: true })
 		},
 
 		stop: function () {

@@ -12,12 +12,12 @@
 			this.stats = null;
 
 			this.clock = new THREE.Clock();
-			this.grid = new SIM.GridManager(this);
+			this.grid = new SIM.GridManager();
 			this.gui = null;
-			this.graphics = new SIM.GraphicsEngine(this);
-			this.rooms = new SIM.RoomManager(this);
-			this.audio = new SIM.AudioManager(this);
-			this.events = new SIM.EventManager(this);
+			this.graphics = new SIM.GraphicsEngine();
+			this.rooms = new SIM.RoomManager();
+			this.audio = new SIM.AudioManager();
+			this.events = new SIM.EventManager();
 
 			this.modelUrls = {
 				dead: [
@@ -171,7 +171,8 @@
 			mesh = this.graphics.getModel(this.modelUrls.live[0]);
 			mesh.position.set(gridSection.x + 20, gridSection.y + 1.2, 10);
 
-			var servant = new SIM.Servant(this, mesh, this.initialHall);
+			var servant = new SIM.Servant(mesh, this.initialHall);
+			this.servant = servant;
 			this.addShape(servant);
 		},
 
@@ -273,6 +274,11 @@
 					this.shapes[i].turnRed();
 				}
 			};
+		},
+
+		getRoomByName: function(roomName) {
+
+			return this.rooms.getRoomByName(roomName);
 		},
 
 		// USER INPUT
@@ -380,10 +386,6 @@
 		},
 
 		update: function(dt) {
-
-			if (!dt || dt > 200) {
-				return;
-			}
 
 			for (var i = this.shapes.length - 1; i >= 0; i--) {
 				this.shapes[i].update(dt);

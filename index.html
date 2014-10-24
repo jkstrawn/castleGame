@@ -150,8 +150,10 @@
 			var oldTime = 0;
 			var stats;
 			var sim = new SIM.CastleSim();
+			var started = false;
 
 			sim.init();
+			setTimeout(function() {started = true;}, 3000);
 			animate();
 
 			document.addEventListener( 'mouseup', onDocumentMouseUp, false );
@@ -187,10 +189,14 @@
 
 				var dt = time - oldTime;
 				oldTime = time;
+				stats.update();
+				sim.render();
+
+				if (!started) {
+					return;
+				}
 
 				sim.update(dt);
-				sim.render();
-				stats.update();
 			}
 
 			function onWindowMouseWheel(event) {

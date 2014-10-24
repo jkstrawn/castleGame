@@ -2,8 +2,7 @@
 
 	var RoomManager = my.Class({
 
-		constructor: function(sim) {
-			this.sim = sim;
+		constructor: function() {
 			this.rooms = [];
 			this.roomTypes = [];
 			this.tempRoom = null;
@@ -35,7 +34,7 @@
 				}
 			});
 
-			var room = new DraggingRoom(this.sim, roomModel, roomType);
+			var room = new DraggingRoom(roomModel, roomType);
 
 			return room;
 		},
@@ -46,9 +45,9 @@
 			var roomModel = this.generateRoomModel(roomType, new THREE.Vector3(gridSection.x, gridSection.y, 0));
 			var room = null;
 			if (typeName == "Bedroom") {
-				room = new Bedroom(this.sim, roomModel, roomType);
+				room = new Bedroom(roomModel, roomType);
 			} else {
-				room = new Room(this.sim, roomModel, roomType);
+				room = new Room(roomModel, roomType);
 			}
 
 			this.rooms.push(room);
@@ -57,7 +56,7 @@
 
 		generateRoomModel: function(roomType, vector) {
 
-			var roomModel = this.sim.graphics.getModel(this.sim.modelUrls.dead[roomType.modelIndex]);
+			var roomModel = sim.graphics.getModel(sim.modelUrls.dead[roomType.modelIndex]);
 
 			roomModel.position.set(vector.x, vector.y, vector.z);
 			roomModel.rotation.y = Math.PI * 1.5;
@@ -95,18 +94,18 @@
 
 			console.log(model);
 
-			var shape = new Room(this.sim, model);
+			var shape = new Room(model);
 			console.log(shape);
-			this.sim.shapes.push(shape);
+			sim.shapes.push(shape);
 		},
 
 		addInitialHall: function() {
 			console.log("add initial hall");
-			var gridSection = this.sim.grid.get(4, 0);
+			var gridSection = sim.grid.get(4, 0);
 			var room = this.generateRoom("Hall", gridSection);
 
-			this.sim.grid.setRoom({gridX: 4, gridY: 0}, room);
-			this.sim.addShape(room);
+			sim.grid.setRoom({gridX: 4, gridY: 0}, room);
+			sim.addShape(room);
 
 			return room;
 		},
@@ -118,7 +117,7 @@
 			}
 
 			room.gridSectionToSnapTo = hoveredSnapLocation;
-			var gridSection = this.sim.grid.get(hoveredSnapLocation.gridX, hoveredSnapLocation.gridY);
+			var gridSection = sim.grid.get(hoveredSnapLocation.gridX, hoveredSnapLocation.gridY);
 
 			this.moveUpperRoomIfNecessary(room, gridSection, hoveredSnapLocation);
 			room.tween = new TWEEN.Tween(room.model.position).to({
@@ -132,10 +131,10 @@
 
 		moveUpperRoomIfNecessary: function(room, gridSection, hoveredSnapLocation) {
 
-			var roomBelowLocation = this.sim.grid.getRoom(hoveredSnapLocation.gridX, hoveredSnapLocation.gridY - 1);
+			var roomBelowLocation = sim.grid.getRoom(hoveredSnapLocation.gridX, hoveredSnapLocation.gridY - 1);
 
 			if (this.tempRoom && this.shouldShowTempRoom(roomBelowLocation)) {
-				var height = this.sim.grid.gridHeight;
+				var height = sim.grid.gridHeight;
 				this.tempRoom.model.visible = true;
 				this.tempRoom.model.position.set(room.model.position.x, room.model.position.y + height, room.model.position.z);
 
@@ -144,7 +143,7 @@
 				    y: gridSection.y + height,
 				    z: 0
 				}, 100).easing(TWEEN.Easing.Back.Out).start();				
-				this.sim.graphics.addTempObject(this.tempRoom.model);
+				sim.graphics.addTempObject(this.tempRoom.model);
 			} else if (this.tempRoom) {
 				this.tempRoom.model.visible = false;
 			}
@@ -202,9 +201,9 @@
 			var rooms = [];
 
 			if (roomName == "stairBottom") {
-				var roomBelowLocation = this.sim.grid.getRoom(hoveredGridSnapper.gridX, hoveredGridSnapper.gridY - 1);
+				var roomBelowLocation = sim.grid.getRoom(hoveredGridSnapper.gridX, hoveredGridSnapper.gridY - 1);
 				if (this.shouldShowTempRoom(roomBelowLocation)) {
-					var upperGridSection = this.sim.grid.get(hoveredGridSnapper.gridX, hoveredGridSnapper.gridY + 1);
+					var upperGridSection = sim.grid.get(hoveredGridSnapper.gridX, hoveredGridSnapper.gridY + 1);
 					var extraRoom = this.generateRoom("stairTop", upperGridSection);
 					rooms.push({room: extraRoom, grid: upperGridSection});
 				}
@@ -214,7 +213,7 @@
 				}
 			}
 
-			var gridSection = this.sim.grid.get(hoveredGridSnapper.gridX, hoveredGridSnapper.gridY);
+			var gridSection = sim.grid.get(hoveredGridSnapper.gridX, hoveredGridSnapper.gridY);
 			var room = this.generateRoom(roomName, gridSection);
 			rooms.push({room: room, grid: gridSection});
 
@@ -228,7 +227,7 @@
 			var rooms = [];
 
 			if (roomName == "stairBottom") {
-				var roomBelowLocation = this.sim.grid.getRoom(hoveredGridSnapper.gridX, hoveredGridSnapper.gridY - 1);
+				var roomBelowLocation = sim.grid.getRoom(hoveredGridSnapper.gridX, hoveredGridSnapper.gridY - 1);
 				if (roomBelowLocation && roomBelowLocation.type.name == "stairTop") {
 					var newRoomType = this.getTypeByName("stairMiddle");
 					var newModel = this.generateRoomModel(newRoomType, roomBelowLocation.model.position);
@@ -247,6 +246,30 @@
 			};
 		},
 
+		getTrash: function() {
+
+			for (var i = this.rooms.length - 1; i >= 0; i--) {
+				var trash = this.rooms[i].getRandomTrash();
+				if (this.rooms[i].reachable && trash && !trash.claimed) {
+					return trash;
+				}
+			};
+
+			return null;
+		},
+
+		getRoomByName: function(roomName) {
+
+			for (var i = this.rooms.length - 1; i >= 0; i--) {
+				if (this.rooms[i].gridName == roomName) {
+					return this.rooms[i];
+				}
+			};
+
+			console.log("ERROR: Tried to find non-existant room name '" + roomName + "'");
+			return null;
+		},
+
 	});
 
 	SIM.RoomManager = RoomManager;
@@ -255,29 +278,30 @@
 
 
 	var Room = my.Class(SIM.Shape, {
-		constructor: function (_sim, _model, _type) {
-			Room.Super.call(this, _sim, _model);
+		constructor: function (_model, _type) {
+			Room.Super.call(this, _model);
 
 			this.light = null;
 			this.type = _type;
-			this.trashSpawnSpeed = 3000;
+			this.trashSpawnSpeed = 8000;
 			this.trashTimer = 1000;
-			this.width = _type.width * _sim.grid.gridWidth;
-			this.length = _sim.grid.gridLength;
+			this.width = _type.width * sim.grid.gridWidth;
+			this.length = sim.grid.gridLength;
 			this.trash = [];
 			this.age = 0;
 			this.gridName = "a";
 			this.gridConnected = false;
+			this.reachable = false;
 		},
 
 		createLight: function() {
-			this.sim.pointLight.position.set( this.model.position.x + 15, this.model.position.y + 15, this.model.position.z + 10 );
+			sim.pointLight.position.set( this.model.position.x + 15, this.model.position.y + 15, this.model.position.z + 10 );
 		},
 
 		removeLight: function() {
-			if (this.sim.pointLight.position.x == (this.model.position.x + 15)
-			 && this.sim.pointLight.position.y == (this.model.position.y + 15)) {
-				this.sim.pointLight.position.set( 0, -200, 0 );
+			if (sim.pointLight.position.x == (this.model.position.x + 15)
+			 && sim.pointLight.position.y == (this.model.position.y + 15)) {
+				sim.pointLight.position.set( 0, -200, 0 );
 			}
 		},
 
@@ -325,7 +349,7 @@
 
 			var x = (this.width - 10) * Math.random() + this.model.position.x + 5;
 			var z = (this.length - 10) * Math.random() + this.model.position.z + 5;
-			var y = this.model.position.y + 2;
+			var y = this.model.position.y + 1;
 
 			//var model = sim.graphics.getModel(sim.modelUrls[0]);
 
@@ -336,9 +360,10 @@
 
 			mesh.position.set(x, y, z);
 			
-			var trash = new Trash(this.sim, mesh);
+			var trash = new Trash(mesh, this.gridName);
 			this.trash.push(trash);
-			this.sim.addShape(trash);
+			sim.grid.getPath(sim.servant, trash);
+			sim.addShape(trash);
 		},
 
 		getClosestTrash: function(position) {
@@ -356,17 +381,22 @@
 				}
 			};
 
-			if (closestTrash) {
-				closestTrash.claimed = true;
-			}
 			return closestTrash;
+		},
+
+		getRandomTrash: function() {
+
+			if (this.trash.length)
+				return this.trash[0];
+
+			return null;
 		},
 
 		removeTrash: function(trash) {
 
 			for (var i = this.trash.length - 1; i >= 0; i--) {
 				if (this.trash[i] == trash) {
-					this.sim.removeShape(this.trash[i]);
+					sim.removeShape(this.trash[i]);
 					this.trash.splice(i, 1);
 					return;
 				}
@@ -415,16 +445,17 @@
 			this.gridName = gridName;
 
 			var points = [];
+			var height = 1.2;
 
-			this.addNewPoint(points, this.gridName + 2, this.width - 4, 1, 25, [this.gridName + 4]);
+			this.addNewPoint(points, this.gridName + 2, this.width - 4, height, 25, [this.gridName + 4]);
 
 			if (this.type.name == "stairMiddle" || this.type.name == "stairBottom") {
 				this.addNewPoint(points, this.gridName + 1, this.width - 4, 30, 21, [this.gridName + 6]);
-				this.addNewPoint(points, this.gridName + 4, 4, 1, 25, [this.gridName + 2, this.gridName + 5]);
-				this.addNewPoint(points, this.gridName + 5, 4, 15, 5, [this.gridName + 2, this.gridName + 4, this.gridName + 6]);
+				this.addNewPoint(points, this.gridName + 4, 4, height, 25, [this.gridName + 2, this.gridName + 5]);
+				this.addNewPoint(points, this.gridName + 5, 4, 15, 5, [this.gridName + 4, this.gridName + 6]);
 				this.addNewPoint(points, this.gridName + 6, this.width - 4, 15, 5, [this.gridName + 1, this.gridName + 5]);
 			} else {
-				this.addNewPoint(points, this.gridName + 4, 4, 1, 25, [this.gridName + 2]);
+				this.addNewPoint(points, this.gridName + 4, 4, height, 25, [this.gridName + 2]);
 			}
 
 			return points;
@@ -451,8 +482,8 @@
 	
 	var Bedroom = my.Class(SIM.Room, {
 
-		constructor: function(sim, model, type) {
-			Bedroom.Super.call(this, sim, model, type);
+		constructor: function(model, type) {
+			Bedroom.Super.call(this, model, type);
 
 			this.nobleTimer = Math.random() * 2000;
 			this.noble = null;
@@ -465,7 +496,7 @@
 					this.nobleTimer -= dt;
 
 					if (this.nobleTimer < 0) {
-						this.generateNoble();
+						//this.generateNoble();
 					}
 				} else {
 					this.nobleTimer = Math.random * 2000;
@@ -483,8 +514,8 @@
 			var position = this.getPosition();
 			nobleModel.position.set(position.x + 10, position.y+ 5, position.z + 10);
 
-			var noble = new SIM.Noble(this.sim, nobleModel, this);
-			this.sim.addShape(noble);
+			var noble = new SIM.Noble(nobleModel, this);
+			sim.addShape(noble);
 		},
 	});
 
@@ -493,8 +524,8 @@
 
 	var DraggingRoom = my.Class(SIM.Room, {
 
-		constructor: function(sim, model, type) {
-			DraggingRoom.Super.call(this, sim, model, type);
+		constructor: function(model, type) {
+			DraggingRoom.Super.call(this, model, type);
 			this.gridSectionToSnapTo = null;
 		},
 
@@ -505,8 +536,9 @@
 
 	var Trash = my.Class(SIM.Shape, {
 
-		constructor: function(sim, model) {
-			Trash.Super.call(this, sim, model);
+		constructor: function(model, gridName) {
+			Trash.Super.call(this, model);
+			this.gridName = gridName;
 			this.claimed = false;
 		}
 	});

@@ -375,7 +375,7 @@ TWEEN.Tween = function ( object ) {
 
 				}
 
-				return false;
+				return !_isPlaying;
 
 			}
 

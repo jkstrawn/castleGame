@@ -2,7 +2,7 @@
 
 	var GraphicsEngine = my.Class({
 
-		constructor: function(_sim) {
+		constructor: function() {
 
 			this.renderer = null;
 			this.scene = null;
@@ -12,7 +12,6 @@
 			this.mouse = new THREE.Vector2();
 
 			this.raycaster = new THREE.Raycaster();
-			this.sim = _sim;
 			this.models = [];
 			this.numModelsToLoad = 0;
 			this.tempObjects = [];
@@ -241,9 +240,9 @@
 			var ambientLight = new THREE.AmbientLight( 0x808080 );
 			this.scene.add( ambientLight );
 
-			this.sim.pointLight = new THREE.PointLight( 0xffcc00, 2, 30 );
-			this.sim.pointLight.position.set( 0, 100, 0 );
-			this.scene.add( this.sim.pointLight );
+			sim.pointLight = new THREE.PointLight( 0xffcc00, 2, 30 );
+			sim.pointLight.position.set( 0, 100, 0 );
+			this.scene.add( sim.pointLight );
 		},
 
 		addRendered: function() {

@@ -6,8 +6,7 @@
 		  	AGE_OF_MAJORITY: 18
 		},
 
-		constructor: function(sim, model) {
-			this.sim = sim;
+		constructor: function(model) {
 			this.model = model;
 			this.hover = false;
 			this.tween = null;
@@ -53,8 +52,8 @@
 
 	var Person = my.Class(SIM.Shape, {
 
-		constructor: function(_sim, model, room) {
-			Person.Super.call(this, _sim, model);
+		constructor: function(model, room) {
+			Person.Super.call(this, model);
 			this.room = room;
 			this.tween = null;
 			this.lastPositionInRoom = null;
@@ -156,14 +155,15 @@
 		},
 
 		moveTo: function(position, speed) {
-
 			if (this.tween)
-				TWEEN.remove(this.tween);
+				this.tween.stop();
+
 			this.rotateToPosition(position.x, position.z);
 
 			var oldPosition = this.model.position;
 			var distance = oldPosition.distanceTo(position);
 			var time = distance / speed * 1000;
+
 			this.tween = new TWEEN.Tween(this.model.position).to({
 			    x: position.x,
 			    y: position.y,
@@ -171,8 +171,12 @@
 			}, time).onComplete($.proxy(this.arrivedAtDestination, this)).start();
 
 			if (this.model.animations) {
-				this.model.stopAll();
-				this.model.play("walk", 1, speed / 7);
+				if (!this.model.animations["walk"].isPlaying) {
+					this.model.stopAll();
+					this.model.play("walk", 1, speed / 7);
+				} else {
+					this.model.animations["walk"].timeScale = speed / 7;
+				}
 			}
 
 			//need to adjust shorter distances to take longer in order to use sine easing
@@ -203,13 +207,14 @@
 
 			this.state = this.states.DRAGGING;
 			this.lastPositionInRoom = this.getPosition().clone();
+			this.path = null;
 
 			if (this.tween)
 				TWEEN.remove(this.tween);
 		},
 
 		stopDragging: function() {
-			var room = this.sim.rooms.getContainingRoom(this.model.position);
+			var room = sim.rooms.getContainingRoom(this.model.position);
 
 			if (room) {
 				this.room = room;
@@ -235,13 +240,17 @@
 
 	var Servant = my.Class(SIM.Person, {
 
-		constructor: function(_sim, model, room) {
-			Servant.Super.call(this, _sim, model, room);
+		constructor: function(model, room) {
+			Servant.Super.call(this, model, room);
 
 
 			this.trashToCollect = null;
 			this.newTrash = false;
 			this.cleaningTimer = 0;
+
+			if (room == null) {
+				console.log("ERROR: Tried to instantiate a servant with a null room");
+			}
 		},
 
 		update: function(dt) {
@@ -259,7 +268,6 @@
 			}
 
 			if (this.state == this.states.IDLE || this.state == this.states.IDLEWALK) {
-
 				this.idleTime += dt;
 				this.timeTilWander -= dt;
 				this.moveIfTrashToClean();
@@ -284,7 +292,7 @@
 
 			if (this.state == this.states.CLEANING && this.newTrash) {
 				this.newTrash = false;
-				this.sim.audio.addSound([this.getRandomStateSound("CLEANING")], 200, 1, this.getPosition())
+				sim.audio.addSound([this.getRandomStateSound("CLEANING")], 200, 1, this.getPosition())
 			}
 		},
 
@@ -296,20 +304,67 @@
 			var trash = this.room.getClosestTrash(this.model.position);
 
 			if (trash) {
-				this.state = this.states.MOVING;
-				this.trashToCollect = trash;
-				this.newTrash = true;
-				this.moveTo(new THREE.Vector3(trash.model.position.x, this.model.position.y, trash.model.position.z), this.walkingSpeed);
+				this.assignTrash(trash);
+			} else {
+				this.tryGettingForeignTrash();
 			}
 		},
 
+		tryGettingForeignTrash: function() {
+
+			trash = sim.rooms.getTrash();
+
+			if (trash) {
+				var path = sim.grid.getPath(this, trash);
+				this.assignTrash(trash, path);
+			}
+		},
+
+		assignTrash: function(trash, path) {
+
+			this.state = this.states.MOVING;
+			this.trashToCollect = trash;
+			this.newTrash = true;
+			trash.claimed = true;
+
+			if (path) {
+				this.path = path;
+				this.moveAlongPath();
+			} else {
+				this.moveTo(new THREE.Vector3(trash.getX(), this.getY(), trash.getZ()), this.walkingSpeed);	
+			}
+		},
+
+		moveAlongPath: function() {
+
+			if (this.path[0].room) {
+				this.room = this.path[0].room;
+			}
+
+			this.moveTo(new THREE.Vector3(this.path[0].x, this.path[0].y, this.path[0].z), this.walkingSpeed);
+		},
 
 		arrivedAtDestination: function() {
-			Servant.Super.prototype.arrivedAtDestination.call(this);
+
+			if (this.path) {
+				this.path.shift();
+				if (this.path.length) {
+					this.moveAlongPath();
+					return;
+				}
+				this.path = null;
+			}
+
+			if (this.model.animations) {
+				this.model.stopAll();
+				this.model.play("idle", 1);
+			}
 
 			if (this.trashToCollect) {
 				this.state = this.states.CLEANING;
 				this.cleaningTimer = 2000;
+			} else {
+				this.state = this.states.IDLE;
 			}
 		},
 
@@ -338,8 +393,8 @@
 	SIM.Servant = Servant;
 
 	var Noble = my.Class(SIM.Person, {
-		constructor: function(_sim, model, room) {
-			Noble.Super.call(this, _sim, model, room);
+		constructor: function(model, room) {
+			Noble.Super.call(this, model, room);
 		},
 
 	});
