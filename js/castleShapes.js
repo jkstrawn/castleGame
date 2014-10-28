@@ -370,8 +370,12 @@
 
 		turnRed: function() {
 
-			var redMaterial = new THREE.MeshBasicMaterial({color: 0xFF0000});
-			//this.model.children[0].children[0].material = redMaterial;
+			this.model.traverse(function(thing) {
+				if (thing.material instanceof THREE.MeshLambertMaterial) {
+					thing.material.color.setHex( 0xff0000 );
+					//thing.material.ambient.setHex( 0xff0000 );
+				}
+			});	
 		},
 
 		stop: function() {
@@ -395,6 +399,21 @@
 	var Noble = my.Class(SIM.Person, {
 		constructor: function(model, room) {
 			Noble.Super.call(this, model, room);
+
+			this.taxMoney = 0;
+		},
+
+		update: function(dt) {
+			Noble.Super.update.call(this, dt);
+
+			this.taxMoney += dt / 1000;
+		},
+
+		getTaxMoney: function() {
+
+			var money = this.taxMoney;
+			this.taxMoney = 0;
+			return money;
 		},
 
 	});

@@ -18,6 +18,7 @@
 			this.rooms = new SIM.RoomManager();
 			this.audio = new SIM.AudioManager();
 			this.events = new SIM.EventManager();
+			this.resources = new SIM.ResourceManager();
 
 			this.modelUrls = {
 				dead: [
@@ -36,21 +37,6 @@
 			this.draggingShape = null;
 			this.hoveredShape = null;
 			this.tweenForBox = null;
-
-			this.resources = {
-				food: 10,
-				stone: 10,
-				servants: 0,
-				peasants: 0,
-				hygiene: 50,
-				morale: 50,
-				peasantProduction: {
-					food: 0,
-					stone: 10
-				},
-				hygieneTimer: 0,
-				idleTimer: 0
-			};
 
 			this.loadingBar = {
 				max: 0,
@@ -73,9 +59,6 @@
 			this.grid.init();
 			this.graphics.init(this.modelUrls, $.proxy( this.loadedModels, this ));
 			this.gui = new BlendCharacterGui();
-			this.gui.setValue("Servants", this.resources.servants);
-			this.gui.setValue("Food", this.resources.food);
-			this.gui.setValue("Stone", this.resources.food);
 		},
 
 		loadedModels: function() {
@@ -116,7 +99,7 @@
 			if (this.resources.food >= 2) {
 				var that = this;
 				this.setLoadingBar(3, "Getting Servant", $.proxy(this.finishedHireServant, this), function() {
-					that.changeResourceValue("Food", -2);
+					that.resources.changeValue("Food", -2);
 				});
 			}
 		},
@@ -128,22 +111,10 @@
 
 		sliderChanged: function(data) {
 
-			this.resources.peasantProduction.food = data.detail.food;
-			this.resources.peasantProduction.stone = data.detail.stone;
+			this.resources.setPeasantProductionSlider(data.detail.food, data.detail.stone);
 		},
 
 		// PROCESS EVENTS
-
-		changeResourceValue: function(name, value) {
-
-			if (!value) {
-				return;
-			}
-
-			var newValue = this.resources[name.toLowerCase()] += value;	
-
-			this.gui.setValue(name, Math.floor(newValue));
-		},
 
 		setLoadingBar: function(time, name, callback, successful) {
 
@@ -199,6 +170,19 @@
 			this.shapes.push(shape);
 		},
 
+		getShapesOfType: function(type) {
+
+			var shapesOfType = [];
+
+			for (var i = this.shapes.length - 1; i >= 0; i--) {
+				if (this.shapes[i] instanceof type) {
+					shapesOfType.push(this.shapes[i]);
+				}
+			};
+
+			return shapesOfType;
+		},
+
 		removeShape: function(shape) {
 
 			for (var i = this.shapes.length - 1; i >= 0; i--) {
@@ -229,7 +213,7 @@
 				this.graphics.addModel(roomChanges[i].model);
 			};
 
-			this.changeResourceValue("Stone", cost * -1);
+			this.resources.changeValue("Stone", cost * -1);
 			this.clearDragging();
 			this.rooms.clearTempRoom();
 			this.rooms.clearRoomGridNames();
@@ -391,9 +375,7 @@
 				this.shapes[i].update(dt);
 			};
 
-			this.updateRatings(dt);
-
-			this.updateResources(dt);
+			this.resources.update(dt);
 
 			this.updateLoadingBar(dt);
 
@@ -406,59 +388,6 @@
 
 		randomizeWind: function() {
 
-		},
-
-		updateRatings: function(dt) {
-
-			this.resources.hygieneTimer -= dt;
-			this.resources.idleTimer -= dt;
-
-			if (this.resources.hygieneTimer < 0) {
-				this.resources.hygieneTimer = 10000;
-
-				var totalTrash = this.rooms.getNumberOfTrash();
-				this.hygiene = (50 - totalTrash) * 2;
-				this.gui.setRating("Hygiene", Math.floor(this.hygiene));	
-			}
-
-			if (this.resources.idleTimer < 0) {
-				this.resources.idleTimer = 10000;
-
-				var totalIdleTime = 0;
-				var totalServants = 0;
-
-				for (var i = this.shapes.length - 1; i >= 0; i--) {
-					if (this.shapes[i] instanceof SIM.Servant) {
-						totalServants++;
-						totalIdleTime += this.shapes[i].getIdleTime();
-					}
-				};
-
-				var averageIdleTime = totalIdleTime / totalServants;
-				this.resources.morale = averageIdleTime / 100;
-				if (this.resources.morale < 20) {
-					this.turnServantsRed();
-				}
-				this.gui.setRating("Morale", Math.floor(this.resources.morale));
-			}
-		},
-
-		updateResources: function(dt) {
-			var productionPower = this.resources.peasants * dt / 100000;
-
-			var foodProd = this.resources.peasantProduction.food * productionPower;
-			var stoneProd = this.resources.peasantProduction.stone * productionPower;
-
-			var totalServants = 0;
-			for (var i = this.shapes.length - 1; i >= 0; i--) {
-				if (this.shapes[i] instanceof SIM.Servant) {
-					totalServants++;
-				}
-			};
-			
-			var foodDifference = foodProd - totalServants * dt / 20000;
-			this.changeResourceValue("Food", foodDifference);
-			this.changeResourceValue("Stone", stoneProd);
 		},
 
 		updateLoadingBar: function(dt) {

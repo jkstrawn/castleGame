@@ -13,6 +13,7 @@ function BlendCharacterGui(animations) {
 		Peasants: 0,
 		Stone: 0,
 		Food: 0,
+		Gold: 0,
 
 		//Ratings
 		Morale: 50,
@@ -57,6 +58,7 @@ function BlendCharacterGui(animations) {
 		this.controls.folderResources = this.gui.addFolder( "Resources" );
 		this.controls.folderResources.add( this.controls, "Food" );
 		this.controls.folderResources.add( this.controls, "Stone" );
+		this.controls.folderResources.add( this.controls, "Gold" );
 		this.controls.folderResources.add( this.controls, "Servants" );
 		this.controls.folderResources.add( this.controls, "Peasants" );
 		this.controls.folderResources.open();
