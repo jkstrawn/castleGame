@@ -151,7 +151,7 @@
 
 			var self = this;
 
-			var model = new BlenderCharacterLoader();
+			var model = new AnimatedModelLoader();
 
 			model.load( url, function() {
 

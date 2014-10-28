@@ -1,4 +1,4 @@
-BlenderCharacterLoader = function() {
+AnimatedModelLoader = function() {
 
 	this.material = null;
 	this.geometry = null;
@@ -24,7 +24,7 @@ BlenderCharacterLoader = function() {
 
 	this.createModel = function() {
 
-		blendMesh = new THREE.BlendCharacter();
+		blendMesh = new THREE.AnimatedModel();
 		blendMesh.load( this.geometry, this.material.clone() );
 
 		return blendMesh;
@@ -33,7 +33,7 @@ BlenderCharacterLoader = function() {
 
 
 
-THREE.BlendCharacter = function () {
+THREE.AnimatedModel = function () {
 
 	this.animations = {};
 	this.weightSchedule = [];
@@ -269,9 +269,9 @@ THREE.BlendCharacter = function () {
 };
 
 
-THREE.BlendCharacter.prototype = Object.create( THREE.SkinnedMesh.prototype );
+THREE.AnimatedModel.prototype = Object.create( THREE.SkinnedMesh.prototype );
 
-THREE.BlendCharacter.prototype.getForward = function() {
+THREE.AnimatedModel.prototype.getForward = function() {
 
 	var forward = new THREE.Vector3();
 
