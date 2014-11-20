@@ -78,16 +78,33 @@
 
 		addGround: function() {
 
-			var width = 500;
-			var length = 1000;
-			var geometry = new THREE.PlaneGeometry(length, width, 9, 9);
+			var width = 2000;
+			var length = 4000;
+			var geometry = new THREE.PlaneGeometry(length, width, 39, 19);
 
-			for (var i = 20, l = geometry.vertices.length - 40; i < l; i++) {
-				geometry.vertices[i].z = Math.random() * 50;
+			var distance = 0;
+			var counter = 0;
+			var heights = [];
+
+			for (var i = 0; i < geometry.vertices.length; i++) {
+				counter++;
+				if (counter > 19) {
+					distance++;
+					counter = 0;
+				}
+				var y = (34 - distance);
+				var offset = 15;
+				var depth = (y - offset) * (y - offset) * .4 - 100;
+				var height = Math.random() * 50 + depth * 2;
+				height = Math.round(height);
+				if (i > geometry.vertices.length - 120) {
+					height = 0;
+				}
+				heights.push(height);
+				geometry.vertices[i].z = height;
 			}
-			for (var i = 10, l = 20; i < l; i++) {
-				geometry.vertices[i].z = 50 + Math.random() * 20;
-			}
+
+			console.log(heights.join(","));
 
 			var texture = '../res/textures/grass.png';
 			var textureObject = THREE.ImageUtils.loadTexture(texture);
@@ -103,7 +120,8 @@
 			});
 			var plane = new THREE.Mesh(geometry, material4);
 			plane.rotation.x = -1/2 * Math.PI;
-			plane.position.set(0, 0, -100);
+			//plane.position.set(0, 0, -100);
+			plane.position.set(0, 0, -800);
 			this.scene.add(plane);
 		},
 
@@ -437,17 +455,12 @@
 		},
 
 		zoom: function(increase) {
-			if ((this.camera.fov - increase) > 0)
-			{
-				var vector = new THREE.Vector3( 0, 0, -1 );
 
-				vector.applyQuaternion( this.camera.quaternion );
+			var vector = new THREE.Vector3( 0, 0, -1 );
 
-				this.camera.position.add( vector.multiplyScalar( increase * 4 ));
-				//this.camera.fov -= increase
-			}
+			vector.applyQuaternion( this.camera.quaternion );
 
-			this.camera.updateProjectionMatrix(); 
+			this.camera.position.add( vector.multiplyScalar( increase * 6 ));
 		},
 
 		moveCamera: function(direction) {

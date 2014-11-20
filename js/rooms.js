@@ -496,7 +496,7 @@
 					this.nobleTimer -= dt;
 
 					if (this.nobleTimer < 0) {
-						//this.generateNoble();
+						this.generateNoble();
 					}
 				} else {
 					this.nobleTimer = Math.random * 2000;

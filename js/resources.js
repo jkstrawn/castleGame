@@ -6,6 +6,7 @@
 
 			this.food = 10;
 			this.stone = 10;
+			this.gold = 0;
 			this.servants = 0;
 			this.peasants = 0;
 			this.hygiene = 50;
@@ -45,10 +46,11 @@
 		update: function(dt) {
 
 			var servants = sim.getShapesOfType(SIM.Servant);
+			var nobles = sim.getShapesOfType(SIM.Noble);
 
 			this.updateHygiene(dt);
 			this.updateMorale(dt, servants);
-			this.updateResources(dt, servants);
+			this.updateResources(dt, servants, nobles);
 		},
 
 		updateHygiene: function(dt) {
@@ -86,15 +88,22 @@
 			}
 		},
 
-		updateResources: function(dt, servants) {
+		updateResources: function(dt, servants, nobles) {
+
 
 			var productionPower = this.peasants * dt / 100000;
 			var foodProd = this.peasantProduction.food * productionPower;
 			var stoneProd = this.peasantProduction.stone * productionPower;
 			var foodDifference = foodProd - servants.length * dt / 20000;
+			var goldGeneration = 0;
+
+			for (var i = nobles.length - 1; i >= 0; i--) {
+				goldGeneration += nobles[i].getTaxMoney();
+			};
 
 			this.changeValue("Food", foodDifference);
 			this.changeValue("Stone", stoneProd);
+			this.changeValue("Gold", goldGeneration);
 		},
 	});
 

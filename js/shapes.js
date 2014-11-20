@@ -404,7 +404,7 @@
 		},
 
 		update: function(dt) {
-			Noble.Super.update.call(this, dt);
+			Noble.Super.prototype.update.call(this, dt);
 
 			this.taxMoney += dt / 1000;
 		},
